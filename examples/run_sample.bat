@@ -1,0 +1,1 @@
+call ..\bin\win64\luajit .\samples\%1.lua
