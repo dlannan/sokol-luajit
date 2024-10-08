@@ -19,14 +19,27 @@ The Wasm part of sokol might not be able to be utilized in this manner. However 
 
 ## Examples
 I have ported 5 examples from sokol, and will be adding more. These show how the ffi interface can be used.
+
+How to use the example. Open a command window or powershell and cd to the examples folder where run_sample.bat is.
+Run the exec like:
+
+```run_sample.bat cube_sapp```
+
+
 Some notes:
 - There are a number of objects that must be created as pointers. In ffi the easiest way to do this is to make an array object of size 1 and this way the handle in lua is a pointer and the object access uses the array indexing.
 - No performance considerations have been taken into account. These are almost direct 1 to 1 mappings of the sokol C samples to luajit samples. 
 - pathing is not yet made friendly. Use the run_sample bat file with one of the following parameters:
+
    cube_sapp        - Simple spinning cube
+
    shadow_sapp      - Shadowed cube with moving light
+
    shapes_sapp      - Primitive shapes spinning
+
    triangle_sapp    - Classic triangle
+
    offscreen_sapp   - Sphere with render texture torii? spinning on its surface.
+
 
 Feel free to contribute or post issues/ideas comment. I put this together yesterday, and its very rudimentary atm.
