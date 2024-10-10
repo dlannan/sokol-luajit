@@ -1,4 +1,4 @@
-local sg        = _G.sg
+local sg        = _G.sg or require("sokol_gfx")
 
 local hmm_utils = {}
 

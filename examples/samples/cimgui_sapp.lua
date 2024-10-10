@@ -4,7 +4,7 @@ package.path    = package.path..";../?.lua"
 
 --_G.SOKOL_DLL    = "sokol_debug_dll"
 local sapp      = require("sokol_app")
-local sg        = require("sokol_imgui") -- Includes gfx!!
+sg              = require("sokol_imgui") -- Includes gfx!!
 local im = sg -- Will NOT be using imgui in applications. Sample only. Dont recommend.
 local slib      = require("sokol_libs") -- Warn - always after gfx!!
 
