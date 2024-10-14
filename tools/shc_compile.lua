@@ -1,25 +1,27 @@
 -- A way to run the tool as part of a runtime or a build stage.
 local ffi   = require("ffi")
 local sg    = require("sokol_gfx")
+local dirtools = require("tools.dirtools")
 
-local base_dir = "."
-if(ffi.os == "Windows") then 
-    local cmdh = io.popen("cd", "r")
-    if(cmdh) then base_dir = cmdh:read("*a"); cmdh:close() end
-else 
-    local cmdh = io.popen("cwd", "r")
-    if(cmdh) then base_dir = cmdh:read("*a"); cmdh:close() end
-end
+-- local base_dir = "."
+-- if(ffi.os == "Windows") then 
+--     local cmdh = io.popen("cd", "r")
+--     if(cmdh) then base_dir = cmdh:read("*a"); cmdh:close() end
+-- else 
+--     local cmdh = io.popen("cwd", "r")
+--     if(cmdh) then base_dir = cmdh:read("*a"); cmdh:close() end
+-- end
 
-local folder_name = "sokol%-luajit"
-local last_folder, remain = string.match(base_dir, "(.-"..folder_name..")(.-)")
-remain = remain:gsub("%s+", "")
-if(ffi.os == "Windows") then 
-    base_dir = last_folder.."\\"
-else 
-    base_dir = last_folder.."/"
-end
-print("Base Directory: "..base_dir)
+-- local folder_name = "sokol%-luajit"
+-- local last_folder, remain = string.match(base_dir, "(.-"..folder_name..")(.-)")
+-- remain = remain:gsub("%s+", "")
+-- if(ffi.os == "Windows") then 
+--     base_dir = last_folder.."\\"
+-- else 
+--     base_dir = last_folder.."/"
+-- end
+-- print("Base Directory: "..base_dir)
+local base_dir = dirtools.get_app_path("sokol%-luajit")
 
 -- Setup some defaults
 local sh_compiler = {
