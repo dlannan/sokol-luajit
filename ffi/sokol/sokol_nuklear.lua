@@ -15,6 +15,8 @@ local sokol_nuklear   = ffi.load( lib )
 
 ffi.cdef[[
 
+typedef float nk_float;
+
 /*
     Resource id typedefs:
 
