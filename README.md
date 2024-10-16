@@ -52,9 +52,6 @@ cimgui example
 nuklear example
 ![alt text](https://github.com/dlannan/sokol-luajit/blob/main/media/nuklear_sapp.png "nuklear Example")
 
-nuklear example
-![alt text](https://github.com/dlannan/sokol-luajit/blob/main/media/nuklear_sapp.png "nuklear Example")
-
 offscreen example
 ![alt text](https://github.com/dlannan/sokol-luajit/blob/main/media/offscreen_sappjpeg.jpeg "offscreen Example")
 
