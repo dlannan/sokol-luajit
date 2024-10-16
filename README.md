@@ -43,3 +43,23 @@ Some notes:
 
 
 Feel free to contribute or post issues/ideas comment. I put this together yesterday, and its very rudimentary atm.
+
+Screenshots:
+
+cimgui example
+![alt text](https://github.com/dlannan/sokol-luajit/blob/main/media/cimgui_sapp.png "cimgui Example")
+
+nuklear example
+![alt text](https://github.com/dlannan/sokol-luajit/blob/main/media/nuklear_sapp.png "nuklear Example")
+
+nuklear example
+![alt text](https://github.com/dlannan/sokol-luajit/blob/main/media/nuklear_sapp.png "nuklear Example")
+
+offscreen example
+![alt text](https://github.com/dlannan/sokol-luajit/blob/main/media/offscreen_sappjpeg.jpeg "offscreen Example")
+
+shadow example
+<video src='https://github.com/dlannan/sokol-luajit/blob/main/media/2024-10-07%2011-31-08.mp4' width=180/>
+
+shapes example
+<video src='https://github.com/dlannan/sokol-luajit/blob/main/media/2024-10-07%2011-32-21.mp4' width=180/>
