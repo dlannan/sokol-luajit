@@ -28,6 +28,8 @@ local function init(void)
     snk[0].dpi_scale = sapp.sapp_dpi_scale()
     snk[0].logger.func = slib.slog_func
     nk.snk_setup(snk)
+
+    sapp.sapp_show_mouse(false)
 end
 
 -- --------------------------------------------------------------------------------------
@@ -99,6 +101,9 @@ local sel_date          = sel_time
 -- --------------------------------------------------------------------------------------
 
 local function draw_demo_ui(ctx)
+
+    local res = nk.nk_style_set_cursor(ctx, 0)
+    nk.nk_style_show_cursor(ctx)
 
     -- /* window flags */
     ctx[0].style.window.header.align = header_align
