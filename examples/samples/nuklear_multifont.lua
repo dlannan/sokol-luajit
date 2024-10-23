@@ -54,9 +54,9 @@ end
 local master_img_width = ffi.new("int[1]", 0)
 local master_img_height = ffi.new("int[1]", 0)   
 
-local function font_loader( atlas, font_file, font_size )
+local function font_loader( atlas, font_file, font_size, cfg)
 
-    local newfont = nk.nk_font_atlas_add_from_file(atlas, font_file, 16, nil)
+    local newfont = nk.nk_font_atlas_add_from_file(atlas, font_file, font_size, cfg)
     local image = nk.nk_font_atlas_bake(atlas, master_img_width, master_img_height, nk.NK_FONT_ATLAS_RGBA32)
     return image, newfont
 end
@@ -97,11 +97,12 @@ local function setup_font(ctx)
     
     image = nk.nk_font_atlas_bake(atlas, master_img_width, master_img_height, nk.NK_FONT_ATLAS_RGBA32)
 
-    image, fonts[1] = font_loader(atlas, font_path.."acknowtt.ttf", 16.0)
+    image, fonts[1] = font_loader(atlas, font_path.."acknowtt.ttf", 16.0, nil)
 
-    image, fonts[2] = font_loader(atlas, font_path.."fontawesome-webfont.ttf", 20.0)
+    atlas[0].config.range = nk.nk_font_awesome_glyph_ranges()
+    image, fonts[2] = font_loader(atlas, font_path.."fontawesome-webfont.ttf", 40.0, atlas[0].config)
 
-    image, fonts[3] = font_loader(atlas, font_path.."ProggyClean.ttf", 18.0)
+    image, fonts[3] = font_loader(atlas, font_path.."ProggyClean.ttf", 18.0, nil)
 
     -- Dump the atlas to check it.
     stb.stbi_write_png( "samples/font/atlas_font.png", master_img_width[0], master_img_height[0], 4, image, master_img_width[0] * 4)
@@ -110,10 +111,9 @@ local function setup_font(ctx)
     local nk_img = font_atlas_img(image)
     nk.nk_font_atlas_end(atlas, nk_img, nil)
     nk.nk_font_atlas_cleanup(atlas)
-
-    nk.nk_style_set_font(ctx, fonts[1].handle)
-    
+   
     nk.nk_style_load_all_cursors(ctx, atlas[0].cursors)
+    nk.nk_style_set_font(ctx, fonts[1].handle)
 end
 
 -- --------------------------------------------------------------------------------------
@@ -184,9 +184,9 @@ local function draw_demo_ui(ctx)
             nk.nk_style_set_font(ctx, fonts[1].handle)
             nk.nk_button_label(ctx, "Hello In acknowtt Font")
 
+            local utf = ffi.new("char[2]", {0x83, 0xf1})
             nk.nk_style_set_font(ctx, fonts[2].handle)
-            --nk.nk_label(ctx, "", 0)
-            nk.nk_button_label(ctx, string.char(0xf0)..string.char(0xfc))
+            nk.nk_button_label(ctx, "")
 
             nk.nk_style_set_font(ctx, fonts[3].handle)
             nk.nk_button_label(ctx, "Hello in ProggyClean")
