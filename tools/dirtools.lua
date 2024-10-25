@@ -15,6 +15,9 @@ dirtools.get_app_path = function( expected_root_folder )
 
     local folder_name = expected_root_folder
     local last_folder, remain = string.match(base_dir, "(.-"..folder_name..")(.-)")
+    last_folder = last_folder or ""
+    remain = remain or ""
+
     remain = remain:gsub("%s+", "")
     if(ffi.os == "Windows") then 
         base_dir = last_folder.."\\"

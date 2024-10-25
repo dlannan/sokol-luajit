@@ -14,9 +14,9 @@ local hutils    = require("hmm_utils")
 local ffi       = require("ffi")
 
 -- --------------------------------------------------------------------------------------
+-- Shader debug enabled
+local shc       = require("tools.shc_compile").init( "sokol%-luajit", true )
 
-local shc       = require("tools.shc_compile")
-shc.debug       = true
 -- Need to use default because this is whats used for first unnamed program
 local shadow_shader   = shc.compile("./samples/shadows-sapp.glsl", "shadow")
 local display_shader  = shc.compile("./samples/shadows-sapp.glsl", "display")

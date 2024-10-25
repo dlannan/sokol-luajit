@@ -24,22 +24,33 @@ local dirtools = require("tools.dirtools")
 local base_dir = dirtools.get_app_path("sokol%-luajit")
 
 -- Setup some defaults
-local sh_compiler = {
+local sh_compiler = {}
+local exec_opts = nil
+local exec = nil
 
-    target_tmp      = base_dir.."bin/shaderbin/shader_gen.h",
-    target_lang     = "glsl410",
-    target_output   = "sokol",
+-- --------------------------------------------------------------------------------------
+-- Set the base path from where you are running your app from
+--   returns a lua table that can then be used in the soko shader methods
+-- --------------------------------------------------------------------------------------
+sh_compiler.init = function(base_path, debug_shader)
+    base_dir = dirtools.get_app_path(base_path)
 
-    typedefs        = {},
-}
+    sh_compiler.target_tmp      = base_dir.."bin/shaderbin/shader_gen.h"
+    sh_compiler.target_lang     = "glsl410"
+    sh_compiler.target_output   = "sokol"
+    
+    sh_compiler.typedefs        = {}
+    
+    sh_compiler.debug   = debug_shader
 
-local exec_opts = {
-    ["Linx"]        = base_dir.."tools/shader_compiler/linux/sokol-shdc.exe",
-    ["Windows"]     = base_dir.."tools\\shader_compiler\\win32\\sokol-shdc.exe",
-    ["MacOSX"]      = base_dir.."tools/shader_compiler/win32/sokol-shdc.exe",
-}
-local exec = exec_opts[ffi.os]
-
+    exec_opts = {
+        ["Linx"]        = base_dir.."tools/shader_compiler/linux/sokol-shdc.exe",
+        ["Windows"]     = base_dir.."tools\\shader_compiler\\win32\\sokol-shdc.exe",
+        ["MacOSX"]      = base_dir.."tools/shader_compiler/win32/sokol-shdc.exe",
+    }
+    exec = exec_opts[ffi.os]    
+    return sh_compiler
+end
 
 -- --------------------------------------------------------------------------------------
 -- Process the shader header file for use in the lua scripts
@@ -152,7 +163,7 @@ sh_compiler.compile = function( glslfile, program_name )
     if(tmpfile) then 
         local shader_src = tmpfile:read("*a")
         tmpfile:close()
-        local lua_shader = sh_compiler.process_shader(glslfile, shader_src, program_name)
+        lua_shader = sh_compiler.process_shader(glslfile, shader_src, program_name)
         return lua_shader
     else
         print("Cannot load tmpfile: "..sh_compiler.target_tmp)

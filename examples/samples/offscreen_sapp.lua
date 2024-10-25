@@ -16,7 +16,8 @@ local ffi       = require("ffi")
 -- --------------------------------------------------------------------------------------
 
 local shc       = require("tools.shc_compile")
--- shc.debug       = true
+local shc       = require("tools.shc_compile").init( "sokol%-luajit", false )
+
 -- Need to use default because this is whats used for first unnamed program
 local default   = shc.compile("./samples/offscreen-sapp.glsl", "default")
 local offscreen = shc.compile("./samples/offscreen-sapp.glsl", "offscreen")
