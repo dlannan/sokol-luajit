@@ -137,8 +137,29 @@ int   stbi_zlib_decode_buffer(char *obuffer, int olen, const char *ibuffer, int 
 char *stbi_zlib_decode_noheader_malloc(const char *buffer, int len, int *outlen);
 int   stbi_zlib_decode_noheader_buffer(char *obuffer, int olen, const char *ibuffer, int ilen);
 
+typedef void stbi_write_func(void *context, void *data, int size);
 
+typedef struct
+{
+   stbi_write_func *func;
+   void *context;
+   unsigned char buffer[64];
+   int buf_used;
+} stbi__write_context;
 
+int stbi_write_png(char const *filename, int w, int h, int comp, const void  *data, int stride_in_bytes);
+int stbi_write_bmp(char const *filename, int w, int h, int comp, const void  *data);
+int stbi_write_tga(char const *filename, int w, int h, int comp, const void  *data);
+int stbi_write_hdr(char const *filename, int w, int h, int comp, const float *data);
+int stbi_write_jpg(char const *filename, int x, int y, int comp, const void  *data, int quality);
+
+int stbi_write_png_to_func(stbi_write_func *func, void *context, int w, int h, int comp, const void  *data, int stride_in_bytes);
+int stbi_write_bmp_to_func(stbi_write_func *func, void *context, int w, int h, int comp, const void  *data);
+int stbi_write_tga_to_func(stbi_write_func *func, void *context, int w, int h, int comp, const void  *data);
+int stbi_write_hdr_to_func(stbi_write_func *func, void *context, int w, int h, int comp, const float *data);
+int stbi_write_jpg_to_func(stbi_write_func *func, void *context, int x, int y, int comp, const void  *data, int quality);
+
+void stbi_flip_vertically_on_write(int flip_boolean);
 ]]
 
 return stb_lib

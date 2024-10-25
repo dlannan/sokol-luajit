@@ -5444,6 +5444,9 @@ enum nk_style_cursor {
     NK_CURSOR_RESIZE_TOP_RIGHT_DOWN_LEFT,
     NK_CURSOR_COUNT
 };
+
+void snk_set_atlas( struct nk_font_atlas atlas);
+
 void nk_style_default(struct nk_context*);
 void nk_style_from_table(struct nk_context*, const struct nk_color*);
 void nk_style_load_cursor(struct nk_context*, enum nk_style_cursor, const struct nk_cursor*);
@@ -5467,6 +5470,7 @@ nk_bool nk_style_pop_vec2(struct nk_context*);
 nk_bool nk_style_pop_style_item(struct nk_context*);
 nk_bool nk_style_pop_flags(struct nk_context*);
 nk_bool nk_style_pop_color(struct nk_context*);
+
 /* =============================================================================
  *
  *                                  COLOR
@@ -5871,6 +5875,7 @@ struct nk_font_atlas {
 
 /* some language glyph codepoint ranges */
 const nk_rune *nk_font_default_glyph_ranges(void);
+const nk_rune* nk_font_awesome_glyph_ranges(void);
 const nk_rune *nk_font_chinese_glyph_ranges(void);
 const nk_rune *nk_font_cyrillic_glyph_ranges(void);
 const nk_rune *nk_font_korean_glyph_ranges(void);
@@ -7071,6 +7076,7 @@ struct nk_style {
 
 struct nk_style_item nk_style_item_image(struct nk_image img);
 struct nk_style_item nk_style_item_color(struct nk_color);
+struct nk_style_item nk_style_item_nine_slice(struct nk_nine_slice slice);
 struct nk_style_item nk_style_item_hide(void);
 ]]
 
