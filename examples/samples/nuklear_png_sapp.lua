@@ -1,4 +1,4 @@
-package.path    = package.path..";../../?.lua"
+package.path    = package.path..";../?.lua"
 local dirtools = require("tools.dirtools")
 local base_path = dirtools.get_app_path("sokol%-luajit")
 

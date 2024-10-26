@@ -1,27 +1,10 @@
 -- A way to run the tool as part of a runtime or a build stage.
 local ffi   = require("ffi")
-local sg    = require("sokol_gfx")
+local sg    = sg or require("sokol_gfx")
 local dirtools = require("tools.dirtools")
 
--- local base_dir = "."
--- if(ffi.os == "Windows") then 
---     local cmdh = io.popen("cd", "r")
---     if(cmdh) then base_dir = cmdh:read("*a"); cmdh:close() end
--- else 
---     local cmdh = io.popen("cwd", "r")
---     if(cmdh) then base_dir = cmdh:read("*a"); cmdh:close() end
--- end
-
--- local folder_name = "sokol%-luajit"
--- local last_folder, remain = string.match(base_dir, "(.-"..folder_name..")(.-)")
--- remain = remain:gsub("%s+", "")
--- if(ffi.os == "Windows") then 
---     base_dir = last_folder.."\\"
--- else 
---     base_dir = last_folder.."/"
--- end
--- print("Base Directory: "..base_dir)
-local base_dir = dirtools.get_app_path("sokol%-luajit")
+local base_dir = nil
+local tools_dir = nil
 
 -- Setup some defaults
 local sh_compiler = {}
@@ -32,8 +15,13 @@ local exec = nil
 -- Set the base path from where you are running your app from
 --   returns a lua table that can then be used in the soko shader methods
 -- --------------------------------------------------------------------------------------
-sh_compiler.init = function(base_path, debug_shader)
+sh_compiler.init = function(base_path, debug_shader, tools_path)
+
     base_dir = dirtools.get_app_path(base_path)
+    tools_dir = base_dir
+    if(tools_path) then 
+        tools_dir = base_dir..tools_path.."/"
+    end 
 
     sh_compiler.target_tmp      = base_dir.."bin/shaderbin/shader_gen.h"
     sh_compiler.target_lang     = "glsl410"
@@ -41,12 +29,12 @@ sh_compiler.init = function(base_path, debug_shader)
     
     sh_compiler.typedefs        = {}
     
-    sh_compiler.debug   = debug_shader
+    sh_compiler.debug   = debug_shader or false
 
     exec_opts = {
-        ["Linx"]        = base_dir.."tools/shader_compiler/linux/sokol-shdc.exe",
-        ["Windows"]     = base_dir.."tools\\shader_compiler\\win32\\sokol-shdc.exe",
-        ["MacOSX"]      = base_dir.."tools/shader_compiler/win32/sokol-shdc.exe",
+        ["Linx"]        = tools_dir.."tools/shader_compiler/linux/sokol-shdc.exe",
+        ["Windows"]     = tools_dir.."tools\\shader_compiler\\win32\\sokol-shdc.exe",
+        ["MacOSX"]      = tools_dir.."tools/shader_compiler/win32/sokol-shdc.exe",
     }
     exec = exec_opts[ffi.os]    
     return sh_compiler
@@ -171,4 +159,8 @@ sh_compiler.compile = function( glslfile, program_name )
     end
 end
 
+-- --------------------------------------------------------------------------------------
+
 return sh_compiler
+
+-- --------------------------------------------------------------------------------------
