@@ -32,9 +32,9 @@ sh_compiler.init = function(base_path, debug_shader, tools_path)
     sh_compiler.debug   = debug_shader or false
 
     exec_opts = {
-        ["Linx"]        = tools_dir.."tools/shader_compiler/linux/sokol-shdc.exe",
+        ["Linux"]       = tools_dir.."tools/shader_compiler/linux/sokol-shdc",
         ["Windows"]     = tools_dir.."tools\\shader_compiler\\win32\\sokol-shdc.exe",
-        ["MacOSX"]      = tools_dir.."tools/shader_compiler/win32/sokol-shdc.exe",
+        ["MacOSX"]      = tools_dir.."tools/shader_compiler/win32/sokol-shdc",
     }
     exec = exec_opts[ffi.os]    
     return sh_compiler

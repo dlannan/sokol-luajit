@@ -1,6 +1,7 @@
-package.cpath   = package.cpath..";../bin/win64/?.dll"
-package.path    = package.path..";../ffi/sokol/?.lua"
+
+
 package.path    = package.path..";../?.lua"
+local dirtools  = require("tools.dirtools").init("sokol%-luajit")
 
 --_G.SOKOL_DLL    = "sokol_debug_dll"
 local sapp      = require("sokol_app")
@@ -24,7 +25,7 @@ typedef struct state {
 
 -- --------------------------------------------------------------------------------------
 -- The nice way to take a glsl shader and load, compile and return a shader description
-local shc       = require("tools.shc_compile").init( "sokol%-luajit", false )
+local shc       = require("tools.shc_compile").init( "sokol%-luajit", true )
 local shader    = shc.compile("./samples/cube-sapp.glsl")
 
 -- --------------------------------------------------------------------------------------

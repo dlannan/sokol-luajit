@@ -4,13 +4,14 @@ local sokol_filename = _G.SOKOL_DLL or "sokol_dll"
 local libs = ffi_sokol_app or {
    OSX     = { x64 = sokol_filename..".so" },
    Windows = { x64 = sokol_filename..".dll" },
-   Linux   = { x64 = sokol_filename..".so", arm = sokol_filename..".so" },
+   Linux   = { x64 = "lib"..sokol_filename..".so", arm = "lib"..sokol_filename..".so" },
    BSD     = { x64 = sokol_filename..".so" },
    POSIX   = { x64 = sokol_filename..".so" },
    Other   = { x64 = sokol_filename..".so" },
 }
 
 local lib  = ffi_sokol_app or libs[ ffi.os ][ ffi.arch ]
+print(lib)
 local sokol_app   = ffi.load( lib )
 
 ffi.cdef[[
