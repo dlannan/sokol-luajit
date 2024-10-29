@@ -75,7 +75,7 @@ sh_compiler.process_shader = function( filename, shader_src, program_name )
         ffi_str = ffi_str..typedefs
         ffi_str = ffi_str.."]]\n\n"
     end
-print(ffi_str)
+
     -- Make a sg_shader_desc 
 
     -- get vs_source 
@@ -132,7 +132,6 @@ sh_compiler.compile = function( glslfile, program_name )
 
     local command = exec..' -i '..glslfile.." -o "..sh_compiler.target_tmp
     command = command.." -l "..sh_compiler.target_lang.." -f "..sh_compiler.target_output
-    print(command)
 
     local runner = io.popen(command, "r")
     -- Read in the results, then the files

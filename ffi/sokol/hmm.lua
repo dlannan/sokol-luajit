@@ -20,6 +20,11 @@ typedef union hmm_vec2
 {
     struct
     {
+        float x, y;
+    };
+
+    struct
+    {
         float X, Y;
     };
 
@@ -43,6 +48,11 @@ typedef union hmm_vec2
 
 typedef union hmm_vec3
 {
+    struct
+    {
+        float x, y, z;
+    };
+
     struct
     {
         float X, Y, Z;
@@ -96,6 +106,10 @@ typedef union hmm_vec4
             {
                 float X, Y, Z;
             };
+            struct
+            {
+                float x, y, z;
+            };        
         };
 
         float W;
@@ -109,6 +123,10 @@ typedef union hmm_vec4
             {
                 float R, G, B;
             };
+            struct
+            {
+                float x, y, z;
+            };        
         };
 
         float A;
@@ -155,9 +173,17 @@ typedef union hmm_quaternion
             {
                 float X, Y, Z;
             };
+            struct
+            {
+                float x, y, z;
+            };        
         };
         
-        float W;
+        union
+        {
+            float W;
+            float w;
+        };
     };
     
     float Elements[4];
