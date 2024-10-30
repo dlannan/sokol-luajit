@@ -1,6 +1,10 @@
 # sokol-luajit
 A luajit set of ffi wrappers for the excellent sokol framework,
 
+- [x] Win64 Binaries - samples and remotery working
+- [X] Linux64 Binaries - samples and remotery working
+- [ ] MacOS Binaries - incomplete. Testing and Fixing ongoing. Expected completion soon.
+
 ## Sokol
 The repo is based entirely on the brilliant framework here:
 https://github.com/floooh/sokol
