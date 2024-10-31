@@ -43,6 +43,7 @@ Some notes:
 Use the run_sample bat file with one of the following parameters:
 | Command | Description |
 |---------|-------------|
+|```cimgui_sapp``` | Imgui Demo example |
 |```cube_sapp``` | Simple spinning cube |
 |```shadow_sapp``` | Shadowed cube with moving light |
 |```shapes_sapp``` | Primitive shapes spinning |
