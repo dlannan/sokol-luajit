@@ -39,22 +39,30 @@ Some notes:
 
 Use the run_sample bat file with one of the following parameters:
 
-   ```cube_sapp```        - Simple spinning cube
+```cube_sapp``` 
+> Simple spinning cube
 
-   ```shadow_sapp```      - Shadowed cube with moving light
+```shadow_sapp```      
+> Shadowed cube with moving light
 
-   ```shapes_sapp```      - Primitive shapes spinning
+```shapes_sapp```      
+> Primitive shapes spinning
 
-   ```triangle_sapp```    - Classic triangle
+```triangle_sapp```    
+> Classic triangle
 
-   ```offscreen_sapp```   - Sphere with render texture torii? spinning on its surface.
+```offscreen_sapp```   
+> Sphere with render texture torii? spinning on its surface.
 
-   ```nuklear_sapp```     - Nuklear GUI demo
+```nuklear_sapp```     
+> Nuklear GUI demo
 
-   ```sdf_sapp```         - SDF from the Sokol samples
+```sdf_sapp```         
+> SDF from the Sokol samples
 
-  ```remotery_cube```     - A spinning cube with Remotery backend. 
-                            Go to /tools/remotery/vis and open index.html in your browser.
+```remotery_cube```     
+> A spinning cube with Remotery backend. 
+> Go to /tools/remotery/vis and open index.html in your browser.
 
 
 Feel free to contribute or post issues/ideas comment. I put this together yesterday, and its very rudimentary atm.
