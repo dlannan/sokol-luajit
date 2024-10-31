@@ -24,10 +24,12 @@ The Wasm part of sokol might not be able to be utilized in this manner. However 
 ## Examples
 I have ported 5 examples from sokol, and will be adding more. These show how the ffi interface can be used.
 
-How to use the example. Open a command window or powershell and cd to the examples folder where run_sample.bat is.
-Run the exec like:
+How to use the example. Open a command window or powershell in the repo folder (Win64 powershell shown below)
 
-```run_sample.bat cube_sapp```
+```
+PS sokol-luajit> cd .\examples\
+PS sokol-luajit\examples> .\run_sample.bat cube_sapp
+```
 
 
 Some notes:
