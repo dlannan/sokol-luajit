@@ -50,6 +50,8 @@ Use the run_sample bat file with one of the following parameters:
 |```triangle_sapp``` | Classic triangle |
 |```offscreen_sapp``` | Sphere with render texture torii? spinning on its surface. |
 |```nuklear_sapp``` | Nuklear GUI demo |
+|```nuklear_png_sapp``` | Nuklear example with images |
+|```nuklear_multifont``` | Nuklear examples with multiple fonts and font awesome icons |
 |```sdf_sapp``` | SDF from the Sokol samples |
 |```remotery_cube```| A spinning cube with Remotery backend. Open /tools/remotery/vis/index.html in your browser. |
 
