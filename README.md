@@ -9,6 +9,9 @@ A luajit set of ffi wrappers for the excellent sokol framework,
 The repo is based entirely on the brilliant framework here:
 https://github.com/floooh/sokol
 
+sdf exmample 
+![alt text](https://github.com/dlannan/sokol-luajit/blob/main/media/2024-10-30_11-48.png "sdf Example")
+
 Some of the source files have been modified to support shared libraries a little better and make the binding of ffi a little easier. There are only small changes, but this is kept in this location - do not use as a source for sokol itself.
 https://github.com/dlannan/sokol
 
@@ -52,9 +55,6 @@ Use the run_sample bat file with one of the following parameters:
 Feel free to contribute or post issues/ideas comment. I put this together yesterday, and its very rudimentary atm.
 
 Screenshots:
-
-sdf exmample 
-![alt text](https://github.com/dlannan/sokol-luajit/blob/main/media/2024-10-30_11-48.png "sdf Example")
 
 cimgui example
 ![alt text](https://github.com/dlannan/sokol-luajit/blob/main/media/cimgui_sapp.png "cimgui Example")
