@@ -35,7 +35,9 @@ PS sokol-luajit\examples> .\run_sample.bat cube_sapp
 Some notes:
 - There are a number of objects that must be created as pointers. In ffi the easiest way to do this is to make an array object of size 1 and this way the handle in lua is a pointer and the object access uses the array indexing.
 - No performance considerations have been taken into account. These are almost direct 1 to 1 mappings of the sokol C samples to luajit samples. 
-- pathing is not yet made friendly. Use the run_sample bat file with one of the following parameters:
+- pathing is not yet made friendly.
+
+Use the run_sample bat file with one of the following parameters:
 
    ```cube_sapp```        - Simple spinning cube
 
@@ -51,7 +53,8 @@ Some notes:
 
    ```sdf_sapp```         - SDF from the Sokol samples
 
-  ```remotery_cube```     - A spinning cube with Remotery backend. Go to /tools/remotery/vis and open index.html in your browser.
+  ```remotery_cube```     - A spinning cube with Remotery backend. 
+                            Go to /tools/remotery/vis and open index.html in your browser.
 
 
 Feel free to contribute or post issues/ideas comment. I put this together yesterday, and its very rudimentary atm.
