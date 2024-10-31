@@ -51,7 +51,7 @@ Use the run_sample bat file with one of the following parameters:
 |```offscreen_sapp``` | Sphere with render texture torii? spinning on its surface. |
 |```nuklear_sapp``` | Nuklear GUI demo |
 |```sdf_sapp``` | SDF from the Sokol samples |
-|```remotery_cube```| A spinning cube with Remotery backend. Go to /tools/remotery/vis and open index.html in your browser. |
+|```remotery_cube```| A spinning cube with Remotery backend. Open /tools/remotery/vis/index.html in your browser. |
 
 Feel free to contribute or post issues/ideas comment. I put this together yesterday, and its very rudimentary atm.
 
