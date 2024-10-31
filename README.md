@@ -5,6 +5,11 @@ A luajit set of ffi wrappers for the excellent sokol framework,
 - [X] Linux64 Binaries - samples and remotery working
 - [ ] MacOS Binaries - incomplete. Testing and Fixing ongoing. Expected completion soon.
 
+For all things, Sokol, luajit and sokol-luajit feel free to drop in the Discord
+
+Discord - https://discord.gg/KMDeFebk
+
+
 ## Sokol
 The repo is based entirely on the brilliant framework here:
 https://github.com/floooh/sokol
