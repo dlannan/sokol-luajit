@@ -93,17 +93,22 @@ function tmerge(t1, t2)
 end
 
 -- ---------------------------------------------------------------------------
-
-function tdump(o)
+local visited = {}
+function tdump(o, level)
+	local level = level or 1
+	if(level == 0) then visited = {} end
 	if type(o) == 'table' then
-	   local s = '{ '
-	   for k,v in pairs(o) do
-		  if type(k) ~= 'number' then k = '"'..k..'"' end
-		  s = s .. '['..k..'] = ' .. tdump(v) .. ','
-	   end
-	   return s .. '} '
+	   	local s = ' {\n'
+	   	for k,v in pairs(o) do
+		  	if type(k) ~= 'number' then k = '"'..tostring(k)..'"' end
+			if(visited[v] == nil) then 
+				visited[v] = true
+		  		s = s .. string.rep("  ", level)..'['..k..'] = ' .. tdump(v, level+1)
+			end
+	   	end
+	   	return s .. string.rep("  ", level-1)..'}\n'
 	else
-	   return tostring(o)
+	   return tostring(o).."\n"
 	end
  end
 

@@ -18,6 +18,7 @@ dirtools.add_default_paths = function(path)
 
     package.cpath   = package.cpath..";"..path.."bin/"..folders[ffi.os].."/?."..extensions[ffi.os]
     package.path    = package.path..";"..path.."/ffi/sokol/?.lua"
+    package.path    = package.path..";"..path.."lua/?.lua"
     package.path    = package.path..";"..path.."/?.lua"
 end
 

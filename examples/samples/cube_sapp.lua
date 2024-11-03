@@ -10,7 +10,9 @@ local slib      = require("sokol_libs") -- Warn - always after gfx!!
 local hmm       = require("hmm")
 local hutils    = require("hmm_utils")
 
-local ffi = require("ffi")
+local utils     = require("utils")
+
+local ffi       = require("ffi")
 
 -- --------------------------------------------------------------------------------------
 
@@ -189,3 +191,5 @@ app_desc[0].logger.func = slib.slog_func
 sapp.sapp_run( app_desc )
 
 -- --------------------------------------------------------------------------------------
+
+print(utils.tdump(package))

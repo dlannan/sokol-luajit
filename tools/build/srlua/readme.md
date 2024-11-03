@@ -35,3 +35,9 @@ RBuild calls srlua with options to package the binaries needed and the scripts n
 
 Eventually RBuild will become of the editor. Its initial development is to design and configure the build process.
 
+## example
+
+The following is an example srlua command to build the cube_sapp example
+```
+..\..\ThuncBuild\libs\srlua\bin\win64\glue.exe ..\..\ThuncBuild\libs\srlua\bin\win64\srlua.exe .\examples\samples\cube_sapp.lua .\examples\samples\cube_sapp.exe
+```
