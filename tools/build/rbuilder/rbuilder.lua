@@ -196,9 +196,19 @@ local function cleanup()
 end
 
 -- --------------------------------------------------------------------------------------
-
+local current_ctx = nil
 local function input(event) 
-    nk.snk_handle_event(event)
+    if(event.type == sapp.SAPP_EVENTTYPE_RESIZED) then 
+        nk.snk_handle_event(event)
+    elseif(event.type == sapp.SAPP_EVENTTYPE_MOUSE_ENTER) then 
+        nk.nk_style_show_cursor(current_ctx)
+        sapp.sapp_show_mouse(false)
+    elseif(event.type == sapp.SAPP_EVENTTYPE_MOUSE_LEAVE) then 
+        nk.nk_style_hide_cursor(current_ctx)
+        sapp.sapp_show_mouse(true)
+    else 
+        nk.snk_handle_event(event)
+    end    
 end
 
 
@@ -299,6 +309,7 @@ end
 local function frame(void) 
 
     local ctx = nk.snk_new_frame()
+    current_ctx = ctx
 
     -- // see big function at end of file
     main_ui(ctx)
