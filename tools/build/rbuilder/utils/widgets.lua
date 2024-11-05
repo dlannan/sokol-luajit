@@ -35,6 +35,7 @@ end
 
 widgets.widget_pie_menu = function(ctx, left, top, radius, icons, item_count)
 
+    local scale = radius / 140
     local ret = -1
     local total_space = ffi.new("struct nk_rect")
     local bounds = ffi.new("struct nk_rect")
@@ -42,8 +43,8 @@ widgets.widget_pie_menu = function(ctx, left, top, radius, icons, item_count)
  
     --  /* pie menu popup */
     local border = ctx.style.window.popup_border_color
-    local bgcolor = ctx.style.window.fixed_background.data.color
     local bgtype = ctx.style.window.fixed_background.type
+    local alpha = ctx.style.window.fixed_background.data.color.a
 
     ctx.style.window.fixed_background.data.color.a = 0
     ctx.style.window.popup_border_color = nk.nk_rgba(0,0,0,0)
@@ -99,8 +100,8 @@ widgets.widget_pie_menu = function(ctx, left, top, radius, icons, item_count)
  
                 --  /* button content */
                 local a = a_min + (a_max - a_min)/2.0
-                local rx = bounds.w/2.5; ry = 0
-                content.w = 30; content.h = 30;
+                local rx = bounds.w * 0.5 - bounds.w * 0.125; ry = 0
+                content.w = 30 * scale; content.h = 30 * scale;
                 content.x = center.x + ((rx * math.cos(a) - ry * math.sin(a)) - content.w/2.0)
                 content.y = center.y + (rx * math.sin(a) + ry * math.cos(a) - content.h/2.0)
                 nk.nk_draw_image(out, content, icons[i], nk.nk_rgb(255,255,255))
@@ -136,7 +137,7 @@ widgets.widget_pie_menu = function(ctx, left, top, radius, icons, item_count)
     ctx.style.window.padding = padding
 
     ctx.style.window.fixed_background.type = bgtype
-    ctx.style.window.fixed_background.data.color.a = 255
+    ctx.style.window.fixed_background.data.color.a = alpha
     ctx.style.window.popup_border_color = border
     return ret
 end
@@ -190,7 +191,6 @@ widgets.make_pie_popup = function(ctx, icons, pie_size, pie_count)
 
     if ((nk.nk_input_is_mouse_click_down_in_rect(ctx.input, nk.NK_BUTTON_RIGHT, nk.nk_window_get_bounds(ctx),nk.nk_true) == true) and 
         piemenu_active == 0) then 
-        print(" >>> activate_pie")
         piemenu_pos = nk.nk_vec2(ctx.input.mouse.pos.x, ctx.input.mouse.pos.y)
         piemenu_active = 1
     end
@@ -199,12 +199,28 @@ widgets.make_pie_popup = function(ctx, icons, pie_size, pie_count)
         ret = widgets.widget_pie_menu(ctx, piemenu_pos.x, piemenu_pos.y, pie_size, icons, pie_count)
         if (ret == -2) then piemenu_active = 0 end
         if (ret ~= -1) then 
-            print(" >>> deactivate_pie")
-            print("piemenu selected: "..ret)
             piemenu_active = 0
         end
     end
     return ret
+end 
+
+--------------------------------------------------------------------------------
+
+widgets.widget_combo_box = function(ctx, items, selected_item, height)
+    
+    local buffer = ffi.string(items[selected_item])
+    if (nk.nk_combo_begin_label(ctx, buffer, nk.nk_vec2(nk.nk_widget_width(ctx), height)) == true) then
+        nk.nk_layout_row_dynamic(ctx, 35, 1);
+        local count = table.getn(items)
+        for i = 1, count do
+            if (nk.nk_combo_item_label(ctx, ffi.string(items[i]), nk.NK_TEXT_LEFT) == true) then
+                selected_item = i
+            end
+        end
+        nk.nk_combo_end(ctx)
+    end
+    return selected_item
 end 
 
 --------------------------------------------------------------------------------

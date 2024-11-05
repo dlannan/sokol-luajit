@@ -226,31 +226,59 @@ end
 local group_width = ffi.new("int[1]", {320})
 local group_height = ffi.new("int[1]", {200})
 
-local group_name = ffi.new("char[64]")
-local group_name_len = ffi.new("int[1]")
+local project_name = ffi.new("char[256]")
+local project_name_len = ffi.new("int[1]")
+
+local platform_selected = 1
+local platforms = { "Win64", "MacOS", "Linux", "IOS64" }
+
+local res_selected = 1
+local resolutions = { "1920x1080", "1680x1050", "1600x900", "1440x900", "1376x768" }
+
 
 local function project_panel(ctx)
 
     nk.nk_style_set_font(ctx, fonts[3].handle)
 
-    nk.nk_layout_row_begin(ctx, nk.NK_STATIC, 22, 3)
-    nk.nk_layout_row_push(ctx, 50)
-    nk.nk_label(ctx, "size:", nk.NK_TEXT_LEFT)
-    nk.nk_layout_row_push(ctx, 130)
-    nk.nk_property_int(ctx, "#Width:", 100, group_width, 500, 10, 1)
-    nk.nk_layout_row_push(ctx, 130)
-    nk.nk_property_int(ctx, "#Height:", 100, group_height, 500, 10, 1)
-    nk.nk_layout_row_end(ctx)
+    local bounds = nk.nk_window_get_content_region(ctx)
+    local prop_col = bounds.w * 0.25
+    local value_col = bounds.w * 0.75
 
     nk.nk_layout_row_begin(ctx, nk.NK_STATIC, 22, 3)
-    nk.nk_layout_row_push(ctx, 50)
-    nk.nk_label(ctx, "name:", nk.NK_TEXT_LEFT)
-    nk.nk_layout_row_push(ctx, 130)
-    nk.nk_edit_string(ctx, nk.NK_EDIT_SIMPLE, group_name, group_name_len, 64, nk.nk_filter_default)
+    nk.nk_layout_row_push(ctx, prop_col)
+    nk.nk_label(ctx, "Project Name:", nk.NK_TEXT_LEFT)
+    nk.nk_layout_row_push(ctx, value_col)
+    nk.nk_edit_string(ctx, nk.NK_EDIT_SIMPLE, project_name, project_name_len, 256, nk.nk_filter_default)
     nk.nk_layout_row_end(ctx)    
 
+    nk.nk_layout_row_begin(ctx, nk.NK_STATIC, 22, 3)
+    nk.nk_layout_row_push(ctx, prop_col)
+    nk.nk_label(ctx, "Project Path:", nk.NK_TEXT_LEFT)
+    nk.nk_layout_row_push(ctx, value_col * 0.9)
+    nk.nk_edit_string(ctx, nk.NK_EDIT_SIMPLE, project_name, project_name_len, 256, nk.nk_filter_default)
+    nk.nk_layout_row_push(ctx, value_col * 0.1)
+    if(nk.nk_button_label(ctx, ffi.string("...")) == true) then
+        print("pressed")    
+    end
+    nk.nk_layout_row_end(ctx)    
+
+    nk.nk_layout_row_begin(ctx, nk.NK_STATIC, 22, 3)
+    nk.nk_layout_row_push(ctx, prop_col)
+    nk.nk_label(ctx, "Platform Target:", nk.NK_TEXT_LEFT)
+    nk.nk_layout_row_push(ctx, value_col)
+    platform_selected = wdgts.widget_combo_box(ctx, platforms, platform_selected, 200)
+    nk.nk_layout_row_end(ctx)
+
+
+    nk.nk_layout_row_begin(ctx, nk.NK_STATIC, 22, 3)
+    nk.nk_layout_row_push(ctx, prop_col)
+    nk.nk_label(ctx, "Resolution:", nk.NK_TEXT_LEFT)
+    nk.nk_layout_row_push(ctx, value_col)
+    res_selected = wdgts.widget_combo_box(ctx, resolutions, res_selected, 200)
+    nk.nk_layout_row_end(ctx)
+
     -- Awesome little radial popup.
-    local res = wdgts.make_pie_popup(ctx, icons, 140, 6)
+    local res = wdgts.make_pie_popup(ctx, icons, 100, 6)
 end
 
 -- --------------------------------------------------------------------------------------
@@ -268,12 +296,6 @@ local function properties_panel(ctx)
     nk.nk_property_int(ctx, "#Height:", 100, group_height, 500, 10, 1)
     nk.nk_layout_row_end(ctx)
 
-    nk.nk_layout_row_begin(ctx, nk.NK_STATIC, 22, 3)
-    nk.nk_layout_row_push(ctx, 50)
-    nk.nk_label(ctx, "name:", nk.NK_TEXT_LEFT)
-    nk.nk_layout_row_push(ctx, 130)
-    nk.nk_edit_string(ctx, nk.NK_EDIT_SIMPLE, group_name, group_name_len, 64, nk.nk_filter_default)
-    nk.nk_layout_row_end(ctx)    
 end
 
 -- --------------------------------------------------------------------------------------
