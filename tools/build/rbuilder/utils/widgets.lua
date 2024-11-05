@@ -144,7 +144,132 @@ end
 
 --------------------------------------------------------------------------------
 
+local piemenu_pos = nk.nk_vec2(0,0)
+local piemenu_active = 0
+
+widgets.make_pie_popup = function(ctx, icons, pie_size, pie_count)
+
+    pie_size = pie_size or 140
+    pie_count = pie_count or 6
+
+    if ((nk.nk_input_is_mouse_click_down_in_rect(ctx.input, nk.NK_BUTTON_RIGHT, nk.nk_window_get_bounds(ctx),nk.nk_true) == true) and 
+        piemenu_active == 0) then 
+        piemenu_pos = nk.nk_vec2(ctx.input.mouse.pos.x, ctx.input.mouse.pos.y)
+        piemenu_active = 1
+    end
+    local ret = -1
+    if (piemenu_active == 1) then
+        ret = widgets.widget_pie_menu(ctx, piemenu_pos.x, piemenu_pos.y, pie_size, icons, pie_count)
+        if (ret == -2) then piemenu_active = 0 end
+        if (ret ~= -1) then 
+            piemenu_active = 0
+        end
+    end
+    return ret
+end 
+
+--------------------------------------------------------------------------------
+
+widgets.widget_notebook = function(ctx, tabs, current_tab, tab_fixed_width)
+
+    local step = (2*3.141592654) / 32
+    local chart_type = {CHART_LINE=1, CHART_HISTO=2, CHART_MIXED=3}
+
+    -- /* Header */
+    nk.nk_style_push_vec2(ctx, ctx[0].style.window.spacing, nk.nk_vec2(0,0))
+    local rnding = ffi.new("float[1]", {ctx[0].style.button.rounding})
+    nk.nk_style_push_float(ctx, rnding, 0)
+    nk.nk_layout_row_begin(ctx, nk.NK_STATIC, 20, 3)
+    for i = 1, table.getn(tabs) do
+        -- /* make sure button perfectly fits text */
+        local f = ctx[0].style.font
+        local text_width = tab_fixed_width or f.width(f.userdata, f.height, tabs[i], string.len(tabs[i]))
+        local widget_width = text_width + 4 * ctx[0].style.button.padding.x
+        nk.nk_layout_row_push(ctx, widget_width)
+        if (current_tab == i) then
+            -- /* active tab gets highlighted */
+            local button_color = ctx[0].style.button.normal
+            ctx[0].style.button.normal = ctx[0].style.button.active
+            if (nk.nk_button_label(ctx, tabs[i]) == true ) then current_tab = i end
+            ctx[0].style.button.normal = button_color
+        else 
+            if(nk.nk_button_label(ctx, tabs[i]) == true) then current_tab = i end
+        end
+    end
+    nk.nk_style_pop_float(ctx)
+
+    -- /* Body */
+    nk.nk_layout_row_dynamic(ctx, 140, 1)
+    if (nk.nk_group_begin(ctx, "Notebook", nk.NK_WINDOW_BORDER) == true) then
+    
+        nk.nk_style_pop_vec2(ctx)
+        if(current_tab == chart_type.CHART_LINE) then
+            nk.nk_layout_row_dynamic(ctx, 100, 1)
+            if (nk.nk_chart_begin_colored(ctx, nk.NK_CHART_LINES, nk.nk_rgb(255,0,0), nk.nk_rgb(150,0,0), 32, 0.0, 1.0)) then
+                nk.nk_chart_add_slot_colored(ctx, nk.NK_CHART_LINES, nk.nk_rgb(0,0,255), nk.nk_rgb(0,0,150),32, -1.0, 1.0)
+                local id = 0
+                for i = 0, 32 -1 do
+                    nk.nk_chart_push_slot(ctx, math.abs(math.sin(id)), 0)
+                    nk.nk_chart_push_slot(ctx, math.cos(id), 1)
+                    id = id + step
+                end
+            end
+            nk.nk_chart_end(ctx)
+        elseif(current_tab == chart_type.CHART_HISTO) then
+
+            nk.nk_layout_row_dynamic(ctx, 100, 1)
+            if (nk.nk_chart_begin_colored(ctx, nk.NK_CHART_COLUMN, nk.nk_rgb(255,0,0), nk.nk_rgb(150,0,0), 32, 0.0, 1.0)) then
+                local id = 0
+                for i = 0, 32-1 do
+                    nk.nk_chart_push_slot(ctx, math.abs(math.sin(id)), 0)
+                    id = id + step
+                end
+            end
+            nk.nk_chart_end(ctx)
+        elseif(current_tab == chart_type.CHART_MIXED) then
+            nk.nk_layout_row_dynamic(ctx, 100, 1)
+            if (nk.nk_chart_begin_colored(ctx, nk.NK_CHART_LINES, nk.nk_rgb(255,0,0), nk.nk_rgb(150,0,0), 32, 0.0, 1.0)) then
+                nk.nk_chart_add_slot_colored(ctx, nk.NK_CHART_LINES, nk.nk_rgb(0,0,255), nk.nk_rgb(0,0,150),32, -1.0, 1.0)
+                nk.nk_chart_add_slot_colored(ctx, nk.NK_CHART_COLUMN, nk.nk_rgb(0,255,0), nk.nk_rgb(0,150,0), 32, 0.0, 1.0)
+                local id = 0
+                for i = 0, 32-1 do
+                    nk.nk_chart_push_slot(ctx, math.abs(math.sin(id)), 0)
+                    nk.nk_chart_push_slot(ctx, math.abs(math.cos(id)), 1)
+                    nk.nk_chart_push_slot(ctx, math.abs(math.sin(id)), 2)
+                    id = id + step
+                end
+            end
+            nk.nk_chart_end(ctx)
+        end
+        nk.nk_group_end(ctx)
+    else 
+        nk.nk_style_pop_vec2(ctx)
+    end
+
+    return current_tab
+end
+
+--------------------------------------------------------------------------------
+
+widgets.widget_combo_box = function(ctx, items, selected_item, height)
+    
+    local buffer = ffi.string(items[selected_item])
+    if (nk.nk_combo_begin_label(ctx, buffer, nk.nk_vec2(nk.nk_widget_width(ctx), height)) == true) then
+        nk.nk_layout_row_dynamic(ctx, 35, 1);
+        local count = table.getn(items)
+        for i = 1, count do
+            if (nk.nk_combo_item_label(ctx, ffi.string(items[i]), nk.NK_TEXT_LEFT) == true) then
+                selected_item = i
+            end
+        end
+        nk.nk_combo_end(ctx)
+    end
+    return selected_item
+end 
+
+--------------------------------------------------------------------------------
 -- returns struct nk_image
+
 widgets.icon_load = function(filename)
 
     local x = ffi.new("int[1]", {0})
@@ -178,50 +303,6 @@ widgets.icon_load = function(filename)
     stb.stbi_image_free(data)
     return nk_img
 end
-
---------------------------------------------------------------------------------
-
-local piemenu_pos = nk.nk_vec2(0,0)
-local piemenu_active = 0
-
-widgets.make_pie_popup = function(ctx, icons, pie_size, pie_count)
-
-    pie_size = pie_size or 140
-    pie_count = pie_count or 6
-
-    if ((nk.nk_input_is_mouse_click_down_in_rect(ctx.input, nk.NK_BUTTON_RIGHT, nk.nk_window_get_bounds(ctx),nk.nk_true) == true) and 
-        piemenu_active == 0) then 
-        piemenu_pos = nk.nk_vec2(ctx.input.mouse.pos.x, ctx.input.mouse.pos.y)
-        piemenu_active = 1
-    end
-    local ret = -1
-    if (piemenu_active == 1) then
-        ret = widgets.widget_pie_menu(ctx, piemenu_pos.x, piemenu_pos.y, pie_size, icons, pie_count)
-        if (ret == -2) then piemenu_active = 0 end
-        if (ret ~= -1) then 
-            piemenu_active = 0
-        end
-    end
-    return ret
-end 
-
---------------------------------------------------------------------------------
-
-widgets.widget_combo_box = function(ctx, items, selected_item, height)
-    
-    local buffer = ffi.string(items[selected_item])
-    if (nk.nk_combo_begin_label(ctx, buffer, nk.nk_vec2(nk.nk_widget_width(ctx), height)) == true) then
-        nk.nk_layout_row_dynamic(ctx, 35, 1);
-        local count = table.getn(items)
-        for i = 1, count do
-            if (nk.nk_combo_item_label(ctx, ffi.string(items[i]), nk.NK_TEXT_LEFT) == true) then
-                selected_item = i
-            end
-        end
-        nk.nk_combo_end(ctx)
-    end
-    return selected_item
-end 
 
 --------------------------------------------------------------------------------
 
