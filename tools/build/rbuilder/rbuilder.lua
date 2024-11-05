@@ -22,11 +22,14 @@ local ffi       = require("ffi")
 -- --------------------------------------------------------------------------------------
 
 local config    = require("config.settings")
+local wdgts     = require("utils.widgets")
 
 -- --------------------------------------------------------------------------------------
 
 local fonts     = nil
 local atlas     = ffi.new("struct nk_font_atlas[1]")
+
+local icons     = ffi.new("struct nk_image [?]", 10)
 
 -- --------------------------------------------------------------------------------------
 
@@ -186,6 +189,13 @@ local function init(void)
     winrect[0].y = 0
     winrect[0].w = sapp.sapp_width()
     winrect[0].h = sapp.sapp_height()
+
+    icons[0] = wdgts.icon_load("./icon/home.png")
+    icons[1] = wdgts.icon_load("./icon/phone.png")
+    icons[2] = wdgts.icon_load("./icon/plane.png")
+    icons[3] = wdgts.icon_load("./icon/wifi.png")
+    icons[4] = wdgts.icon_load("./icon/settings.png")
+    icons[5] = wdgts.icon_load("./icon/volume.png")   
 end
 
 -- --------------------------------------------------------------------------------------
@@ -238,6 +248,44 @@ local function project_panel(ctx)
     nk.nk_layout_row_push(ctx, 130)
     nk.nk_edit_string(ctx, nk.NK_EDIT_SIMPLE, group_name, group_name_len, 64, nk.nk_filter_default)
     nk.nk_layout_row_end(ctx)    
+
+    -- Awesome little radial popup.
+    local res = wdgts.make_pie_popup(ctx, icons, 140, 6)
+end
+
+-- --------------------------------------------------------------------------------------
+
+local function properties_panel(ctx)
+
+    nk.nk_style_set_font(ctx, fonts[3].handle)
+
+    nk.nk_layout_row_begin(ctx, nk.NK_STATIC, 22, 3)
+    nk.nk_layout_row_push(ctx, 50)
+    nk.nk_label(ctx, "size:", nk.NK_TEXT_LEFT)
+    nk.nk_layout_row_push(ctx, 130)
+    nk.nk_property_int(ctx, "#Width:", 100, group_width, 500, 10, 1)
+    nk.nk_layout_row_push(ctx, 130)
+    nk.nk_property_int(ctx, "#Height:", 100, group_height, 500, 10, 1)
+    nk.nk_layout_row_end(ctx)
+
+    nk.nk_layout_row_begin(ctx, nk.NK_STATIC, 22, 3)
+    nk.nk_layout_row_push(ctx, 50)
+    nk.nk_label(ctx, "name:", nk.NK_TEXT_LEFT)
+    nk.nk_layout_row_push(ctx, 130)
+    nk.nk_edit_string(ctx, nk.NK_EDIT_SIMPLE, group_name, group_name_len, 64, nk.nk_filter_default)
+    nk.nk_layout_row_end(ctx)    
+end
+
+-- --------------------------------------------------------------------------------------
+
+local function panel_project_function(data, left, top, width, height)
+    project_panel(data.ctx)
+end
+
+-- --------------------------------------------------------------------------------------
+
+local function panel_properties_function(data, left, top, width, height)
+    properties_panel(data.ctx)
 end
 
 -- --------------------------------------------------------------------------------------
@@ -250,32 +298,33 @@ local function main_ui(ctx)
 
     nk.nk_style_set_font(ctx, fonts[4].handle)
 
-    -- /* window flags */
-    ctx[0].style.window.header.align = header_align
-    -- window_flags = bit.bor(window_flags, nk.NK_WINDOW_TITLE)
-    -- if (border[0] ==  true) then window_flags = bit.bor(window_flags, nk.NK_WINDOW_BORDER) end
-    -- if (resize[0] == true) then window_flags = bit.bor(window_flags, nk.NK_WINDOW_SCALABLE) end
-    -- if (movable[0] == true) then window_flags = bit.bor(window_flags, nk.NK_WINDOW_MOVABLE) end
-    -- if (no_scrollbar[0] == true) then window_flags = bit.bor(window_flags, nk.NK_WINDOW_NO_SCROLLBAR) end
-    -- if (scale_left[0] == true) then window_flags = bit.bor(window_flags, nk.NK_WINDOW_SCALE_LEFT) end
-    -- if (minimizable[0] == true) then window_flags = bit.bor(window_flags, nk.NK_WINDOW_MINIMIZABLE) end
+    local flags = bit.bor(nk.NK_WINDOW_TITLE, nk.NK_WINDOW_BORDER)
+    local height = sapp.sapp_height() - 20 
+    local width = sapp.sapp_width() / 2 - 15
+    wdgts.widget_panel_fixed(ctx, "Project", 10, 10, width, height, flags, panel_project_function, {ctx=ctx})
 
-    if (nk.nk_begin(ctx, "rbuild", winrect[0], window_flags) == true) then
+    nk.nk_style_set_font(ctx, fonts[4].handle)
+
+    local height = sapp.sapp_height() - 20 
+    local width = sapp.sapp_width() / 2 - 15
+    wdgts.widget_panel_fixed(ctx, "Properties", 10+width+10, 10, width, height, flags, panel_properties_function, {ctx=ctx})
+
+
+    -- if (nk.nk_begin(ctx, "rbuild", winrect[0], window_flags) == true) then
 
         
-        if (show_menu[0] == true) then
+        -- if (show_menu[0] == true) then
+
 
             -- /* menubar */
-            local menu_states = { MENU_DEFAULT = 0, MENU_WINDOWS = 1}
-            nk.nk_menubar_begin(ctx)
+            -- local menu_states = { MENU_DEFAULT = 0, MENU_WINDOWS = 1}
+            -- nk.nk_menubar_begin(ctx)
 
-            project_panel(ctx)
+            -- -- /* menu #1 */
+            -- nk.nk_layout_row_begin(ctx, nk.NK_STATIC, 40, 5)
+            -- nk.nk_layout_row_push(ctx, 40)
 
-            -- /* menu #1 */
-            nk.nk_layout_row_begin(ctx, nk.NK_STATIC, 40, 5)
-            nk.nk_layout_row_push(ctx, 40)
-
-            nk.nk_image(ctx, pix["baboon"])
+            -- nk.nk_image(ctx, pix["baboon"])
 
             -- /*------------------------------------------------
             -- *                  CONTEXTUAL
@@ -297,10 +346,10 @@ local function main_ui(ctx)
             --     nk.nk_contextual_end(ctx)
             -- end
 
-            nk.nk_layout_row_end(ctx)
-        end 
-    end
-    nk.nk_end(ctx)
+            -- nk.nk_layout_row_end(ctx)
+    --     end 
+    --     nk.nk_end(ctx)
+    -- end
     return not nk.nk_window_is_closed(ctx, "Overview")
 end
 
