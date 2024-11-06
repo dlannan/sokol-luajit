@@ -46,6 +46,26 @@ local font_list = {
 
 -- --------------------------------------------------------------------------------------
 
+local visited = {}
+local function tdump(o, level)
+	local level = level or 1
+	if(level == 0) then visited = {} end
+	if type(o) == 'table' then
+	   	local s = ' {\n'
+	   	for k,v in pairs(o) do
+		  	if type(k) ~= 'number' then k = '"'..tostring(k)..'"' end
+			if(visited[v] == nil) then 
+				visited[v] = true
+		  		s = s .. string.rep("  ", level)..'['..k..'] = ' .. tdump(v, level+1)
+			end
+	   	end
+	   	return s .. string.rep("  ", level-1)..'}\n'
+	else
+	   return tostring(o).."\n"
+	end
+ end
+
+
 -- --------------------------------------------------------------------------------------
 -- Static vars 
 -- 
@@ -215,7 +235,7 @@ local function assets_panel(ctx)
 
     nk.nk_style_set_font(ctx, myfonts[3].handle)
 
-    curr_tab = wdgts.widget_notebook(ctx, tabs, curr_tab, 120)
+    curr_tab = wdgts.widget_notebook(ctx, "assets", tabs, curr_tab, 500, 120)
 
     nk.nk_layout_row_begin(ctx, nk.NK_STATIC, 22, 3)
     nk.nk_layout_row_push(ctx, 50)
@@ -304,3 +324,25 @@ app_desc[0].ios_keyboard_resizes_canvas = false
 sapp.sapp_run( app_desc )
 
 -- --------------------------------------------------------------------------------------
+
+local default_libs = {
+    ["os"] = true,
+    ["_G"] = true,
+    ["jit"] = true,
+    ["table"] = true, 
+    ["jit.opt"] = true,
+    ["ffi"] = true, 
+    ["string"] = true,
+    ["io"] = true, 
+    ["coroutine"] = true,
+    ["package"] = true,
+    ["math"] = true,
+    ["debug"] = true,
+    ["bit"] = true, 
+}
+for k,v in pairs(package.loaded) do 
+
+    if(type(v) ~= "userdata" and default_libs[tostring(k)] == nil) then
+        print( "["..tostring(k).."] = "..tostring(v)) 
+    end
+end

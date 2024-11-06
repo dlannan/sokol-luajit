@@ -7,7 +7,9 @@ local ffi       = require("ffi")
 
 --------------------------------------------------------------------------------
 
-local widgets   = {}
+local widgets   = {
+    id_name     = 1,
+}
 
 --------------------------------------------------------------------------------
 
@@ -170,7 +172,7 @@ end
 
 --------------------------------------------------------------------------------
 
-widgets.widget_notebook = function(ctx, tabs, current_tab, tab_fixed_width)
+widgets.widget_notebook = function(ctx, tab_name, tabs, current_tab, height, tab_fixed_width)
 
     local step = (2*3.141592654) / 32
     local chart_type = {CHART_LINE=1, CHART_HISTO=2, CHART_MIXED=3}
@@ -199,12 +201,12 @@ widgets.widget_notebook = function(ctx, tabs, current_tab, tab_fixed_width)
     nk.nk_style_pop_float(ctx)
 
     -- /* Body */
-    nk.nk_layout_row_dynamic(ctx, 140, 1)
-    if (nk.nk_group_begin(ctx, "Notebook", nk.NK_WINDOW_BORDER) == true) then
+    nk.nk_layout_row_dynamic(ctx, height, 1)
+    if (nk.nk_group_begin(ctx, tab_name, nk.NK_WINDOW_BORDER) == true) then
     
         nk.nk_style_pop_vec2(ctx)
         if(current_tab == chart_type.CHART_LINE) then
-            nk.nk_layout_row_dynamic(ctx, 100, 1)
+            nk.nk_layout_row_dynamic(ctx, height-20, 1)
             if (nk.nk_chart_begin_colored(ctx, nk.NK_CHART_LINES, nk.nk_rgb(255,0,0), nk.nk_rgb(150,0,0), 32, 0.0, 1.0)) then
                 nk.nk_chart_add_slot_colored(ctx, nk.NK_CHART_LINES, nk.nk_rgb(0,0,255), nk.nk_rgb(0,0,150),32, -1.0, 1.0)
                 local id = 0
@@ -217,7 +219,7 @@ widgets.widget_notebook = function(ctx, tabs, current_tab, tab_fixed_width)
             nk.nk_chart_end(ctx)
         elseif(current_tab == chart_type.CHART_HISTO) then
 
-            nk.nk_layout_row_dynamic(ctx, 100, 1)
+            nk.nk_layout_row_dynamic(ctx, height-20, 1)
             if (nk.nk_chart_begin_colored(ctx, nk.NK_CHART_COLUMN, nk.nk_rgb(255,0,0), nk.nk_rgb(150,0,0), 32, 0.0, 1.0)) then
                 local id = 0
                 for i = 0, 32-1 do
@@ -227,7 +229,7 @@ widgets.widget_notebook = function(ctx, tabs, current_tab, tab_fixed_width)
             end
             nk.nk_chart_end(ctx)
         elseif(current_tab == chart_type.CHART_MIXED) then
-            nk.nk_layout_row_dynamic(ctx, 100, 1)
+            nk.nk_layout_row_dynamic(ctx, height-20, 1)
             if (nk.nk_chart_begin_colored(ctx, nk.NK_CHART_LINES, nk.nk_rgb(255,0,0), nk.nk_rgb(150,0,0), 32, 0.0, 1.0)) then
                 nk.nk_chart_add_slot_colored(ctx, nk.NK_CHART_LINES, nk.nk_rgb(0,0,255), nk.nk_rgb(0,0,150),32, -1.0, 1.0)
                 nk.nk_chart_add_slot_colored(ctx, nk.NK_CHART_COLUMN, nk.nk_rgb(0,255,0), nk.nk_rgb(0,150,0), 32, 0.0, 1.0)

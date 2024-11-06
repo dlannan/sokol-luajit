@@ -94,7 +94,7 @@ end
 
 -- ---------------------------------------------------------------------------
 local visited = {}
-function tdump(o, level)
+local function tdump(o, level)
 	local level = level or 1
 	if(level == 0) then visited = {} end
 	if type(o) == 'table' then
@@ -347,17 +347,8 @@ return {
 
 	deepcopy		= deepcopy,
 
-	isjudge			= isjudge,
-	getpeoplecount	= getpeoplecount,
-	getpeopletext	= getpeopletext,
-	getscenariotext = getscenariotext,
-	gettimetext		= gettimetext,
-	getjudgetext	= getjudgetext,
-
 	tickround		= tickround,
 
 	loaddata		= loaddata,
-	saveconfig 		= saveconfig,
-	loadconfig 		= loadconfig,
 }
 -- ---------------------------------------------------------------------------
