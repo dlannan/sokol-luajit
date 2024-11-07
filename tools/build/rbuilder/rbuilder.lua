@@ -122,6 +122,7 @@ local function cleanup()
 end
 
 -- --------------------------------------------------------------------------------------
+
 local current_ctx = nil
 local function input(event) 
     if(event.type == sapp.SAPP_EVENTTYPE_RESIZED) then 
@@ -136,7 +137,6 @@ local function input(event)
         nk.snk_handle_event(event)
     end    
 end
-
 
 -- --------------------------------------------------------------------------------------
 -- Extract config and build ffi objects for them 
@@ -245,8 +245,39 @@ local function project_panel(ctx)
 end
 
 -- --------------------------------------------------------------------------------------
-local curr_tab = 1
-local tabs = { { name = "Lua Source" }, { name = "Images" }, { name = "Data" } }
+local curr_tab          = 1
+local files             = {}
+
+-- Fill with temp file list of dir /b 
+local fh = io.popen("dir /b", "r")
+local d = fh:read("*a")
+fh:close()
+
+for f in string.gmatch(d, "(.-)\n") do 
+    local newfile = { name = ffi.string(f)}
+    newfile.select = ffi.new("nk_bool[1]")
+    newfile.select[0] = nk.nk_false
+    table.insert(files, newfile) 
+end
+
+local tabs = { 
+    { 
+        name = "Lua Source",
+        func = function(ctx) 
+            local bounds = nk.nk_window_get_content_region(ctx)
+            nk.nk_layout_row_dynamic(ctx, bounds.h, 1)
+            wdgts.widget_list_selectable(ctx, "source_files", nk.NK_WINDOW_BORDER, files, bounds.w -40 )
+        end,
+    }, 
+    { 
+        name = "Images" 
+    }, 
+    { 
+        name = "Data" 
+    } 
+}
+
+-- --------------------------------------------------------------------------------------
 
 local function assets_panel(ctx)
 
@@ -332,7 +363,7 @@ app_desc[0].cleanup_cb = cleanup
 app_desc[0].event_cb = input
 app_desc[0].width = 1280
 app_desc[0].height = 800
-app_desc[0].window_title = config.title
+app_desc[0].window_title = config.rbuilder.title.value
 app_desc[0].icon.sokol_default = true 
 app_desc[0].logger.func = slib.slog_func 
 app_desc[0].enable_clipboard = true

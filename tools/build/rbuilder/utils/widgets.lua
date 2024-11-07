@@ -179,7 +179,7 @@ widgets.widget_notebook = function(ctx, tab_name, tabs, current_tab, height, tab
     ctx[0].style.window.spacing = nk.nk_vec2(0,0)
     local rounding = ctx[0].style.button.rounding
     ctx[0].style.button.rounding = 0
-    nk.nk_layout_row_begin(ctx, nk.NK_STATIC, 20, 3)
+    nk.nk_layout_row_begin(ctx, nk.NK_STATIC, 24, 3)
     for i, v in ipairs(tabs) do
         -- /* make sure button perfectly fits text */
         local f = ctx[0].style.font
@@ -233,6 +233,22 @@ widgets.widget_combo_box = function(ctx, items, selected_item, height)
     end
     return selected_item
 end 
+
+--------------------------------------------------------------------------------
+
+widgets.widget_list_selectable = function(ctx, title, flags, items, width)
+
+    if (nk.nk_group_begin(ctx, title, flags) == true) then
+        for i, item in ipairs(items) do
+            nk.nk_layout_row_static(ctx, 22, width, 1)
+            if(nk.nk_selectable_label(ctx, item.name, nk.NK_TEXT_LEFT, item.select) == true) then 
+                -- changed
+                print("changed:"..i)
+            end
+        end
+        nk.nk_group_end(ctx)
+    end
+end
 
 --------------------------------------------------------------------------------
 -- returns struct nk_image
