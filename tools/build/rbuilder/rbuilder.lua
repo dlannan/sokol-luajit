@@ -139,18 +139,33 @@ end
 
 
 -- --------------------------------------------------------------------------------------
--- TODO: These to all go into config
-local group_width = ffi.new("int[1]", {320})
-local group_height = ffi.new("int[1]", {200})
+-- Extract config and build ffi objects for them 
+--   Each config property shall have a shadow ffi property labeled with _ffi
+for sectionname, section in pairs(config) do 
 
-local project_path = ffi.new("char[256]")
-local project_path_len = ffi.new("int[1]")
+    for key, value in pairs(section) do 
+        if(type(value) == "string") then 
+            section[key.."_ffi"] = ffi.new("char[256]")
+            --ffi.copy(section[key.."_ffi"], ffi.string(value))
+            section[key.."_len_ffi"] = ffi.new("int[1]", 0)
+        end 
+        if(type(value) == "number") then
+            section[key.."_ffi"] = ffi.new("float[1]", value)
+        end
+    end
+end
 
-local project_startup_file = ffi.new("char[256]")
-local project_startup_file_len = ffi.new("int[1]")
+-- local group_width = ffi.new("int[1]", {320})
+-- local group_height = ffi.new("int[1]", {200})
 
-local project_name = ffi.new("char[256]")
-local project_name_len = ffi.new("int[1]")
+-- local project_path = ffi.new("char[256]")
+-- local project_path_len = ffi.new("int[1]")
+
+-- local project_startup_file = ffi.new("char[256]")
+-- local project_startup_file_len = ffi.new("int[1]")
+
+-- local project_name = ffi.new("char[256]")
+-- local project_name_len = ffi.new("int[1]")
 
 local platform_selected = 1
 local platforms = { "Win64", "MacOS", "Linux", "IOS64" }
@@ -160,68 +175,35 @@ local resolutions = { "1920x1080", "1680x1050", "1600x900", "1440x900", "1376x76
 
 -- --------------------------------------------------------------------------------------
 
-local function project_panel(ctx)
-
-    nk.nk_style_set_font(ctx, myfonts[3].handle)
+local function display_section(ctx, sectionname)
 
     local bounds = nk.nk_window_get_content_region(ctx)
     local prop_col = bounds.w * 0.25
     local value_col = bounds.w * 0.75
 
-    nk.nk_layout_row_begin(ctx, nk.NK_STATIC, 22, 3)
-    nk.nk_layout_row_push(ctx, prop_col)
-    nk.nk_label(ctx, "Project Name:", nk.NK_TEXT_LEFT)
-    nk.nk_layout_row_push(ctx, value_col)
-    nk.nk_edit_string(ctx, nk.NK_EDIT_SIMPLE, project_name, project_name_len, 256, nk.nk_filter_default)
-    nk.nk_layout_row_end(ctx)    
-
-    nk.nk_layout_row_begin(ctx, nk.NK_STATIC, 22, 3)
-    nk.nk_layout_row_push(ctx, prop_col)
-    nk.nk_label(ctx, "Project Path:", nk.NK_TEXT_LEFT)
-    nk.nk_layout_row_push(ctx, value_col * 0.9)
-    nk.nk_edit_string(ctx, nk.NK_EDIT_SIMPLE, project_path, project_path_len, 256, nk.nk_filter_default)
-    nk.nk_layout_row_push(ctx, value_col * 0.1)
-    if(nk.nk_button_label(ctx, ffi.string("...")) == true) then
-        print("pressed")    
+    local section = config[sectionname]
+    for k,v in pairs(section) do
+        if(not string.match(k, ".-_ffi$")) then 
+            print(k,v)
+            if(type(v) == "string") then
+                nk.nk_layout_row_begin(ctx, nk.NK_STATIC, 22, 3)
+                nk.nk_layout_row_push(ctx, prop_col)
+                nk.nk_label(ctx, k..":", nk.NK_TEXT_LEFT)
+                nk.nk_layout_row_push(ctx, value_col)
+                nk.nk_edit_string(ctx, nk.NK_EDIT_SIMPLE, section[k.."_ffi"], section[k.."_len_ffi"], 256, nk.nk_filter_default)
+                nk.nk_layout_row_end(ctx)    
+            end
+        end
     end
-    nk.nk_layout_row_end(ctx)    
+end
 
-    nk.nk_layout_row_begin(ctx, nk.NK_STATIC, 22, 3)
-    nk.nk_layout_row_push(ctx, prop_col)
-    nk.nk_label(ctx, "sokol-luajit Path:", nk.NK_TEXT_LEFT)
-    nk.nk_layout_row_push(ctx, value_col * 0.9)
-    nk.nk_edit_string(ctx, nk.NK_EDIT_SIMPLE, project_name, project_name_len, 256, nk.nk_filter_default)
-    nk.nk_layout_row_push(ctx, value_col * 0.1)
-    if(nk.nk_button_label(ctx, ffi.string("...")) == true) then
-        print("pressed")    
-    end
-    nk.nk_layout_row_end(ctx)    
+-- --------------------------------------------------------------------------------------
 
-    nk.nk_layout_row_begin(ctx, nk.NK_STATIC, 22, 3)
-    nk.nk_layout_row_push(ctx, prop_col)
-    nk.nk_label(ctx, "Startup Lua File:", nk.NK_TEXT_LEFT)
-    nk.nk_layout_row_push(ctx, value_col * 0.9)
-    nk.nk_edit_string(ctx, nk.NK_EDIT_SIMPLE, project_startup_file, project_startup_file_len, 256, nk.nk_filter_default)
-    nk.nk_layout_row_push(ctx, value_col * 0.1)
-    if(nk.nk_button_label(ctx, ffi.string("...")) == true) then
-        print("pressed")    
-    end
-    nk.nk_layout_row_end(ctx)    
+local function project_panel(ctx)
 
-    nk.nk_layout_row_begin(ctx, nk.NK_STATIC, 22, 3)
-    nk.nk_layout_row_push(ctx, prop_col)
-    nk.nk_label(ctx, "Platform Target:", nk.NK_TEXT_LEFT)
-    nk.nk_layout_row_push(ctx, value_col)
-    platform_selected = wdgts.widget_combo_box(ctx, platforms, platform_selected, 200)
-    nk.nk_layout_row_end(ctx)
+    nk.nk_style_set_font(ctx, myfonts[3].handle)
 
-
-    nk.nk_layout_row_begin(ctx, nk.NK_STATIC, 22, 3)
-    nk.nk_layout_row_push(ctx, prop_col)
-    nk.nk_label(ctx, "Resolution:", nk.NK_TEXT_LEFT)
-    nk.nk_layout_row_push(ctx, value_col)
-    res_selected = wdgts.widget_combo_box(ctx, resolutions, res_selected, 200)
-    nk.nk_layout_row_end(ctx)
+    display_section(ctx, "project")
 
     -- Awesome little radial popup.
     local res = wdgts.make_pie_popup(ctx, icons, 100, 6)
