@@ -174,78 +174,43 @@ end
 
 widgets.widget_notebook = function(ctx, tab_name, tabs, current_tab, height, tab_fixed_width)
 
-    local step = (2*3.141592654) / 32
-    local chart_type = {CHART_LINE=1, CHART_HISTO=2, CHART_MIXED=3}
-
     -- /* Header */
-    nk.nk_style_push_vec2(ctx, ctx[0].style.window.spacing, nk.nk_vec2(0,0))
-    local rnding = ffi.new("float[1]", {ctx[0].style.button.rounding})
-    nk.nk_style_push_float(ctx, rnding, 0)
+    local spacing = ctx[0].style.window.spacing
+    ctx[0].style.window.spacing = nk.nk_vec2(0,0)
+    local rounding = ctx[0].style.button.rounding
+    ctx[0].style.button.rounding = 0
     nk.nk_layout_row_begin(ctx, nk.NK_STATIC, 20, 3)
-    for i = 1, table.getn(tabs) do
+    for i, v in ipairs(tabs) do
         -- /* make sure button perfectly fits text */
         local f = ctx[0].style.font
-        local text_width = tab_fixed_width or f.width(f.userdata, f.height, tabs[i], string.len(tabs[i]))
+        local text_width = tab_fixed_width or f.width(f.userdata, f.height, v.name, string.len(tabs[i]))
         local widget_width = text_width + 4 * ctx[0].style.button.padding.x
         nk.nk_layout_row_push(ctx, widget_width)
         if (current_tab == i) then
             -- /* active tab gets highlighted */
             local button_color = ctx[0].style.button.normal
             ctx[0].style.button.normal = ctx[0].style.button.active
-            if (nk.nk_button_label(ctx, tabs[i]) == true ) then current_tab = i end
+            if (nk.nk_button_label(ctx, v.name) == true ) then current_tab = i end
             ctx[0].style.button.normal = button_color
         else 
-            if(nk.nk_button_label(ctx, tabs[i]) == true) then current_tab = i end
+            if(nk.nk_button_label(ctx, v.name) == true) then current_tab = i end
         end
     end
-    nk.nk_style_pop_float(ctx)
+    ctx[0].style.button.rounding = rounding
+    ctx[0].style.window.spacing = spacing
 
     -- /* Body */
     nk.nk_layout_row_dynamic(ctx, height, 1)
     if (nk.nk_group_begin(ctx, tab_name, nk.NK_WINDOW_BORDER) == true) then
     
-        nk.nk_style_pop_vec2(ctx)
-        if(current_tab == chart_type.CHART_LINE) then
-            nk.nk_layout_row_dynamic(ctx, height-20, 1)
-            if (nk.nk_chart_begin_colored(ctx, nk.NK_CHART_LINES, nk.nk_rgb(255,0,0), nk.nk_rgb(150,0,0), 32, 0.0, 1.0)) then
-                nk.nk_chart_add_slot_colored(ctx, nk.NK_CHART_LINES, nk.nk_rgb(0,0,255), nk.nk_rgb(0,0,150),32, -1.0, 1.0)
-                local id = 0
-                for i = 0, 32 -1 do
-                    nk.nk_chart_push_slot(ctx, math.abs(math.sin(id)), 0)
-                    nk.nk_chart_push_slot(ctx, math.cos(id), 1)
-                    id = id + step
-                end
+        for i,v in ipairs(tabs) do
+            if(current_tab == i) then
+                ctx[0].style.window.group_padding = nk.nk_vec2(14,10)
+                if(v.func) then v.func(ctx) end
+                ctx[0].style.window.group_padding = spacing
             end
-            nk.nk_chart_end(ctx)
-        elseif(current_tab == chart_type.CHART_HISTO) then
-
-            nk.nk_layout_row_dynamic(ctx, height-20, 1)
-            if (nk.nk_chart_begin_colored(ctx, nk.NK_CHART_COLUMN, nk.nk_rgb(255,0,0), nk.nk_rgb(150,0,0), 32, 0.0, 1.0)) then
-                local id = 0
-                for i = 0, 32-1 do
-                    nk.nk_chart_push_slot(ctx, math.abs(math.sin(id)), 0)
-                    id = id + step
-                end
-            end
-            nk.nk_chart_end(ctx)
-        elseif(current_tab == chart_type.CHART_MIXED) then
-            nk.nk_layout_row_dynamic(ctx, height-20, 1)
-            if (nk.nk_chart_begin_colored(ctx, nk.NK_CHART_LINES, nk.nk_rgb(255,0,0), nk.nk_rgb(150,0,0), 32, 0.0, 1.0)) then
-                nk.nk_chart_add_slot_colored(ctx, nk.NK_CHART_LINES, nk.nk_rgb(0,0,255), nk.nk_rgb(0,0,150),32, -1.0, 1.0)
-                nk.nk_chart_add_slot_colored(ctx, nk.NK_CHART_COLUMN, nk.nk_rgb(0,255,0), nk.nk_rgb(0,150,0), 32, 0.0, 1.0)
-                local id = 0
-                for i = 0, 32-1 do
-                    nk.nk_chart_push_slot(ctx, math.abs(math.sin(id)), 0)
-                    nk.nk_chart_push_slot(ctx, math.abs(math.cos(id)), 1)
-                    nk.nk_chart_push_slot(ctx, math.abs(math.sin(id)), 2)
-                    id = id + step
-                end
-            end
-            nk.nk_chart_end(ctx)
         end
         nk.nk_group_end(ctx)
-    else 
-        nk.nk_style_pop_vec2(ctx)
     end
 
     return current_tab

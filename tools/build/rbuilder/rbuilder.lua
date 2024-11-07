@@ -141,61 +141,94 @@ end
 -- --------------------------------------------------------------------------------------
 -- Extract config and build ffi objects for them 
 --   Each config property shall have a shadow ffi property labeled with _ffi
-for sectionname, section in pairs(config) do 
+for sectionname, section in pairs(config) do
 
-    for key, value in pairs(section) do 
-        if(type(value) == "string") then 
-            section[key.."_ffi"] = ffi.new("char[256]")
-            --ffi.copy(section[key.."_ffi"], ffi.string(value))
-            section[key.."_len_ffi"] = ffi.new("int[1]", 0)
-        end 
-        if(type(value) == "number") then
-            section[key.."_ffi"] = ffi.new("float[1]", value)
+    for key, prop in pairs(section) do
+        -- If ptype is nill or string its a string
+        if(prop.ptype == nil or prop.ptype == "string") then
+            prop.ffi = ffi.new("char[?]", prop.slen )
+            ffi.fill(prop.ffi, prop.slen, 0)
+            ffi.copy(prop.ffi, ffi.string(prop.value))
+            prop.len_ffi = ffi.new("int[1]", {string.len(prop.value)})
+        elseif(prop.ptype == "combo") then
+            prop.ffi = ffi.new("int[1]", prop.value)
+        elseif(prop.ptype == "int") then
+            prop.ffi = ffi.new("int[1]", prop.value)
+        elseif(prop.ptype == "float") then
+            prop.ffi = ffi.new("float[1]", prop.value)
         end
     end
 end
 
--- local group_width = ffi.new("int[1]", {320})
--- local group_height = ffi.new("int[1]", {200})
-
--- local project_path = ffi.new("char[256]")
--- local project_path_len = ffi.new("int[1]")
-
--- local project_startup_file = ffi.new("char[256]")
--- local project_startup_file_len = ffi.new("int[1]")
-
--- local project_name = ffi.new("char[256]")
--- local project_name_len = ffi.new("int[1]")
-
-local platform_selected = 1
-local platforms = { "Win64", "MacOS", "Linux", "IOS64" }
-
-local res_selected = 1
-local resolutions = { "1920x1080", "1680x1050", "1600x900", "1440x900", "1376x768" }
+local group_width = ffi.new("int[1]", {320})
+local group_height = ffi.new("int[1]", {200})
 
 -- --------------------------------------------------------------------------------------
+local range_float_value = ffi.new("float[1]")
 
 local function display_section(ctx, sectionname)
 
-    local bounds = nk.nk_window_get_content_region(ctx)
-    local prop_col = bounds.w * 0.25
-    local value_col = bounds.w * 0.75
-
     local section = config[sectionname]
+    -- Collect the number of properties in the section
+    local count = 0
+    local sorted = {}
     for k,v in pairs(section) do
-        if(not string.match(k, ".-_ffi$")) then 
-            print(k,v)
-            if(type(v) == "string") then
-                nk.nk_layout_row_begin(ctx, nk.NK_STATIC, 22, 3)
-                nk.nk_layout_row_push(ctx, prop_col)
-                nk.nk_label(ctx, k..":", nk.NK_TEXT_LEFT)
-                nk.nk_layout_row_push(ctx, value_col)
-                nk.nk_edit_string(ctx, nk.NK_EDIT_SIMPLE, section[k.."_ffi"], section[k.."_len_ffi"], 256, nk.nk_filter_default)
-                nk.nk_layout_row_end(ctx)    
+        count = count + 1
+        v.key = k
+        sorted[v.index] = v
+    end
+
+    nk.nk_layout_row_dynamic(ctx, 28 * count + 60, 1)
+    local bounds = nk.nk_window_get_content_region(ctx)
+    local prop_col = bounds.w * 0.23
+    local value_col = bounds.w * 0.73
+
+    local flags = bit.bor(nk.NK_WINDOW_BORDER, nk.NK_WINDOW_TITLE)
+    flags = bit.bor(flags, nk.NK_WINDOW_NO_SCROLLBAR)
+    if (nk.nk_group_begin(ctx, sectionname, flags) == true) then
+    
+        for k,v in ipairs(sorted) do
+            nk.nk_layout_row_begin(ctx, nk.NK_STATIC, 28, 3)
+            nk.nk_layout_row_push(ctx, prop_col)
+            nk.nk_label(ctx, v.key..":", nk.NK_TEXT_LEFT)
+            nk.nk_layout_row_push(ctx, value_col)
+            if(v.ptype == "string" or v.ptype == nil) then
+                nk.nk_edit_string(ctx, nk.NK_EDIT_SIMPLE, v.ffi, v.len_ffi, v.slen, nk.nk_filter_default)
+            elseif(v.ptype == "combo") then 
+                v.value = wdgts.widget_combo_box(ctx, v.plist, v.value, 200)
+            elseif(v.ptype == "int") then
+                nk.nk_property_int(ctx, "", v.vmin, v.ffi, v.vmax, v.vstep, v.vinc)
+            elseif(v.ptype == "float") then
+                nk.nk_property_float(ctx, "", v.vmin, v.ffi, v.vmax, v.vstep, v.vinc)
             end
+            nk.nk_layout_row_end(ctx)    
+
         end
+        nk.nk_group_end(ctx)
     end
 end
+
+-- --------------------------------------------------------------------------------------
+
+local project_curr_tab = 1
+local project_tabs = { 
+    { 
+        name = "Project",
+        func = function(ctx) 
+            display_section(ctx, "project") 
+            display_section(ctx, "sokol")
+        end,
+    }, 
+    { 
+        name = "Build",
+        func = function(ctx) 
+            display_section(ctx, "platform") 
+        end,
+    }, 
+    { 
+        name = "Logs" 
+    } 
+}
 
 -- --------------------------------------------------------------------------------------
 
@@ -203,7 +236,9 @@ local function project_panel(ctx)
 
     nk.nk_style_set_font(ctx, myfonts[3].handle)
 
-    display_section(ctx, "project")
+    project_curr_tab = wdgts.widget_notebook(ctx, "assets", project_tabs, project_curr_tab, 500, 120)
+    -- display_section(ctx, "graphics")
+    -- display_section(ctx, "audio")
 
     -- Awesome little radial popup.
     local res = wdgts.make_pie_popup(ctx, icons, 100, 6)
@@ -211,7 +246,7 @@ end
 
 -- --------------------------------------------------------------------------------------
 local curr_tab = 1
-local tabs = { "Lua Source", "Images", "Data" }
+local tabs = { { name = "Lua Source" }, { name = "Images" }, { name = "Data" } }
 
 local function assets_panel(ctx)
 
@@ -252,7 +287,7 @@ local function main_ui(ctx)
 
     nk.nk_style_set_font(ctx, myfonts[4].handle)
 
-    local flags = bit.bor(nk.NK_WINDOW_TITLE, nk.NK_WINDOW_BORDER)
+    local flags = nk.NK_WINDOW_BORDER
     local height = sapp.sapp_height() - 20 
     local width = sapp.sapp_width() / 2 - 15
     wdgts.widget_panel_fixed(ctx, "Project", 10, 10, width, height, flags, panel_project_function, {ctx=ctx})

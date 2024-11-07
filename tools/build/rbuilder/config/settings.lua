@@ -4,52 +4,58 @@ local ffi       = require("ffi")
 
 -- ------------------------------------------------------------------------------------------------------
 
+local platforms = { "Win64", "MacOS", "Linux", "IOS64" }
+local resolutions = { "1920x1080", "1680x1050", "1600x900", "1440x900", "1376x768" }
+local arch = { "x86", "x64", "arm", "arm64", "arm64be", "ppc", "mips", "mipsel", "mips64", "mips64el", "mips64r6", "mips64r6el" }
+local oss = { "Windows", "Linux", "OSX", "BSD", "POSIX", "Other" }
+
 local settings = {
 
     rbuilder = {
-        appname         = "rbuild",
-        version         = "00.01.snow",
+        appname         = { index = 1, value = "rbuild", slen = 7 },
+        version         = { index = 2, value = "00.01.snow", slen = 32 },
     },
 
     platform = {
-        target          = "Win64",
-        srlua_path      = "../srlua/",      -- initially rbuild will run for the tools/build/rbuilder folder
-        arch            = ffi.arch,
-        os              = ffi.os,
+        target          = { index = 1, value = 1, ptype = "combo", plist = platforms },
+        srlua_path      = { index = 2, value = "../srlua/", slen = 256 },     -- initially rbuild will run for the tools/build/rbuilder folder
+        arch            = { index = 3, value = 2, ptype = "combo", plist = arch },
+        os              = { index = 4, value = 1, ptype = "combo", plist = oss },
     },
 
     project = {
-        project_name    = "default",
-        project_path    = "./",               -- Always starts empty. Will support a project file.
-        project_file    = "default.slp"     -- Sokol luajit project file
+        project_name    = { index = 1, value = "default", slen = 64 },
+        project_path    = { index = 2, value = "./", slen = 256 },               -- Always starts empty. Will support a project file.
+        project_file    = { index = 3, value = "default.slp", slen = 64 },     -- Sokol luajit project file
+        project_start   = { index = 4, value = "example1.lua", slen = 128 },
     },
 
     graphics = {
-        display_res     = "1024x768",
-        display_width   = 1024,
-        display_height  = 768,
-        display_fps     = 60,
-        antialias       = "fxaa",
+        display_res     = { index = 1, value = 1, ptype = "combo", plist = resolutions },
+        display_width   = { index = 2, value = 1024, vmin = 640, vmax = 8192, vstep = 32, vinc = 0.1, ptype = "int" },
+        display_height  = { index = 3, value = 768, vmin = 480, vmax = 8192, vstep = 32, vinc = 0.1, ptype = "int" },
+        display_fps     = { index = 4, value = 60, vmin = 25, vmax = 200, vstep = 5, vinc = 0.1, ptype = "int" },
+        antialias       = { index = 5, value = "fxaa", slen = 16 },
     },
 
     audio = {
-        master_volume   = 1.0,
-        effects_volume  = 1.0,
-        music_volume    = 1.0,
+        master_volume   = { index = 1, value = 1.0, vmin = 0.0, vmax = 1.0, vstep = 0.02, vinc = 0.1, ptype = "float" },
+        effects_volume  = { index = 2, value = 1.0, vmin = 0.0, vmax = 1.0, vstep = 0.02, vinc = 0.1, ptype = "float" },
+        music_volume    = { index = 3, value = 1.0, vmin = 0.0, vmax = 1.0, vstep = 0.02, vinc = 0.1, ptype = "float" },
     },
     
     sokol = {
-        sokol_path      = "../../../../",
-        sokol_bin       = "bin/",
-        sokol_ffi       = "ffi/",
-        sokol_lua       = "lua/",
-        sokol_examples  = "examples/",
+        sokol_path      = { index = 1, value = "../../../../", slen = 256 },
+        sokol_bin       = { index = 2, value = "bin/", slen = 256 },
+        sokol_ffi       = { index = 3, value = "ffi/", slen = 256 },
+        sokol_lua       = { index = 4, value = "lua/", slen = 256 },
+        sokol_examples  = { index = 5, value = "examples/", slen = 256 },
     },
 
     remote = {
         -- These are futures -- 
-        remote_build    = "https://mybuildserver.com/sokol_build",
-        remote_data     = "https://myremotedata.com/data",
+        remote_build    = { index = 1, value = "https://mybuildserver.com/sokol_build", slen = 256 },
+        remote_data     = { index = 2, value = "https://myremotedata.com/data", slen = 256 },
     },
 
     -- Assets will be populated by project file
@@ -58,7 +64,8 @@ local settings = {
     },
 }
 
-settings.rbuilder.title     = settings.rbuilder.appname.." ("..settings.rbuilder.version..")"
+local title     = settings.rbuilder.appname.value.." ("..settings.rbuilder.version.value..")"
+settings.rbuilder.title = { value = title, slen = 32 }
 
 -- ------------------------------------------------------------------------------------------------------
 
