@@ -18,16 +18,16 @@ local settings = {
 
     platform = {
         target          = { index = 1, value = 1, ptype = "combo", plist = platforms },
-        srlua_path      = { index = 2, value = "../srlua/", slen = 256 },     -- initially rbuild will run for the tools/build/rbuilder folder
+        srlua_path      = { index = 2, value = "../srlua/", ptype = "path", slen = 256 },     -- initially rbuild will run for the tools/build/rbuilder folder
         arch            = { index = 3, value = 2, ptype = "combo", plist = arch },
         os              = { index = 4, value = 1, ptype = "combo", plist = oss },
     },
 
     project = {
         project_name    = { index = 1, value = "default", slen = 64 },
-        project_path    = { index = 2, value = "./", slen = 256 },               -- Always starts empty. Will support a project file.
-        project_file    = { index = 3, value = "default.slp", slen = 64 },     -- Sokol luajit project file
-        project_start   = { index = 4, value = "example1.lua", slen = 128 },
+        project_path    = { index = 2, value = "./", ptype = "path", slen = 256 },               -- Always starts empty. Will support a project file.
+        project_file    = { index = 3, value = "default.slp", ptype = "file", slen = 64 },     -- Sokol luajit project file
+        project_start   = { index = 4, value = "example1.lua", ptype = "file", slen = 128 },
     },
 
     graphics = {
@@ -45,11 +45,11 @@ local settings = {
     },
     
     sokol = {
-        sokol_path      = { index = 1, value = "../../../../", slen = 256 },
-        sokol_bin       = { index = 2, value = "bin/", slen = 256 },
-        sokol_ffi       = { index = 3, value = "ffi/", slen = 256 },
-        sokol_lua       = { index = 4, value = "lua/", slen = 256 },
-        sokol_examples  = { index = 5, value = "examples/", slen = 256 },
+        sokol_path      = { index = 1, value = "../../../../", ptype = "path", slen = 256 },
+        sokol_bin       = { index = 2, value = "bin/", ptype = "path", slen = 256 },
+        sokol_ffi       = { index = 3, value = "ffi/", ptype = "path", slen = 256 },
+        sokol_lua       = { index = 4, value = "lua/", ptype = "path", slen = 256 },
+        sokol_examples  = { index = 5, value = "examples/", ptype = "path", slen = 256 },
     },
 
     remote = {

@@ -38,10 +38,33 @@ local icons     = ffi.new("struct nk_image [?]", 10)
 
 local myfonts   = nil
 local font_list = {
-    { font_file = "fontawesome-webfont.ttf", font_size = 30.0, range = nk.nk_font_awesome_glyph_ranges() },
+    { font_file = "fontawesome-webfont.ttf", font_size = 16.0, range = nk.nk_font_awesome_glyph_ranges() },
     { font_file = "Rubik-Light.ttf", font_size = 16.0 },
     { font_file = "Rubik-Regular.ttf", font_size = 20.0 },
     { font_file = "Rubik-Bold.ttf", font_size = 21.0 },
+}
+
+-- --------------------------------------------------------------------------------------
+
+local folder_select = {
+    popup_active = 0,
+    popup_dim = ffi.new("struct nk_rect",{20, 100, 220, 90}),
+    folder_path = ".",
+    ui_func = function(ctx, dim, udata)
+
+        nk.nk_layout_row_dynamic(ctx, 25, 1)
+        nk.nk_label(ctx, "A terrible error as occured", nk.NK_TEXT_LEFT)
+        nk.nk_layout_row_dynamic(ctx, 25, 2)
+        if (nk.nk_button_label(ctx, "OK") == true) then
+            udata.popup_active = 0
+            nk.nk_popup_close(ctx)
+        end
+        if (nk.nk_button_label(ctx, "WTF") == true) then
+            udata.popup_active = 0
+            nk.nk_popup_close(ctx)
+        end
+        return udata.popup_active
+    end,
 }
 
 -- --------------------------------------------------------------------------------------
@@ -112,6 +135,11 @@ local function init(void)
     icons[3] = wdgts.icon_load("./icon/wifi.png")
     icons[4] = wdgts.icon_load("./icon/settings.png")
     icons[5] = wdgts.icon_load("./icon/volume.png")   
+
+    folder_select.popup_dim.w = sapp.sapp_width()* 0.4
+    folder_select.popup_dim.h = sapp.sapp_height()* 0.7
+    folder_select.popup_dim.x = sapp.sapp_width()/2-8 - folder_select.popup_dim.w/2
+    folder_select.popup_dim.y = sapp.sapp_height()/2-40 - folder_select.popup_dim.h/2
 end
 
 -- --------------------------------------------------------------------------------------
@@ -127,6 +155,8 @@ local current_ctx = nil
 local function input(event) 
     if(event.type == sapp.SAPP_EVENTTYPE_RESIZED) then 
         nk.snk_handle_event(event)
+        folder_select.popup_dim.x = sapp.sapp_width()/2 - folder_select.popup_dim.w/2
+        folder_select.popup_dim.y = sapp.sapp_height()/2 - folder_select.popup_dim.h    
     elseif(event.type == sapp.SAPP_EVENTTYPE_MOUSE_ENTER) then 
         nk.nk_style_show_cursor(current_ctx)
         sapp.sapp_show_mouse(false)
@@ -156,6 +186,18 @@ for sectionname, section in pairs(config) do
             prop.ffi = ffi.new("int[1]", prop.value)
         elseif(prop.ptype == "float") then
             prop.ffi = ffi.new("float[1]", prop.value)
+        elseif(prop.ptype == "path") then
+            print(prop.value)
+            prop.ffi = ffi.new("char[?]", prop.slen )
+            ffi.fill(prop.ffi, prop.slen, 0)
+            ffi.copy(prop.ffi, ffi.string(prop.value))
+            prop.len_ffi = ffi.new("int[1]", {string.len(prop.value)})
+        elseif(prop.ptype == "file") then
+            print(prop.value)
+            prop.ffi = ffi.new("char[?]", prop.slen )
+            ffi.fill(prop.ffi, prop.slen, 0)
+            ffi.copy(prop.ffi, ffi.string(prop.value))
+            prop.len_ffi = ffi.new("int[1]", {string.len(prop.value)})            
         end
     end
 end
@@ -191,19 +233,38 @@ local function display_section(ctx, sectionname)
             nk.nk_layout_row_begin(ctx, nk.NK_STATIC, 28, 3)
             nk.nk_layout_row_push(ctx, prop_col)
             nk.nk_label(ctx, v.key..":", nk.NK_TEXT_LEFT)
-            nk.nk_layout_row_push(ctx, value_col)
             if(v.ptype == "string" or v.ptype == nil) then
+                nk.nk_layout_row_push(ctx, value_col)
                 nk.nk_edit_string(ctx, nk.NK_EDIT_SIMPLE, v.ffi, v.len_ffi, v.slen, nk.nk_filter_default)
+            elseif(v.ptype == "path") then
+                nk.nk_layout_row_push(ctx, value_col - 34)
+                nk.nk_edit_string(ctx, nk.NK_EDIT_SIMPLE, v.ffi, v.len_ffi, v.slen, nk.nk_filter_default)
+                nk.nk_style_set_font(ctx, myfonts[1].handle)
+                nk.nk_layout_row_push(ctx, 30)               
+                if(nk.nk_button_label(ctx, "") == true) then 
+                    folder_select.popup_active = 1
+                end
+                nk.nk_style_set_font(ctx, myfonts[3].handle)
+            elseif(v.ptype == "file") then
+                nk.nk_layout_row_push(ctx, value_col - 34)
+                nk.nk_edit_string(ctx, nk.NK_EDIT_SIMPLE, v.ffi, v.len_ffi, v.slen, nk.nk_filter_default)
+                nk.nk_style_set_font(ctx, myfonts[1].handle)
+                nk.nk_layout_row_push(ctx, 30)
+                nk.nk_button_label(ctx, "")
+                nk.nk_style_set_font(ctx, myfonts[3].handle)
             elseif(v.ptype == "combo") then 
+                nk.nk_layout_row_push(ctx, value_col)
                 v.value = wdgts.widget_combo_box(ctx, v.plist, v.value, 200)
             elseif(v.ptype == "int") then
+                nk.nk_layout_row_push(ctx, value_col)
                 nk.nk_property_int(ctx, "", v.vmin, v.ffi, v.vmax, v.vstep, v.vinc)
             elseif(v.ptype == "float") then
+                nk.nk_layout_row_push(ctx, value_col)
                 nk.nk_property_float(ctx, "", v.vmin, v.ffi, v.vmax, v.vstep, v.vinc)
             end
-            nk.nk_layout_row_end(ctx)    
-
+            nk.nk_layout_row_end(ctx)
         end
+
         nk.nk_group_end(ctx)
     end
 end
@@ -256,7 +317,7 @@ fh:close()
 for f in string.gmatch(d, "(.-)\n") do 
     local newfile = { name = ffi.string(f)}
     newfile.select = ffi.new("nk_bool[1]")
-    newfile.select[0] = nk.nk_false
+    newfile.select[0] = 0
     table.insert(files, newfile) 
 end
 
@@ -298,36 +359,48 @@ end
 
 -- --------------------------------------------------------------------------------------
 
-local function panel_project_function(data, left, top, width, height)
-    project_panel(data.ctx)
-end
-
--- --------------------------------------------------------------------------------------
-
-local function panel_assets_function(data, left, top, width, height)
-    assets_panel(data.ctx)
-end
-
--- --------------------------------------------------------------------------------------
-
 local function main_ui(ctx)
 
     if(myfonts == nil) then 
         myfonts = fonts.setup_font(ctx, font_list)
     end
 
-    nk.nk_style_set_font(ctx, myfonts[4].handle)
+    wdgts.widget_panel_fixed(ctx, "WinMain", 0, 0, sapp.sapp_width(), sapp.sapp_height(), 0, function(data)
 
-    local flags = nk.NK_WINDOW_BORDER
-    local height = sapp.sapp_height() - 20 
-    local width = sapp.sapp_width() / 2 - 15
-    wdgts.widget_panel_fixed(ctx, "Project", 10, 10, width, height, flags, panel_project_function, {ctx=ctx})
+        folder_select.popup_active = wdgts.widget_popup_panel(ctx, "popup", folder_select.popup_dim, folder_select.ui_func, folder_select, folder_select.popup_active)
 
-    nk.nk_style_set_font(ctx, myfonts[4].handle)
+        nk.nk_style_set_font(ctx, myfonts[4].handle)
 
-    local height = sapp.sapp_height() - 20 
-    local width = sapp.sapp_width() / 2 - 15
-    wdgts.widget_panel_fixed(ctx, "Assets", 10+width+10, 10, width, height, flags, panel_assets_function, {ctx=ctx})
+        local flags = nk.NK_WINDOW_BORDER
+        local height = sapp.sapp_height()
+        nk.nk_layout_row_dynamic(ctx, height-20, 2)
+
+        -- wdgts.widget_panel_fixed(ctx, "Project", 10, 10, width, height, flags, function(data)
+        if (nk.nk_group_begin(ctx, "Project", flags) == true) then
+
+            local padding = ctx[0].style.window.padding
+            ctx[0].style.window.padding = nk.nk_vec2(10,10)
+    
+            project_panel(data.ctx)
+        -- end, {ctx=ctx})
+            nk.nk_group_end(ctx)
+        end
+
+        nk.nk_style_set_font(ctx, myfonts[4].handle)
+
+        -- wdgts.widget_panel_fixed(ctx, "Assets", 10+width+10, 10, width, height, flags, function(data)
+        if (nk.nk_group_begin(ctx, "Assets", flags) == true) then
+
+            local padding = ctx[0].style.window.padding
+            ctx[0].style.window.padding = nk.nk_vec2(10,10)
+    
+            assets_panel(data.ctx)
+        -- end, {ctx=ctx})
+        nk.nk_group_end(ctx)
+        end
+
+    end, {ctx=ctx})
+
     return not nk.nk_window_is_closed(ctx, "Overview")
 end
 
@@ -394,3 +467,5 @@ for k,v in pairs(package.loaded) do
         print( "["..tostring(k).."] = "..tostring(v)) 
     end
 end
+
+-- --------------------------------------------------------------------------------------

@@ -251,6 +251,23 @@ widgets.widget_list_selectable = function(ctx, title, flags, items, width)
 end
 
 --------------------------------------------------------------------------------
+
+widgets.widget_popup_panel = function(ctx, title, dim, content_func, userdata, active)
+
+    if (active == 1) then
+    
+        if (nk.nk_popup_begin(ctx, nk.NK_POPUP_STATIC, title, 0, dim) == true) then
+        
+            if(content_func) then active = content_func(ctx, dim, userdata) end
+            nk.nk_popup_end(ctx)
+        else 
+            active = nk.nk_false
+        end
+    end
+    return active
+end
+
+--------------------------------------------------------------------------------
 -- returns struct nk_image
 
 widgets.icon_load = function(filename)
