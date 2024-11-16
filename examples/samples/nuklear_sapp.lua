@@ -98,6 +98,8 @@ local date_selected     = 0
 local sel_time          = os.date ("*t")
 local sel_date          = sel_time
 
+local popup_active = ffi.new("int[1]")
+
 -- --------------------------------------------------------------------------------------
 
 local function draw_demo_ui(ctx)
@@ -822,7 +824,6 @@ local function draw_demo_ui(ctx)
         
             color = ffi.new("struct nk_color[1]", {{255,0,0, 255}})
             select = ffi.new("int[4]")
-            popup_active = ffi.new("int[1]")
             inp = ctx[0].input
             bounds = ffi.new("struct nk_rect[1]")
 
@@ -868,10 +869,10 @@ local function draw_demo_ui(ctx)
 
             if (nk.nk_contextual_begin(ctx, 0, nk.nk_vec2(350, 60), bounds) == true) then
                 nk.nk_layout_row_dynamic(ctx, 30, 4)
-                color.r = nk.nk_propertyi(ctx, "#r", 0, color.r, 255, 1, 1)
-                color.g = nk.nk_propertyi(ctx, "#g", 0, color.g, 255, 1, 1)
-                color.b = nk.nk_propertyi(ctx, "#b", 0, color.b, 255, 1, 1)
-                color.a = nk.nk_propertyi(ctx, "#a", 0, color.a, 255, 1, 1)
+                color[0].r = nk.nk_propertyi(ctx, "#r", 0, color[0].r, 255, 1, 1)
+                color[0].g = nk.nk_propertyi(ctx, "#g", 0, color[0].g, 255, 1, 1)
+                color[0].b = nk.nk_propertyi(ctx, "#b", 0, color[0].b, 255, 1, 1)
+                color[0].a = nk.nk_propertyi(ctx, "#a", 0, color[0].a, 255, 1, 1)
                 nk.nk_contextual_end(ctx)
             end
 
@@ -881,29 +882,29 @@ local function draw_demo_ui(ctx)
             nk.nk_label(ctx, "Popup:", nk.NK_TEXT_LEFT)
             nk.nk_layout_row_push(ctx, 50)
             if (nk.nk_button_label(ctx, "Popup")) then
-                popup_active = 1
+                popup_active[0] = 1
             end
             nk.nk_layout_row_end(ctx)
 
-            if (popup_active == 1) then
+            if (popup_active[0] == 1) then
             
                 local s = ffi.new("struct nk_rect[1]",{{20, 100, 220, 90}})
-                if (nk.nk_popup_begin(ctx, nk.NK_POPUP_STATIC, "Error", 0, s) == true) then
+                if (nk.nk_popup_begin(ctx, nk.NK_POPUP_STATIC, "Error", 0, s[0]) == true) then
                 
                     nk.nk_layout_row_dynamic(ctx, 25, 1)
                     nk.nk_label(ctx, "A terrible error as occured", nk.NK_TEXT_LEFT)
                     nk.nk_layout_row_dynamic(ctx, 25, 2)
                     if (nk.nk_button_label(ctx, "OK")) then
-                        popup_active = 0
+                        popup_active[0] = 0
                         nk.nk_popup_close(ctx)
                     end
                     if (nk.nk_button_label(ctx, "Cancel")) then
-                        popup_active = 0
+                        popup_active[0] = 0
                         nk.nk_popup_close(ctx)
                     end
                     nk.nk_popup_end(ctx)
                 else 
-                    popup_active = nk.nk_false
+                    popup_active[0] = nk.nk_false
                 end
             end
 
