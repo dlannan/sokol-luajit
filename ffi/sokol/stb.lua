@@ -1,7 +1,7 @@
 local ffi  = require( "ffi" )
 
 local libs = ffi_stb_dll or {
-   OSX     = { x64 = "stb_dll" },
+   OSX     = { x64 = "libstb_dll_macos" },
    Windows = { x64 = "stb_dll.dll" },
    Linux   = { x64 = "stb_dll.so", arm = "stb_dll.so" },
    BSD     = { x64 = "stb_dll.so" },

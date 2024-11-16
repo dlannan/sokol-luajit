@@ -3,17 +3,17 @@ local ffi = require("ffi")
 local dirtools = {}
 
 ---------------------------------------------------------------------------------------
-
+print("OS: "..ffi.os)
 dirtools.add_default_paths = function(path) 
     local folders = {
         ["Linux"]       = "linux",
         ["Windows"]     = "win64",
-        ["MacOSX"]      = "macos",
+        ["OSX"]         = "macos",
     }
     local extensions = {
         ["Linux"]       = "so",
         ["Windows"]     = "dll",
-        ["MacOSX"]      = "so",
+        ["OSX"]         = "dylib",
     }
 
     package.cpath   = package.cpath..";"..path.."bin/"..folders[ffi.os].."/?."..extensions[ffi.os]

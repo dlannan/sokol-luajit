@@ -1,7 +1,7 @@
 local ffi  = require( "ffi" )
 
 local libs = ffi_remotery_dll or {
-   OSX     = { x64 = "remotery_dll" },
+   OSX     = { x64 = "remotery_dll_macos.so" },
    Windows = { x64 = "remotery_dll.dll" },
    Linux   = { x64 = "remotery_dll.so", arm = "remotery_dll.so" },
    BSD     = { x64 = "remotery_dll.so" },

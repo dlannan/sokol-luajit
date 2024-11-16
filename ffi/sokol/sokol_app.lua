@@ -1,8 +1,9 @@
 local ffi  = require( "ffi" )
 
+print(package.cpath)
 local sokol_filename = _G.SOKOL_DLL or "sokol_dll"
 local libs = ffi_sokol_app or {
-   OSX     = { x64 = sokol_filename..".so" },
+   OSX     = { x64 = "lib"..sokol_filename.."_macos.so" },
    Windows = { x64 = sokol_filename..".dll" },
    Linux   = { x64 = "lib"..sokol_filename..".so", arm = "lib"..sokol_filename..".so" },
    BSD     = { x64 = sokol_filename..".so" },
