@@ -3,7 +3,8 @@ A luajit set of ffi wrappers for the excellent sokol framework,
 
 - [x] Win64 Binaries - samples and remotery working
 - [X] Linux64 Binaries - samples and remotery working
-- [ ] MacOS Binaries - incomplete. Testing and Fixing ongoing. Expected completion soon.
+- [x] MacOS - x86_64 Binaries - samples and remotery working
+- [ ] MacOS - arm64 Binaries - tbd. Working on tests/solves.
 
 For all things, Sokol, luajit and sokol-luajit feel free to drop in the Discord
 
