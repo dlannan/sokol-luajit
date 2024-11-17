@@ -95,7 +95,8 @@ local folder_select = {
             if(bhit) then
                 udata.hit = bhit 
                 if(bhit[2] == "..") then 
-                    udata.folder_path = udata.folder_path:match("(.-)[^\\]-[^%.]+$")
+                    udata.folder_path = udata.folder_path:match("(.-)[^\\]-$")
+                    print(udata.folder_path)
                     if(udata.folder_path == nil or udata.folder_path == "") then udata.folder_path = "." end
                 else
                     udata.folder_path = udata.folder_path.."\\"..udata.hit[2]
@@ -193,6 +194,7 @@ local function display_section(ctx, sectionname)
                 nk.nk_layout_row_push(ctx, 30)               
                 if(nk.nk_button_label(ctx, "") == true) then 
                     folder_select.popup_active = 1
+                    folder_select.folder_path = v.value
                 end
                 nk.nk_style_set_font(ctx, myfonts[3].handle)
             elseif(v.ptype == "file") then
