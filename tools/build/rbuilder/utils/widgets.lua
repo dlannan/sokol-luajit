@@ -175,29 +175,29 @@ end
 widgets.widget_notebook = function(ctx, tab_name, tabs, current_tab, height, tab_fixed_width)
 
     -- /* Header */
-    local spacing = ctx[0].style.window.spacing
-    ctx[0].style.window.spacing = nk.nk_vec2(0,0)
-    local rounding = ctx[0].style.button.rounding
-    ctx[0].style.button.rounding = 0
+    local spacing = ctx.style.window.spacing
+    ctx.style.window.spacing = nk.nk_vec2(0,0)
+    local rounding = ctx.style.button.rounding
+    ctx.style.button.rounding = 0
     nk.nk_layout_row_begin(ctx, nk.NK_STATIC, 24, 3)
     for i, v in ipairs(tabs) do
         -- /* make sure button perfectly fits text */
-        local f = ctx[0].style.font
+        local f = ctx.style.font
         local text_width = tab_fixed_width or f.width(f.userdata, f.height, v.name, string.len(tabs[i]))
-        local widget_width = text_width + 4 * ctx[0].style.button.padding.x
+        local widget_width = text_width + 4 * ctx.style.button.padding.x
         nk.nk_layout_row_push(ctx, widget_width)
         if (current_tab == i) then
             -- /* active tab gets highlighted */
-            local button_color = ctx[0].style.button.normal
-            ctx[0].style.button.normal = ctx[0].style.button.active
+            local button_color = ctx.style.button.normal
+            ctx.style.button.normal = ctx.style.button.active
             if (nk.nk_button_label(ctx, v.name) == true ) then current_tab = i end
-            ctx[0].style.button.normal = button_color
+            ctx.style.button.normal = button_color
         else 
             if(nk.nk_button_label(ctx, v.name) == true) then current_tab = i end
         end
     end
-    ctx[0].style.button.rounding = rounding
-    ctx[0].style.window.spacing = spacing
+    ctx.style.button.rounding = rounding
+    ctx.style.window.spacing = spacing
 
     -- /* Body */
     nk.nk_layout_row_dynamic(ctx, height, 1)
@@ -205,9 +205,9 @@ widgets.widget_notebook = function(ctx, tab_name, tabs, current_tab, height, tab
     
         for i,v in ipairs(tabs) do
             if(current_tab == i) then
-                ctx[0].style.window.group_padding = nk.nk_vec2(14,10)
+                ctx.style.window.group_padding = nk.nk_vec2(14,10)
                 if(v.func) then v.func(ctx) end
-                ctx[0].style.window.group_padding = spacing
+                ctx.style.window.group_padding = spacing
             end
         end
         nk.nk_group_end(ctx)
@@ -249,6 +249,30 @@ widgets.widget_list_selectable = function(ctx, title, flags, items, width)
         nk.nk_group_end(ctx)
     end
 end
+
+--------------------------------------------------------------------------------
+
+widgets.widget_list_buttons = function(ctx, title, flags, items, width)
+    local pressed = nil    
+    local button_align = ctx.style.button.text_alignment
+    local rounding = ctx.style.button.rounding
+    ctx.style.button.rounding = 0
+    ctx.style.button.text_alignment = nk.NK_TEXT_LEFT
+    flags = flags or nk.NK_WINDOW_BORDER  -- default setup
+    if (nk.nk_group_begin(ctx, title, flags) == true) then
+        for i, item in ipairs(items) do
+            nk.nk_layout_row_static(ctx, 22, width, 1)
+            if(nk.nk_button_label(ctx, item.name) == true) then 
+                pressed = {i, item.name}
+            end
+        end
+        nk.nk_group_end(ctx)
+    end
+    ctx.style.button.rounding = rounding
+    ctx.style.button.text_alignment = button_align
+    return pressed
+end
+
 
 --------------------------------------------------------------------------------
 

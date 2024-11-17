@@ -1,16 +1,3 @@
--- rbuild config settings
-
-local ffi       = require("ffi")
-
--- ------------------------------------------------------------------------------------------------------
-
-
--- ------------------------------------------------------------------------------------------------------
--- The main module table
-local settings = {}
-
--- Default settings if none are loaded or found
-local default_settings = [[
 
 local platforms = { "Win64", "MacOS", "Linux", "IOS64" }
 local resolutions = { "1920x1080", "1680x1050", "1600x900", "1440x900", "1376x768" }
@@ -75,50 +62,3 @@ local default = {
 }
 
 return default
-]]
-
--- ------------------------------------------------------------------------------------------------------
-
-local function loadconfig(projectpath)
-
-    local res = nil
-    local fh = io.open(projectpath, "r")
-    if(fh) then 
-        res = fh:read("*a")
-        fh:close()
-        res = load(res)()
-        print(res)
-    else
-        print("[Error] settings.load - unable to load config: "..projectpath)
-    end
-    return res
-end 
-
--- ------------------------------------------------------------------------------------------------------
-
-settings.load = function( projectpath )
-
-    if( projectpath == nil ) then 
-        projectpath = "./projects/default.slp"
-        -- Attempt to load it. If it fails, this is the first time run! save a default!
-        local fh = io.open(projectpath, "r")
-        if(fh == nil) then 
-            fh = io.open(projectpath, "w")
-            fh:write(default_settings)
-        end 
-        fh:close()
-    end
-
-    -- Load the project settings into the local config
-    settings.config = loadconfig(projectpath)
-
-    local title = settings.config.rbuilder.appname.value.." ("..settings.config.rbuilder.version.value..")"
-    settings.config.rbuilder.title = { value = title, slen = 32 }
-    return settings.config
-end
-
--- ------------------------------------------------------------------------------------------------------
-
-return settings
-
--- ------------------------------------------------------------------------------------------------------

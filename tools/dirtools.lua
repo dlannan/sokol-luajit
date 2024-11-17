@@ -50,6 +50,74 @@ dirtools.get_app_path = function( expected_root_folder )
     return base_dir
 end
 
+-- --------------------------------------------------------------------------------------
+
+local dir_cmd = "dir /b"
+if(ffi.os ~= "Windows") then dir_cmd = "ls -1" end
+
+local list_cache = {}
+
+dirtools.get_dirlist = function(path, cache_update)
+
+    if(list_cache[path] and cache_update == nil) then return list_cache[path] end
+
+    local files             = {}
+    local res = ""
+    -- Fill with temp file list of dir /b 
+    local fh = io.popen(dir_cmd.." "..path, "r")
+    if(fh) then 
+        res = fh:read("*a")
+        fh:close()
+    else 
+        print("[Error] dirtools.get_dirlist bad path: "..tostring(path))
+        return files        
+    end
+
+    for f in string.gmatch(res, "(.-)\n") do 
+        local newfile = { name = ffi.string(f)}
+        newfile.select = ffi.new("int[1]")
+        newfile.select[0] = 0
+        table.insert(files, newfile) 
+    end    
+
+    list_cache[path] = files
+    return files
+end
+
+-- --------------------------------------------------------------------------------------
+
+local folders_cmd = "dir /Ad /b"
+if(ffi.os ~= "Windows") then folders_cmd = "ls -1 -d */" end
+
+local list_folders_cache = {}
+
+dirtools.get_folderslist = function(path, cache_update)
+
+    if(list_folders_cache[path] and cache_update == nil) then return list_folders_cache[path] end
+
+    local files             = {}
+    local res = ""
+    -- Fill with temp file list of dir /b 
+    local fh = io.popen(folders_cmd.." "..path, "r")
+    if(fh) then 
+        res = fh:read("*a")
+        fh:close()
+    else 
+        print("[Error] dirtools.get_folderslist bad path: "..tostring(path))
+        return files
+    end
+
+    for f in string.gmatch(res, "(.-)\n") do 
+        local newfile = { name = ffi.string(f)}
+        newfile.select = ffi.new("int[1]")
+        newfile.select[0] = 0
+        table.insert(files, newfile) 
+    end    
+
+    list_folders_cache[path] = files
+    return files
+end
+
 ---------------------------------------------------------------------------------------
 -- By default the paths are added
 
