@@ -25,17 +25,49 @@ dirtools.add_default_paths = function(path)
     package.path    = package.path..";"..path.."/?.lua"
 end
 
+local sep = "\\"
+if(ffi.os ~= "Windows") then sep = "/" end
+
 ---------------------------------------------------------------------------------------
 -- Much safer way to build folder than pattern match (very unstable)
 dirtools.get_folder = function(path)
     local parts = {}
-    local sep = "\\"
     local patt = "(.-)[\\]"
-    if(ffi.os ~= "Windows") then patt = "(.-)[/]"; sep = "/" end
+    if(ffi.os ~= "Windows") then patt = "(.-)[/]" end
     for pseg in string.gmatch(path, patt) do
         tinsert(parts, pseg)
     end
+    if(#parts < 1) then return path end
     return tconcat(parts, sep)
+end
+
+---------------------------------------------------------------------------------------
+-- Check if the path is folder or file
+if(ffi.os == "Windows") then 
+    dirtools.is_folder = function(path)
+
+        local fh = io.popen("attrib "..path, "r")
+        if(fh) then 
+            local res = fh:read("*a")
+            local fileattr = string.sub(res, 1, 20)
+            fileattr = string.gsub(fileattr, " ", "")
+            fh:close()
+            return (#fileattr == 0)
+        end
+        return false
+    end
+else
+    dirtools.is_folder = function(path)
+
+        local fh = io.popen("file "..path, "r")
+        if(fh) then 
+            local res = fh:read("*a")
+            local folder = string.match(res, ".-: directory$")
+            fh:close()
+            return (folder ~= nil)
+        end
+        return false
+    end
 end
 
 ---------------------------------------------------------------------------------------
@@ -90,7 +122,7 @@ dirtools.get_dirlist = function(path, cache_update)
     end
 
     for f in string.gmatch(res, "(.-)\n") do 
-        local newfile = { name = ffi.string(f)}
+        local newfile = { name = ffi.string(f), folder = dirtools.is_folder(path..sep..f) }
         newfile.select = ffi.new("int[1]")
         newfile.select[0] = 0
         table.insert(files, newfile) 

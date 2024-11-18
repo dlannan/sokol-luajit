@@ -74,8 +74,68 @@ local tabs = {
 
 -- --------------------------------------------------------------------------------------
 
+local file_select = {
+    popup_active = 0,
+    prop = nil,
+    file_selected = "",
+    popup_dim = ffi.new("struct nk_rect",{20, 100, 220, 90}),
+    folder_path = ".",
+    hit = {0, "", 0},
+
+    ui_func = function(ctx, dim, udata)
+
+        nk.nk_layout_row_dynamic(ctx, dim.h-20, 1)
+        local flags = bit.bor(nk.NK_WINDOW_BORDER, nk.NK_WINDOW_TITLE)
+        flags = bit.bor(flags, nk.NK_WINDOW_NO_SCROLLBAR)
+        if (nk.nk_group_begin(ctx, "Select File", flags) == true) then
+        
+            nk.nk_layout_row_dynamic(ctx, dim.h-90, 1)
+            local files = dirtools.get_dirlist(udata.folder_path)
+            if(#files == 0 or files[1].name ~= "..") then table.insert(files, 1, { name = ".." }) end
+            local bhit = wdgts.widget_list_buttons(ctx, "select_file", nil, files, dim.w -40 )
+            
+            if(bhit) then
+                udata.hit = bhit 
+                if(bhit[2] == "..") then 
+                    udata.folder_path = dirtools.get_folder(udata.folder_path)
+                    if(udata.folder_path == nil or udata.folder_path == "") then udata.folder_path = "." end
+                else
+                    local isfolder = dirtools.is_folder(udata.folder_path.."\\"..udata.hit[2])
+                    print(isfolder)
+                    if(isfolder == true) then 
+                        udata.folder_path = udata.folder_path.."\\"..udata.hit[2]
+                    else 
+                        udata.file_selected = udata.folder_path.."\\"..udata.hit[2]
+                    end
+                end
+            end
+
+            nk.nk_layout_row_dynamic(ctx, 25, 2)
+            if (nk.nk_button_label(ctx, "Cancel") == true) then
+                udata.popup_active = 0
+            end
+            if (nk.nk_button_label(ctx, "OK") == true) then
+                udata.popup_active = 0
+                if(udata.prop) then 
+                    udata.prop.value = udata.file_selected
+                    udata.prop.ffi = ffi.new("char[?]", udata.prop.slen )
+                    ffi.fill(udata.prop.ffi, udata.prop.slen, 0)
+                    ffi.copy(udata.prop.ffi, ffi.string(udata.prop.value))
+                    udata.prop.len_ffi = ffi.new("int[1]", {string.len(udata.prop.value)})
+                end
+            end
+            nk.nk_group_end(ctx)
+        end
+        if(udata.popup_active == 0) then nk.nk_popup_close(ctx) end
+        return udata.popup_active
+    end,
+}
+
+-- --------------------------------------------------------------------------------------
+
 local folder_select = {
     popup_active = 0,
+    prop = nil,
     popup_dim = ffi.new("struct nk_rect",{20, 100, 220, 90}),
     folder_path = ".",
     hit = {0, "", 0},
@@ -100,7 +160,6 @@ local folder_select = {
                 else
                     udata.folder_path = udata.folder_path.."\\"..udata.hit[2]
                 end
-                print(udata.folder_path)
             end
 
             nk.nk_layout_row_dynamic(ctx, 25, 2)
@@ -109,6 +168,13 @@ local folder_select = {
             end
             if (nk.nk_button_label(ctx, "OK") == true) then
                 udata.popup_active = 0
+                if(udata.prop) then 
+                    udata.prop.value = udata.folder_path
+                    udata.prop.ffi = ffi.new("char[?]", udata.prop.slen )
+                    ffi.fill(udata.prop.ffi, udata.prop.slen, 0)
+                    ffi.copy(udata.prop.ffi, ffi.string(udata.prop.value))
+                    udata.prop.len_ffi = ffi.new("int[1]", {string.len(udata.prop.value)})
+                end
             end
             nk.nk_group_end(ctx)
         end
@@ -136,13 +202,11 @@ for sectionname, section in pairs(config) do
         elseif(prop.ptype == "float") then
             prop.ffi = ffi.new("float[1]", prop.value)
         elseif(prop.ptype == "path") then
-            print(prop.value)
             prop.ffi = ffi.new("char[?]", prop.slen )
             ffi.fill(prop.ffi, prop.slen, 0)
             ffi.copy(prop.ffi, ffi.string(prop.value))
             prop.len_ffi = ffi.new("int[1]", {string.len(prop.value)})
         elseif(prop.ptype == "file") then
-            print(prop.value)
             prop.ffi = ffi.new("char[?]", prop.slen )
             ffi.fill(prop.ffi, prop.slen, 0)
             ffi.copy(prop.ffi, ffi.string(prop.value))
@@ -193,6 +257,7 @@ local function display_section(ctx, sectionname)
                 nk.nk_layout_row_push(ctx, 30)               
                 if(nk.nk_button_label(ctx, "") == true) then 
                     folder_select.popup_active = 1
+                    folder_select.prop = v
                     folder_select.folder_path = v.value
                 end
                 nk.nk_style_set_font(ctx, myfonts[3].handle)
@@ -201,7 +266,11 @@ local function display_section(ctx, sectionname)
                 nk.nk_edit_string(ctx, nk.NK_EDIT_SIMPLE, v.ffi, v.len_ffi, v.slen, nk.nk_filter_default)
                 nk.nk_style_set_font(ctx, myfonts[1].handle)
                 nk.nk_layout_row_push(ctx, 30)
-                nk.nk_button_label(ctx, "")
+                if(nk.nk_button_label(ctx, "") == true) then 
+                    file_select.popup_active = 1
+                    file_select.prop = v
+                    file_select.folder_path = dirtools.get_folder(v.value)
+                end
                 nk.nk_style_set_font(ctx, myfonts[3].handle)
             elseif(v.ptype == "combo") then 
                 nk.nk_layout_row_push(ctx, value_col)
@@ -279,6 +348,7 @@ local function main_ui(ctx)
     wdgts.widget_panel_fixed(ctx, "WinMain", 0, 0, sapp.sapp_width(), sapp.sapp_height(), 0, function(data)
 
         folder_select.popup_active = wdgts.widget_popup_panel(ctx, "popup", folder_select.popup_dim, folder_select.ui_func, folder_select, folder_select.popup_active)
+        file_select.popup_active = wdgts.widget_popup_panel(ctx, "popup", file_select.popup_dim, file_select.ui_func, file_select, file_select.popup_active)
 
         nk.nk_style_set_font(ctx, myfonts[4].handle)
 
@@ -340,6 +410,11 @@ local function init()
     folder_select.popup_dim.h = sapp.sapp_height()* 0.7
     folder_select.popup_dim.x = sapp.sapp_width()/2-8 - folder_select.popup_dim.w/2
     folder_select.popup_dim.y = sapp.sapp_height()/2-40 - folder_select.popup_dim.h/2
+
+    file_select.popup_dim.w = sapp.sapp_width()* 0.4
+    file_select.popup_dim.h = sapp.sapp_height()* 0.7
+    file_select.popup_dim.x = sapp.sapp_width()/2-8 - file_select.popup_dim.w/2
+    file_select.popup_dim.y = sapp.sapp_height()/2-40 - file_select.popup_dim.h/2
 end
 
 -- --------------------------------------------------------------------------------------

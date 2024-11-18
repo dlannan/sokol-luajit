@@ -258,16 +258,30 @@ widgets.widget_list_buttons = function(ctx, title, flags, items, width)
     local rounding = ctx.style.button.rounding
     ctx.style.button.rounding = 0
     ctx.style.button.text_alignment = nk.NK_TEXT_LEFT
+    
+    local col = ctx.style.button.text_normal
+    local hcol = ctx.style.button.text_hover
+    local tcolor = nk.nk_rgb(col.r, col.g, col.b)
+    local thcolor = nk.nk_rgb(hcol.r, hcol.g, hcol.b)
+
     flags = flags or nk.NK_WINDOW_BORDER  -- default setup
     if (nk.nk_group_begin(ctx, title, flags) == true) then
         for i, item in ipairs(items) do
             nk.nk_layout_row_static(ctx, 22, width, 1)
+            if(item.folder == true) then 
+                ctx.style.button.text_normal = nk.nk_rgb(100, 100, 255)
+                ctx.style.button.text_hover = nk.nk_rgb(160, 160, 255)
+            end
             if(nk.nk_button_label(ctx, item.name) == true) then 
                 pressed = {i, item.name}
             end
+            ctx.style.button.text_normal = tcolor
         end
         nk.nk_group_end(ctx)
     end
+
+    ctx.style.button.text_hover = thcolor
+    ctx.style.button.text_normal = tcolor
     ctx.style.button.rounding = rounding
     ctx.style.button.text_alignment = button_align
     return pressed
