@@ -15,6 +15,9 @@ Discord - https://discord.gg/KMDeFebk
 The repo is based entirely on the brilliant framework here:
 https://github.com/floooh/sokol
 
+The sokol api has been built into dll's (this may change in the future) and it is executed in the best (imho) runtime system there is using its amazing ffi module:
+https://luajit.org/
+
 sdf exmample 
 ![alt text](https://github.com/dlannan/sokol-luajit/blob/main/media/2024-10-30_11-48.png "sdf Example")
 

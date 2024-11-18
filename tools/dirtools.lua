@@ -1,6 +1,9 @@
-local ffi = require("ffi")
+local ffi       = require("ffi")
 
-local dirtools = {}
+local dirtools  = {}
+
+local tinsert   = table.insert
+local tconcat   = table.concat
 
 ---------------------------------------------------------------------------------------
 
@@ -20,6 +23,19 @@ dirtools.add_default_paths = function(path)
     package.path    = package.path..";"..path.."/ffi/sokol/?.lua"
     package.path    = package.path..";"..path.."lua/?.lua"
     package.path    = package.path..";"..path.."/?.lua"
+end
+
+---------------------------------------------------------------------------------------
+-- Much safer way to build folder than pattern match (very unstable)
+dirtools.get_folder = function(path)
+    local parts = {}
+    local sep = "\\"
+    local patt = "(.-)[\\]"
+    if(ffi.os ~= "Windows") then patt = "(.-)[/]"; sep = "/" end
+    for pseg in string.gmatch(path, patt) do
+        tinsert(parts, pseg)
+    end
+    return tconcat(parts, sep)
 end
 
 ---------------------------------------------------------------------------------------

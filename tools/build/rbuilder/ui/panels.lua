@@ -95,8 +95,7 @@ local folder_select = {
             if(bhit) then
                 udata.hit = bhit 
                 if(bhit[2] == "..") then 
-                    udata.folder_path = udata.folder_path:match("(.-)[^\\]-$")
-                    print(udata.folder_path)
+                    udata.folder_path = dirtools.get_folder(udata.folder_path)
                     if(udata.folder_path == nil or udata.folder_path == "") then udata.folder_path = "." end
                 else
                     udata.folder_path = udata.folder_path.."\\"..udata.hit[2]
