@@ -176,6 +176,7 @@ widgets.widget_notebook = function(ctx, tab_name, tabs, current_tab, height, tab
 
     -- /* Header */
     local spacing = ctx.style.window.spacing
+
     ctx.style.window.spacing = nk.nk_vec2(0,0)
     local rounding = ctx.style.button.rounding
     ctx.style.button.rounding = 0
@@ -187,11 +188,12 @@ widgets.widget_notebook = function(ctx, tab_name, tabs, current_tab, height, tab
         local widget_width = text_width + 4 * ctx.style.button.padding.x
         nk.nk_layout_row_push(ctx, widget_width)
         if (current_tab == i) then
-            -- /* active tab gets highlighted */
-            local button_color = ctx.style.button.normal
-            ctx.style.button.normal = ctx.style.button.active
+            -- /* active tab gets highlighted */       
+            local col = ctx.style.button.normal.data.color
+            local button_color = nk.nk_rgb(col.r, col.g, col.b)
+            ctx.style.button.normal.data.color = nk.nk_rgb(col.r, col.g, col.b + 40)
             if (nk.nk_button_label(ctx, v.name) == true ) then current_tab = i end
-            ctx.style.button.normal = button_color
+            ctx.style.button.normal.data.color = button_color
         else 
             if(nk.nk_button_label(ctx, v.name) == true) then current_tab = i end
         end

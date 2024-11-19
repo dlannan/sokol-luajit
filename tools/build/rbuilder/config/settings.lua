@@ -33,9 +33,9 @@ local default = {
 
     project = {
         project_name    = { index = 1, value = "default", ptype = "string", slen = 64 },
-        project_path    = { index = 2, value = "./", ptype = "path", slen = 256 },               -- Always starts empty. Will support a project file.
-        project_file    = { index = 3, value = "default.slp", ptype = "file", slen = 64 },     -- Sokol luajit project file
-        project_start   = { index = 4, value = "example1.lua", ptype = "file", slen = 128 },
+        project_path    = { index = 2, value = ".", ptype = "path", slen = 256 },               -- Always starts empty. Will support a project file.
+        project_file    = { index = 3, value = "default.slp", ptype = "file", pfilter = "*.slp", slen = 64 },     -- Sokol luajit project file
+        project_start   = { index = 4, value = "example1.lua", ptype = "file", pfilter = "*.lua", slen = 128 },
     },
 
     graphics = {

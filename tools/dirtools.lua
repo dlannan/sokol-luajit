@@ -29,6 +29,32 @@ local sep = "\\"
 if(ffi.os ~= "Windows") then sep = "/" end
 
 ---------------------------------------------------------------------------------------
+
+dirtools.get_drives = function()
+    local cmd = "wmic logicaldisk get name"
+    -- Note: Add more -t <filetype> to support different file system mounts
+    if(ffi.os ~= "Windows") then cmd = "df -h -t ext4 --output=target" end
+
+    local drives = {}
+    local fh = io.popen(cmd, "r")
+    if(fh) then 
+        local data = fh:read("*a")
+        local count = 0
+        for f in string.gmatch(data, "(.-)\n") do 
+            f = string.gsub(f, "%s+", "")
+            if(count > 0) then 
+                if(#f > 0) then
+                    tinsert(drives, f)
+                end
+            end 
+            count = count + 1
+        end
+        fh:close()
+    end
+    return drives
+end
+
+---------------------------------------------------------------------------------------
 -- Much safer way to build folder than pattern match (very unstable)
 dirtools.get_folder = function(path)
     local parts = {}
@@ -100,53 +126,34 @@ end
 
 -- --------------------------------------------------------------------------------------
 
-local dir_cmd = "dir /b"
-if(ffi.os ~= "Windows") then dir_cmd = "ls -1" end
-
-local list_cache = {}
-
-dirtools.get_dirlist = function(path, cache_update)
-
-    if(list_cache[path] and cache_update == nil) then return list_cache[path] end
-
-    local files             = {}
-    local res = ""
-    -- Fill with temp file list of dir /b 
-    local fh = io.popen(dir_cmd.." "..path, "r")
-    if(fh) then 
-        res = fh:read("*a")
-        fh:close()
-    else 
-        print("[Error] dirtools.get_dirlist bad path: "..tostring(path))
-        return files        
-    end
-
-    for f in string.gmatch(res, "(.-)\n") do 
-        local newfile = { name = ffi.string(f), folder = dirtools.is_folder(path..sep..f) }
-        newfile.select = ffi.new("int[1]")
-        newfile.select[0] = 0
-        table.insert(files, newfile) 
-    end    
-
-    list_cache[path] = files
-    return files
-end
+local allfolders_cmd = "dir /ON /AD /B %s"
+if(ffi.os ~= "Windows") then allfolders_cmd = "ls -p %s | grep /" end
+local allfiles_cmd = "dir /ON /A-D /B %s"
+if(ffi.os ~= "Windows") then allfiles_cmd = "ls -p %s | grep -v /" end
 
 -- --------------------------------------------------------------------------------------
 
-local folders_cmd = "dir /Ad /b"
-if(ffi.os ~= "Windows") then folders_cmd = "ls -1 -d */" end
-
 local list_folders_cache = {}
+local list_cache = {}
 
 dirtools.get_folderslist = function(path, cache_update)
 
-    if(list_folders_cache[path] and cache_update == nil) then return list_folders_cache[path] end
+    -- Check path first. If its a drive on windows then no caching
+    if(ffi.os == "Windows") then 
+        local colon = string.sub(path, 2,-1)
+        if(colon == ":") then cache_update = true; path = path..sep end
+    end
+
+    if(list_folders_cache[path] and cache_update == nil) then 
+        return list_folders_cache[path] 
+    end
 
     local files             = {}
+    table.insert(files, 1, { name = ".." })
+    
     local res = ""
     -- Fill with temp file list of dir /b 
-    local fh = io.popen(folders_cmd.." "..path, "r")
+    local fh = io.popen(string.format(allfolders_cmd, path), "r")
     if(fh) then 
         res = fh:read("*a")
         fh:close()
@@ -156,7 +163,7 @@ dirtools.get_folderslist = function(path, cache_update)
     end
 
     for f in string.gmatch(res, "(.-)\n") do 
-        local newfile = { name = ffi.string(f)}
+        local newfile = { name = ffi.string(f), folder = true }
         newfile.select = ffi.new("int[1]")
         newfile.select[0] = 0
         table.insert(files, newfile) 
@@ -164,6 +171,65 @@ dirtools.get_folderslist = function(path, cache_update)
 
     list_folders_cache[path] = files
     return files
+end
+
+---------------------------------------------------------------------------------------
+
+dirtools.get_dirlist = function(path, cache_update)
+
+    -- Check path first. If its a drive on windows then no caching
+    if(ffi.os == "Windows") then 
+        local colon = string.match(path, "(.)$")
+        if(colon == ":") then path = path..sep end
+    end
+
+    if(list_cache[path] and cache_update == nil) then 
+        return list_cache[path] 
+    end
+
+    -- Get all the folders first
+    local files = dirtools.get_folderslist(path)
+
+    -- Add the files to the list.
+    local res = ""
+    -- Fill with temp file list of dir /b 
+    local fh = io.popen(string.format(allfiles_cmd, path), "r")
+    if(fh) then 
+        res = fh:read("*a")
+        fh:close()
+        if(#res == 0) then 
+            print(path)
+            list_cache[path] = files
+            return files        
+        end
+    else 
+        print("[Error] dirtools.get_dirlist bad path: "..tostring(path))
+        return {}        
+    end
+
+    for f in string.gmatch(res, "(.-)\n") do 
+        local newfile = { name = ffi.string(f), folder = nil }
+        newfile.select = ffi.new("int[1]")
+        newfile.select[0] = 0
+        table.insert(files, newfile) 
+    end    
+
+    list_cache[path] = files
+    return files
+end
+
+---------------------------------------------------------------------------------------
+dirtools.get_parent = function( path )
+    if(path == nil or path == "") then path = "." end
+    local parentpath = dirtools.get_folder(path)
+    return parentpath
+end
+
+---------------------------------------------------------------------------------------
+dirtools.change_folder = function( path, child )
+    
+    local newpath = path..sep..child
+    return newpath
 end
 
 ---------------------------------------------------------------------------------------
