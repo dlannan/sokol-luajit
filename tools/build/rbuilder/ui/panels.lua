@@ -49,6 +49,7 @@ local tabs = {
             local files = config.assets.lua 
             wdgts.widget_list_selectable(ctx, "source_files", nk.NK_WINDOW_BORDER, files, bounds.w -40 )
         end,
+        asset_name = "lua",
     }, 
     { 
         name = "Images",
@@ -59,6 +60,7 @@ local tabs = {
             local files = config.assets.images 
             wdgts.widget_list_selectable(ctx, "source_files", nk.NK_WINDOW_BORDER, files, bounds.w -40 )
         end,
+        asset_name = "images",
     }, 
     { 
         name = "Data",
@@ -69,6 +71,7 @@ local tabs = {
             local files = config.assets.data
             wdgts.widget_list_selectable(ctx, "source_files", nk.NK_WINDOW_BORDER, files, bounds.w -40 )
         end,
+        asset_name = "data",
     } 
 }
 
@@ -124,6 +127,9 @@ local file_select = {
             nk.nk_layout_row_dynamic(ctx, 25, 2)
             if (nk.nk_button_label(ctx, "Cancel") == true) then
                 udata.popup_active = 0
+                if(udata.callback) then 
+                    udata.callback(udata, false)
+                end
             end
             if (nk.nk_button_label(ctx, "OK") == true) then
                 udata.popup_active = 0
@@ -133,6 +139,9 @@ local file_select = {
                     ffi.fill(udata.prop.ffi, udata.prop.slen, 0)
                     ffi.copy(udata.prop.ffi, ffi.string(udata.prop.value))
                     udata.prop.len_ffi = ffi.new("int[1]", {string.len(udata.prop.value)})
+                end
+                if(udata.callback) then 
+                    udata.callback(udata, true)
                 end
             end
             nk.nk_group_end(ctx)
@@ -187,6 +196,10 @@ local folder_select = {
             nk.nk_layout_row_dynamic(ctx, 25, 2)
             if (nk.nk_button_label(ctx, "Cancel") == true) then
                 udata.popup_active = 0
+                if(udata.callback) then 
+                    udata.callback(udata, false)
+                    udata.callback = nil
+                end
             end
             if (nk.nk_button_label(ctx, "OK") == true) then
                 udata.popup_active = 0
@@ -196,6 +209,10 @@ local folder_select = {
                     ffi.fill(udata.prop.ffi, udata.prop.slen, 0)
                     ffi.copy(udata.prop.ffi, ffi.string(udata.prop.value))
                     udata.prop.len_ffi = ffi.new("int[1]", {string.len(udata.prop.value)})
+                end
+                if(udata.callback) then 
+                    udata.callback(udata, true)
+                    udata.callback = nil
                 end
             end
             nk.nk_group_end(ctx)
@@ -359,18 +376,15 @@ local project_tabs = {
             display_section(ctx, "project") 
             display_section(ctx, "sokol")
         end,
-        file_list = {},
     }, 
     { 
         name = "Build",
         func = function(ctx) 
             display_section(ctx, "platform") 
         end,
-        file_list = {},
     }, 
     { 
         name = "Logs",
-        file_list = {},
     } 
 }
 -- --------------------------------------------------------------------------------------
@@ -403,7 +417,7 @@ end
 local function assets_panel(ctx)
 
     nk.nk_style_set_font(ctx, myfonts[3].handle)
-    curr_tab = wdgts.widget_notebook(ctx, "assets", tabs, curr_tab, 500, 120)
+    curr_tab, named_tab = wdgts.widget_notebook(ctx, "assets", tabs, curr_tab, 500, 120)
 
     nk.nk_layout_row_dynamic(ctx, 25, 2)
     if (nk.nk_button_label(ctx, "Add Folder") == true) then
@@ -411,6 +425,13 @@ local function assets_panel(ctx)
         folder_select.prop = nil
         folder_select.folder_path = "."
         folder_select.drives = dirtools.get_drives()
+        folder_select.callback = function(udata, res) 
+            print(udata.folder_path, named_tab, res)
+            if(res == true) then
+                print(named_tab)
+                table.insert(config.assets[named_tab], udata.folder_path)
+            end 
+        end
     end
 
     if (nk.nk_button_label(ctx, "Add File") == true) then
@@ -418,6 +439,12 @@ local function assets_panel(ctx)
         file_select.prop = nil
         file_select.folder_path = dirtools.get_folder(".")
         file_select.drives = dirtools.get_drives()
+        file_select.callback = function(udata, res) 
+            if(res == true) then
+                print(named_tab)
+                table.insert(config.assets[named_tab], udata.file_selected)
+            end 
+        end
     end    
 
 end

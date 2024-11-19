@@ -202,6 +202,7 @@ widgets.widget_notebook = function(ctx, tab_name, tabs, current_tab, height, tab
     ctx.style.window.spacing = spacing
 
     -- /* Body */
+    local named_tab = nil
     nk.nk_layout_row_dynamic(ctx, height, 1)
     if (nk.nk_group_begin(ctx, tab_name, nk.NK_WINDOW_BORDER) == true) then
     
@@ -209,13 +210,14 @@ widgets.widget_notebook = function(ctx, tab_name, tabs, current_tab, height, tab
             if(current_tab == i) then
                 ctx.style.window.group_padding = nk.nk_vec2(14,10)
                 if(v.func) then v.func(ctx) end
+                if(v.name) then named_tab = v.name end
                 ctx.style.window.group_padding = spacing
             end
         end
         nk.nk_group_end(ctx)
     end
 
-    return current_tab
+    return current_tab, named_tab
 end
 
 --------------------------------------------------------------------------------
