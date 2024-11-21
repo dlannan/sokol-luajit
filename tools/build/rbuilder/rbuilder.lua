@@ -46,6 +46,7 @@ local function init(void)
     sapp.sapp_show_mouse(false)
 
     panel.init()
+    sapp.sapp_set_window_title(panel.config.rbuilder.title.value)
 end
 
 -- --------------------------------------------------------------------------------------
@@ -59,6 +60,7 @@ end
 
 local current_ctx = nil
 local function input(event) 
+    panel.input(event)
     if(event.type == sapp.SAPP_EVENTTYPE_RESIZED) then 
         nk.snk_handle_event(event)
         -- folder_select.popup_dim.x = sapp.sapp_width()/2 - folder_select.popup_dim.w/2
@@ -71,7 +73,7 @@ local function input(event)
         sapp.sapp_show_mouse(true)
     else 
         nk.snk_handle_event(event)
-    end    
+    end   
 end
 
 -- --------------------------------------------------------------------------------------
@@ -80,7 +82,7 @@ local function frame(void)
 
     local ctx = nk.snk_new_frame()
     current_ctx = ctx
-    panel.main_ui(ctx)
+    local config_reset = panel.main_ui(ctx)
 
     -- // the sokol_gfx draw pass
     local pass = ffi.new("sg_pass[1]")
@@ -93,6 +95,9 @@ local function frame(void)
     sg.sg_end_pass()
     sg.sg_commit()
 
+    if(config_reset) then 
+        panel.init()
+    end
     ffi.C.Sleep(3)
 end
 
@@ -105,7 +110,7 @@ app_desc[0].cleanup_cb = cleanup
 app_desc[0].event_cb = input
 app_desc[0].width = 1280
 app_desc[0].height = 800
-app_desc[0].window_title = panel.config.rbuilder.title.value
+app_desc[0].window_title = ""
 app_desc[0].icon.sokol_default = true 
 app_desc[0].logger.func = slib.slog_func 
 app_desc[0].enable_clipboard = true

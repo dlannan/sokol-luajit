@@ -38,7 +38,12 @@ file_selector.create_file_selector = function( name, rect, start_folder, folders
             nk.nk_layout_row_dynamic(ctx, dim.h-20, 1)
             local flags = bit.bor(nk.NK_WINDOW_BORDER, nk.NK_WINDOW_TITLE)
             flags = bit.bor(flags, nk.NK_WINDOW_NO_SCROLLBAR)
-            if (nk.nk_group_begin(ctx, name, flags) == true) then
+
+            local full_path = udata.file_selected
+            if(folders_only) then full_path = udata.folder_path end
+            local long_name = string.format("%s: %s", name, full_path)
+
+            if (nk.nk_group_begin(ctx, long_name, flags) == true) then
             
                 nk.nk_layout_row_begin(ctx, nk.NK_DYNAMIC, 25, 2)
                 nk.nk_layout_row_push(ctx, 0.2)
@@ -94,7 +99,11 @@ file_selector.create_file_selector = function( name, rect, start_folder, folders
                 if (nk.nk_button_label(ctx, "OK") == true) then
                     udata.popup_active = 0
                     if(udata.prop) then 
-                        udata.prop.value = udata.file_selected
+                        if(folders_only) then
+                            udata.prop.value = udata.folder_path
+                        else
+                            udata.prop.value = udata.file_selected
+                        end
                         udata.prop.ffi = ffi.new("char[?]", udata.prop.slen )
                         ffi.fill(udata.prop.ffi, udata.prop.slen, 0)
                         ffi.copy(udata.prop.ffi, ffi.string(udata.prop.value))

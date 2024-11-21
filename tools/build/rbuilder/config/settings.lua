@@ -1,7 +1,7 @@
 -- rbuild config settings
 
 local ffi       = require("ffi")
-
+local json      = require("lua.json")
 -- ------------------------------------------------------------------------------------------------------
 
 
@@ -33,9 +33,8 @@ local default = {
 
     project = {
         project_name    = { index = 1, value = "default", ptype = "string", slen = 64 },
-        project_path    = { index = 2, value = ".", ptype = "path", slen = 256 },               -- Always starts empty. Will support a project file.
-        project_file    = { index = 3, value = "default.slp", ptype = "file", pfilter = "*.slp", slen = 64 },     -- Sokol luajit project file
-        project_start   = { index = 4, value = "example1.lua", ptype = "file", pfilter = "*.lua", slen = 128 },
+        build_path      = { index = 2, value = "<change me>", ptype = "path", slen = 256 },               -- Always starts empty. Will support a project file.
+        project_start   = { index = 3, value = "example1.lua", ptype = "file", pfilter = "*.lua", slen = 128 },
     },
 
     graphics = {
@@ -98,19 +97,22 @@ end
 
 settings.load = function( projectpath )
 
-    if( projectpath == nil ) then 
-        projectpath = "./projects/default.slp"
-        -- Attempt to load it. If it fails, this is the first time run! save a default!
-        local fh = io.open(projectpath, "r")
-        if(fh == nil) then 
-            fh = io.open(projectpath, "w")
-            fh:write(default_settings)
-        end 
+    -- Grab the recents file list too.
+    settings.recent = nil
+    local fh = io.open("config/recent_projects.json", "r")
+    if(fh) then 
+        settings.recent = json.decode( fh:read("*a") )
         fh:close()
     end
 
-    -- Load the project settings into the local config
-    settings.config = loadconfig(projectpath)
+    if( projectpath == nil ) then 
+        print("[Error] settings.load invalid projectpath nil, using default settings.")
+        settings.config = load(default_settings)()
+    else
+
+        -- Load the project settings into the local config
+        settings.config = loadconfig(projectpath)
+    end
 
     local title = settings.config.rbuilder.appname.value.." ("..settings.config.rbuilder.version.value..")"
     settings.config.rbuilder.title = { value = title, slen = 32 }

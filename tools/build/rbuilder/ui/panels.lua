@@ -17,9 +17,11 @@ local fsel      = require("ui.file_selector")
 
 local icons     = ffi.new("struct nk_image [?]", 10)
 
-local config    = settings.load()
 local themes    = require("lua.themes")
 
+local panel     = {
+    config = nil
+}
 
 -- --------------------------------------------------------------------------------------
 -- Static vars 
@@ -52,7 +54,7 @@ local tabs = {
             
             local bounds = nk.nk_window_get_content_region(ctx)
             nk.nk_layout_row_dynamic(ctx, bounds.h, 1)
-            local files = config.assets.lua 
+            local files = panel.config.assets.lua 
             wdgts.widget_list_removeable(ctx, "source_files", nk.NK_WINDOW_BORDER, files, bounds.w -40 )
         end,
         asset_name = "lua",
@@ -63,7 +65,7 @@ local tabs = {
             
             local bounds = nk.nk_window_get_content_region(ctx)
             nk.nk_layout_row_dynamic(ctx, bounds.h, 1)
-            local files = config.assets.images 
+            local files = panel.config.assets.images 
             wdgts.widget_list_removeable(ctx, "source_files", nk.NK_WINDOW_BORDER, files, bounds.w -40 )
         end,
         asset_name = "images",
@@ -74,7 +76,7 @@ local tabs = {
             
             local bounds = nk.nk_window_get_content_region(ctx)
             nk.nk_layout_row_dynamic(ctx, bounds.h, 1)
-            local files = config.assets.data
+            local files = panel.config.assets.data
             wdgts.widget_list_removeable(ctx, "source_files", nk.NK_WINDOW_BORDER, files, bounds.w -40 )
         end,
         asset_name = "data",
@@ -87,7 +89,7 @@ local tabs = {
 
 local function setup_config()
     
-    for sectionname, section in pairs(config) do
+    for sectionname, section in pairs(panel.config) do
 
         for key, prop in pairs(section) do
             -- If ptype is nill or string its a string
@@ -120,7 +122,7 @@ end
 -- --------------------------------------------------------------------------------------
 local pix = {}
 
-local function init()
+panel.init = function()
 
     local base_path = "./"
     pix["baboon"] = wdgts.icon_load(base_path.."images/baboon.png")
@@ -152,6 +154,7 @@ local function init()
         sapp.sapp_height()/2-40 - popup_high/2, popup_wide, popup_high)
     file_select = fsel.create_file_selector("Select File", dim2, ".")
 
+    panel.config = settings.load()
     setup_config()
 end
 
@@ -159,7 +162,7 @@ end
 
 local function display_section(ctx, sectionname)
 
-    local section = config[sectionname]
+    local section = panel.config[sectionname]
     -- Collect the number of properties in the section
     local count = 0
     local sorted = {}
@@ -293,7 +296,7 @@ local function assets_panel(ctx)
                     name=ffi.string(udata.folder_path),
                     select = ffi.new("bool[1]", {0})
                 }
-                table.insert(config.assets[tabinfo.asset_name], newfolder)
+                table.insert(panel.config.assets[tabinfo.asset_name], newfolder)
             end 
         end
     end
@@ -310,7 +313,7 @@ local function assets_panel(ctx)
                     name=ffi.string(udata.file_selected),
                     select = ffi.new("bool[1]", {0})
                 }
-                table.insert(config.assets[tabinfo.asset_name], newfile)
+                table.insert(panel.config.assets[tabinfo.asset_name], newfile)
             end 
         end
     end    
@@ -319,13 +322,15 @@ end
 
 -- --------------------------------------------------------------------------------------
 
-local function main_ui(ctx)
+panel.main_ui = function(ctx)
 
     if(myfonts == nil) then 
         myfonts = fonts.setup_font(ctx, font_list)
         wdgts.myfonts = myfonts
         themes.tech(ctx)
     end
+
+    local config_reset = nil
 
     wdgts.widget_panel_fixed(ctx, "WinMain", 0, 0, sapp.sapp_width(), sapp.sapp_height(), 0, function(data)
 
@@ -343,7 +348,7 @@ local function main_ui(ctx)
         
             nk.nk_layout_row_dynamic(ctx, 35, 1)
             if (nk.nk_menu_item_label(ctx, "New", nk.NK_TEXT_LEFT)) then
-                init()
+                config_reset = true
             end
             nk.nk_layout_row_dynamic(ctx, 35, 1)
             if (nk.nk_menu_item_label(ctx, "Open", nk.NK_TEXT_LEFT)) then 
@@ -416,18 +421,32 @@ local function main_ui(ctx)
 
     end, {ctx=ctx})
 
-    return not nk.nk_window_is_closed(ctx, "Overview")
+    -- return not nk.nk_window_is_closed(ctx, "Overview")
+    return config_reset
 end
 
 -- --------------------------------------------------------------------------------------
 
-return {
-    config      = config,
+panel.input = function(event)
 
-    init        = init, 
-    main_ui     = main_ui,
-}
+    if(event.type == sapp.SAPP_EVENTTYPE_RESIZED) then 
 
+        local popup_wide = sapp.sapp_width()* 0.4
+        local popup_high = sapp.sapp_height()* 0.7
+
+        local dim = nk.nk_rect( sapp.sapp_width()/2-8 - popup_wide/2,
+        sapp.sapp_height()/2-40 - popup_high/2, popup_wide, popup_high)
+        folder_select.popup_dim = dim
+
+        local dim2 = nk.nk_rect( sapp.sapp_width()/2-8 - popup_wide/2,
+            sapp.sapp_height()/2-40 - popup_high/2, popup_wide, popup_high)
+        file_select.popup_dim = dim2
+    end
+end
+
+-- --------------------------------------------------------------------------------------
+
+return panel
 
 -- --------------------------------------------------------------------------------------
 
