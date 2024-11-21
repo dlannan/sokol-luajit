@@ -9,6 +9,7 @@ local ffi       = require("ffi")
 
 local widgets   = {
     id_name     = 1,
+    myfonts     = nil,
 }
 
 --------------------------------------------------------------------------------
@@ -253,6 +254,46 @@ widgets.widget_list_selectable = function(ctx, title, flags, items, width)
         nk.nk_group_end(ctx)
     end
 end
+
+--------------------------------------------------------------------------------
+
+widgets.widget_list_removeable = function(ctx, title, flags, items, width, color1, color2)
+
+    local button_align = ctx.style.button.text_alignment
+    local rounding = ctx.style.button.rounding
+    ctx.style.button.rounding = 0
+    ctx.style.button.text_alignment = nk.NK_TEXT_LEFT
+
+    local colors = {
+        color1 or nk.nk_rgb(15, 10, 40),
+        color2 or nk.nk_rgb(15, 10, 50),
+    }
+    local col = ctx.style.button.normal.data.color
+    local obg = nk.nk_rgb(col.r, col.g, col.b)
+
+    if (nk.nk_group_begin(ctx, title, flags) == true) then
+        for i, item in ipairs(items) do
+            nk.nk_layout_row_begin(ctx, nk.NK_STATIC, 24, 2)
+            nk.nk_layout_row_push(ctx, width - 30)
+            ctx.style.button.normal.data.color = colors[i%2 + 1]
+            nk.nk_button_label(ctx, item.name)
+            nk.nk_style_set_font(ctx, widgets.myfonts[1].handle)
+            nk.nk_layout_row_push(ctx, 30)
+            if(nk.nk_button_label(ctx, "") == true) then 
+                -- changed
+                print("changed:"..i)
+            end
+            nk.nk_style_set_font(ctx, widgets.myfonts[3].handle)
+            nk.nk_layout_row_end(ctx)
+        end
+        nk.nk_group_end(ctx)
+    end
+
+    ctx.style.button.normal.data.color = obg
+    ctx.style.button.rounding = rounding
+    ctx.style.button.text_alignment = button_align    
+end
+
 
 --------------------------------------------------------------------------------
 

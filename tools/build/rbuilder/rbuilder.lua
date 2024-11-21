@@ -85,7 +85,7 @@ local function frame(void)
     -- // the sokol_gfx draw pass
     local pass = ffi.new("sg_pass[1]")
     pass[0].action.colors[0].load_action = sg.SG_LOADACTION_CLEAR
-    pass[0].action.colors[0].clear_value = { 0.25, 0.5, 0.7, 1.0 }
+    pass[0].action.colors[0].clear_value = { 0.09, 0.067, 0.153, 1.0 }
     pass[0].swapchain = slib.sglue_swapchain()
     sg.sg_begin_pass(pass)
 

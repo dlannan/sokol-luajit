@@ -18,6 +18,8 @@ local fsel      = require("ui.file_selector")
 local icons     = ffi.new("struct nk_image [?]", 10)
 
 local config    = settings.load()
+local themes    = require("lua.themes")
+
 
 -- --------------------------------------------------------------------------------------
 -- Static vars 
@@ -51,7 +53,7 @@ local tabs = {
             local bounds = nk.nk_window_get_content_region(ctx)
             nk.nk_layout_row_dynamic(ctx, bounds.h, 1)
             local files = config.assets.lua 
-            wdgts.widget_list_selectable(ctx, "source_files", nk.NK_WINDOW_BORDER, files, bounds.w -40 )
+            wdgts.widget_list_removeable(ctx, "source_files", nk.NK_WINDOW_BORDER, files, bounds.w -40 )
         end,
         asset_name = "lua",
     }, 
@@ -62,7 +64,7 @@ local tabs = {
             local bounds = nk.nk_window_get_content_region(ctx)
             nk.nk_layout_row_dynamic(ctx, bounds.h, 1)
             local files = config.assets.images 
-            wdgts.widget_list_selectable(ctx, "source_files", nk.NK_WINDOW_BORDER, files, bounds.w -40 )
+            wdgts.widget_list_removeable(ctx, "source_files", nk.NK_WINDOW_BORDER, files, bounds.w -40 )
         end,
         asset_name = "images",
     }, 
@@ -73,7 +75,7 @@ local tabs = {
             local bounds = nk.nk_window_get_content_region(ctx)
             nk.nk_layout_row_dynamic(ctx, bounds.h, 1)
             local files = config.assets.data
-            wdgts.widget_list_selectable(ctx, "source_files", nk.NK_WINDOW_BORDER, files, bounds.w -40 )
+            wdgts.widget_list_removeable(ctx, "source_files", nk.NK_WINDOW_BORDER, files, bounds.w -40 )
         end,
         asset_name = "data",
     } 
@@ -321,6 +323,8 @@ local function main_ui(ctx)
 
     if(myfonts == nil) then 
         myfonts = fonts.setup_font(ctx, font_list)
+        wdgts.myfonts = myfonts
+        themes.tech(ctx)
     end
 
     wdgts.widget_panel_fixed(ctx, "WinMain", 0, 0, sapp.sapp_width(), sapp.sapp_height(), 0, function(data)
