@@ -194,10 +194,7 @@ local function display_section(ctx, sectionname)
                 nk.nk_style_set_font(ctx, myfonts[1].handle)
                 nk.nk_layout_row_push(ctx, 30)               
                 if(nk.nk_button_label(ctx, "") == true) then 
-                    folder_select.popup_active = 1
-                    folder_select.prop = v
-                    folder_select.folder_path = v.value
-                    folder_select.drives = dirtools.get_drives()
+                    fsel.open(folder_select, v.value, v)
                 end
                 nk.nk_style_set_font(ctx, myfonts[3].handle)
             elseif(v.ptype == "file") then
@@ -206,10 +203,7 @@ local function display_section(ctx, sectionname)
                 nk.nk_style_set_font(ctx, myfonts[1].handle)
                 nk.nk_layout_row_push(ctx, 30)
                 if(nk.nk_button_label(ctx, "") == true) then 
-                    file_select.popup_active = 1
-                    file_select.prop = v
-                    file_select.folder_path = dirtools.get_folder(v.value)
-                    file_select.drives = dirtools.get_drives()
+                    fsel.open(file_select, v.value, v)
                 end
                 nk.nk_style_set_font(ctx, myfonts[3].handle)
             elseif(v.ptype == "combo") then 
@@ -352,12 +346,15 @@ panel.main_ui = function(ctx)
             end
             nk.nk_layout_row_dynamic(ctx, 35, 1)
             if (nk.nk_menu_item_label(ctx, "Open", nk.NK_TEXT_LEFT)) then 
+                panel.loadconfig()
             end
             nk.nk_layout_row_dynamic(ctx, 35, 1)
             if (nk.nk_menu_item_label(ctx, "Save", nk.NK_TEXT_LEFT)) then 
+                panel.saveconfig(true)
             end
             nk.nk_layout_row_dynamic(ctx, 35, 1)
             if (nk.nk_menu_item_label(ctx, "SaveAs", nk.NK_TEXT_LEFT)) then 
+                panel.saveconfig(true)
             end
             nk.nk_layout_row_dynamic(ctx, 35, 1)
             if (nk.nk_menu_item_label(ctx, "Quit", nk.NK_TEXT_LEFT)) then 
@@ -442,6 +439,32 @@ panel.input = function(event)
             sapp.sapp_height()/2-40 - popup_high/2, popup_wide, popup_high)
         file_select.popup_dim = dim2
     end
+end
+
+-- --------------------------------------------------------------------------------------
+
+panel.loadconfig = function()
+
+    fsel.open(file_select, ".", nil, 
+        function(udata, res) 
+            if(res == true) then
+                local name=ffi.string(udata.file_selected)
+                settings.load(name)
+            end 
+        end)
+end
+
+-- --------------------------------------------------------------------------------------
+
+panel.saveconfig = function(saveas)
+    
+    fsel.open(file_select, ".", nil, 
+        function(udata, res) 
+            if(res == true) then
+                local name=ffi.string(udata.file_selected)
+                settings.save(name)
+            end 
+        end)
 end
 
 -- --------------------------------------------------------------------------------------

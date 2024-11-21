@@ -39,11 +39,7 @@ file_selector.create_file_selector = function( name, rect, start_folder, folders
             local flags = bit.bor(nk.NK_WINDOW_BORDER, nk.NK_WINDOW_TITLE)
             flags = bit.bor(flags, nk.NK_WINDOW_NO_SCROLLBAR)
 
-            local full_path = udata.file_selected
-            if(folders_only) then full_path = udata.folder_path end
-            local long_name = string.format("%s: %s", name, full_path)
-
-            if (nk.nk_group_begin(ctx, long_name, flags) == true) then
+            if (nk.nk_group_begin(ctx, name, flags) == true) then
             
                 nk.nk_layout_row_begin(ctx, nk.NK_DYNAMIC, 25, 2)
                 nk.nk_layout_row_push(ctx, 0.2)
@@ -58,7 +54,7 @@ file_selector.create_file_selector = function( name, rect, start_folder, folders
                 nk.nk_layout_row_end(ctx)
 
                 if(udata.fs_type) then
-                    nk.nk_layout_row_dynamic(ctx, dim.h-110, 1)
+                    nk.nk_layout_row_dynamic(ctx, dim.h-135, 1)
                     local files = dirtools.get_folderslist(udata.folder_path)
                     local bhit = wdgts.widget_list_buttons(ctx, "folder_files", nil, files, dim.w -40 )
                     
@@ -69,9 +65,13 @@ file_selector.create_file_selector = function( name, rect, start_folder, folders
                         else
                             udata.folder_path = dirtools.change_folder(udata.folder_path, udata.hit[2])
                         end
+                        local full_path = udata.file_selected
+                        if(folders_only) then full_path = udata.folder_path end            
+                        ffi.copy(udata.prop.ffi, ffi.string(full_path))
+                        udata.prop.len_ffi[0] = #full_path
                     end
                 else
-                    nk.nk_layout_row_dynamic(ctx, dim.h-110, 1)
+                    nk.nk_layout_row_dynamic(ctx, dim.h-135, 1)
                     local files = dirtools.get_dirlist(udata.folder_path)
                     local bhit = wdgts.widget_list_buttons(ctx, "select_file", nil, files, dim.w -40 )
                     
@@ -87,8 +87,24 @@ file_selector.create_file_selector = function( name, rect, start_folder, folders
                                 udata.file_selected  = dirtools.change_folder(udata.folder_path, udata.hit[2])
                             end
                         end
+
+                        local full_path = udata.file_selected
+                        if(folders_only) then full_path = udata.folder_path end            
+                        ffi.copy(udata.prop.ffi, ffi.string(full_path))
+                        udata.prop.len_ffi[0] = #full_path
                     end
                 end
+
+                nk.nk_layout_row_dynamic(ctx, 25, 1)
+                local edit_evt = nk.nk_edit_string(ctx, nk.NK_EDIT_SIMPLE, udata.prop.ffi, udata.prop.len_ffi, udata.prop.slen, nk.nk_filter_default)
+                if(edit_evt == 1 or edit_evt == 10) then 
+                    if(folders_only) then
+                        udata.folder_path = ffi.string(udata.prop.ffi)
+                    else
+                        udata.file_selected = ffi.string(udata.prop.ffi)
+                    end
+                end
+
                 nk.nk_layout_row_dynamic(ctx, 25, 2)
                 if (nk.nk_button_label(ctx, "Cancel") == true) then
                     udata.popup_active = 0
@@ -98,17 +114,6 @@ file_selector.create_file_selector = function( name, rect, start_folder, folders
                 end
                 if (nk.nk_button_label(ctx, "OK") == true) then
                     udata.popup_active = 0
-                    if(udata.prop) then 
-                        if(folders_only) then
-                            udata.prop.value = udata.folder_path
-                        else
-                            udata.prop.value = udata.file_selected
-                        end
-                        udata.prop.ffi = ffi.new("char[?]", udata.prop.slen )
-                        ffi.fill(udata.prop.ffi, udata.prop.slen, 0)
-                        ffi.copy(udata.prop.ffi, ffi.string(udata.prop.value))
-                        udata.prop.len_ffi = ffi.new("int[1]", {string.len(udata.prop.value)})
-                    end
                     if(udata.callback) then 
                         udata.callback(udata, true)
                     end
@@ -125,7 +130,21 @@ end
 
 -- --------------------------------------------------------------------------------------
 
+file_selector.open = function(select_obj, initial_path, prop, callback)
 
+    if(prop == nil) then 
+        prop = { ffi = ffi.new("char[?]", 256 ), slen = 256, value = initial_path }
+        ffi.fill(prop.ffi, #initial_path, 0)
+        ffi.copy(prop.ffi, ffi.string(initial_path))
+        prop.len_ffi = ffi.new("int[1]", {#initial_path})    
+    end
+
+    select_obj.popup_active = 1
+    select_obj.prop = prop
+    select_obj.folder_path = dirtools.get_folder(prop.value)
+    select_obj.drives = dirtools.get_drives()
+    if(callback) then select_obj.callback = callback end
+end
 
 -- --------------------------------------------------------------------------------------
 

@@ -2,6 +2,7 @@
 
 local ffi       = require("ffi")
 local json      = require("lua.json")
+
 -- ------------------------------------------------------------------------------------------------------
 
 
@@ -10,14 +11,12 @@ local json      = require("lua.json")
 local settings = {}
 
 -- Default settings if none are loaded or found
-local default_settings = [[
-
 local platforms = { "Win64", "MacOS", "Linux", "IOS64" }
 local resolutions = { "1920x1080", "1680x1050", "1600x900", "1440x900", "1376x768" }
 local arch = { "x86", "x64", "arm", "arm64", "arm64be", "ppc", "mips", "mipsel", "mips64", "mips64el", "mips64r6", "mips64r6el" }
 local oss = { "Windows", "Linux", "OSX", "BSD", "POSIX", "Other" }
 
-local default = {
+local default_settings = {
 
     rbuilder = {
         appname         = { index = 1, value = "rbuild", slen = 7 },
@@ -73,9 +72,6 @@ local default = {
     },
 }
 
-return default
-]]
-
 -- ------------------------------------------------------------------------------------------------------
 
 local function loadconfig(projectpath)
@@ -85,7 +81,12 @@ local function loadconfig(projectpath)
     if(fh) then 
         res = fh:read("*a")
         fh:close()
-        res = load(res)()
+        if(res == nil or #res == 0) then 
+            print("[Error] loadconfig - cannot read settings file: "..projectpath)
+            res = nil 
+        else
+            res = json.decode(res)
+        end
         print(res)
     else
         print("[Error] settings.load - unable to load config: "..projectpath)
@@ -107,7 +108,7 @@ settings.load = function( projectpath )
 
     if( projectpath == nil ) then 
         print("[Error] settings.load invalid projectpath nil, using default settings.")
-        settings.config = load(default_settings)()
+        settings.config = default_settings
     else
 
         -- Load the project settings into the local config
@@ -117,6 +118,20 @@ settings.load = function( projectpath )
     local title = settings.config.rbuilder.appname.value.." ("..settings.config.rbuilder.version.value..")"
     settings.config.rbuilder.title = { value = title, slen = 32 }
     return settings.config
+end
+
+-- ------------------------------------------------------------------------------------------------------
+
+settings.save = function( projectpath )
+
+    -- Grab the recents file list too.
+    settings.recent = nil
+    print(projectpath)
+    local fh = io.open(projectpath, "w")
+    if(fh) then 
+        fh:write( json.encode(settings.config) )
+        fh:close()
+    end
 end
 
 -- ------------------------------------------------------------------------------------------------------
