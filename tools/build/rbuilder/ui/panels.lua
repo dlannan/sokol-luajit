@@ -229,7 +229,7 @@ end
 local project_curr_tab = 1
 local project_tabs = { 
     { 
-        name = "Project",
+        name = "Settings",
         func = function(ctx) 
             display_section(ctx, "project") 
             display_section(ctx, "sokol")
@@ -335,7 +335,7 @@ local function main_ui(ctx)
         -- /* menu #1 */
         nk.nk_layout_row_begin(ctx, nk.NK_STATIC, 25, 2)
         nk.nk_layout_row_push(ctx, 140)
-        if (nk.nk_menu_begin_label(ctx, "Project", nk.NK_TEXT_LEFT, nk.nk_vec2(120, 200))) then 
+        if (nk.nk_menu_begin_label(ctx, "File", nk.NK_TEXT_LEFT, nk.nk_vec2(120, 200))) then 
         
             nk.nk_layout_row_dynamic(ctx, 35, 1)
             if (nk.nk_menu_item_label(ctx, "New", nk.NK_TEXT_LEFT)) then
@@ -390,7 +390,7 @@ local function main_ui(ctx)
         nk.nk_layout_row_dynamic(ctx, height-20, 2)
 
         -- wdgts.widget_panel_fixed(ctx, "Project", 10, 10, width, height, flags, function(data)
-        if (nk.nk_group_begin(ctx, "Project", flags) == true) then
+        if (nk.nk_group_begin(ctx, "Settings", flags) == true) then
 
             local padding = ctx[0].style.window.padding
             ctx[0].style.window.padding = nk.nk_vec2(10,10)
