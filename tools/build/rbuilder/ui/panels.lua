@@ -13,6 +13,7 @@ local slib      = require("sokol_libs") -- Warn - always after gfx!!
 local settings  = require("config.settings")
 local wdgts     = require("utils.widgets")
 local fonts     = require("utils.fonts")
+local fsel      = require("ui.file_selector")
 
 local icons     = ffi.new("struct nk_image [?]", 10)
 
@@ -35,6 +36,9 @@ local font_list = {
     { font_file = "Rubik-Regular.ttf", font_size = 20.0 },
     { font_file = "Rubik-Bold.ttf", font_size = 21.0 },
 }
+
+local folder_select = nil
+local file_select = nil
 
 -- --------------------------------------------------------------------------------------
 local curr_tab          = 1
@@ -73,153 +77,6 @@ local tabs = {
         end,
         asset_name = "data",
     } 
-}
-
-
--- --------------------------------------------------------------------------------------
-
-local file_select = {
-    popup_active = 0,
-    prop = nil,
-    drives = {},
-    file_selected = "",
-    popup_dim = ffi.new("struct nk_rect",{20, 100, 220, 90}),
-    folder_path = ".",
-    hit = {0, "", 0},
-
-    ui_func = function(ctx, dim, udata)
-
-        nk.nk_layout_row_dynamic(ctx, dim.h-20, 1)
-        local flags = bit.bor(nk.NK_WINDOW_BORDER, nk.NK_WINDOW_TITLE)
-        flags = bit.bor(flags, nk.NK_WINDOW_NO_SCROLLBAR)
-        if (nk.nk_group_begin(ctx, "Select File", flags) == true) then
-        
-            nk.nk_layout_row_begin(ctx, nk.NK_DYNAMIC, 25, 2)
-            nk.nk_layout_row_push(ctx, 0.2)
-            nk.nk_label(ctx, "Drives: ", 1)
-            
-            for k,v in ipairs(udata.drives) do
-                nk.nk_layout_row_push(ctx, 0.1)
-                if(nk.nk_button_label(ctx, v) == true) then 
-                    udata.folder_path = v
-                end
-            end
-            nk.nk_layout_row_end(ctx)
-
-            nk.nk_layout_row_dynamic(ctx, dim.h-110, 1)
-            local files = dirtools.get_dirlist(udata.folder_path)
-            local bhit = wdgts.widget_list_buttons(ctx, "select_file", nil, files, dim.w -40 )
-            
-            if(bhit) then
-                udata.hit = bhit 
-                if(bhit[2] == "..") then 
-                    udata.folder_path = dirtools.get_parent(udata.folder_path)
-                else
-                    local isfolder = files[udata.hit[1]].folder ~= nil
-                    if(isfolder == true) then 
-                        udata.folder_path = dirtools.change_folder(udata.folder_path, udata.hit[2])
-                    else 
-                        udata.file_selected  = dirtools.change_folder(udata.folder_path, udata.hit[2])
-                    end
-                end
-            end
-
-            nk.nk_layout_row_dynamic(ctx, 25, 2)
-            if (nk.nk_button_label(ctx, "Cancel") == true) then
-                udata.popup_active = 0
-                if(udata.callback) then 
-                    udata.callback(udata, false)
-                end
-            end
-            if (nk.nk_button_label(ctx, "OK") == true) then
-                udata.popup_active = 0
-                if(udata.prop) then 
-                    udata.prop.value = udata.file_selected
-                    udata.prop.ffi = ffi.new("char[?]", udata.prop.slen )
-                    ffi.fill(udata.prop.ffi, udata.prop.slen, 0)
-                    ffi.copy(udata.prop.ffi, ffi.string(udata.prop.value))
-                    udata.prop.len_ffi = ffi.new("int[1]", {string.len(udata.prop.value)})
-                end
-                if(udata.callback) then 
-                    udata.callback(udata, true)
-                end
-            end
-            nk.nk_group_end(ctx)
-        end
-        if(udata.popup_active == 0) then nk.nk_popup_close(ctx) end
-        return udata.popup_active
-    end,
-}
-
--- --------------------------------------------------------------------------------------
-
-local folder_select = {
-    popup_active = 0,
-    prop = nil,
-    popup_dim = ffi.new("struct nk_rect",{20, 100, 220, 90}),
-    folder_path = ".",
-    drives = {},
-    hit = {0, "", 0},
-
-    ui_func = function(ctx, dim, udata)
-
-        nk.nk_layout_row_dynamic(ctx, dim.h-20, 1)
-        local flags = bit.bor(nk.NK_WINDOW_BORDER, nk.NK_WINDOW_TITLE)
-        flags = bit.bor(flags, nk.NK_WINDOW_NO_SCROLLBAR)
-        if (nk.nk_group_begin(ctx, "Select Folder", flags) == true) then
-        
-            nk.nk_layout_row_begin(ctx, nk.NK_DYNAMIC, 25, 2)
-            nk.nk_layout_row_push(ctx, 0.2)
-            nk.nk_label(ctx, "Drives: ", 1)
-            
-            for k,v in ipairs(udata.drives) do
-                nk.nk_layout_row_push(ctx, 0.1)
-                if(nk.nk_button_label(ctx, v) == true) then 
-                    udata.folder_path = v
-                end
-            end
-            nk.nk_layout_row_end(ctx)
-
-            nk.nk_layout_row_dynamic(ctx, dim.h-110, 1)
-            local files = dirtools.get_folderslist(udata.folder_path)
-            local bhit = wdgts.widget_list_buttons(ctx, "folder_files", nil, files, dim.w -40 )
-            
-            if(bhit) then
-                udata.hit = bhit 
-                if(bhit[2] == "..") then 
-                    udata.folder_path = dirtools.get_parent(udata.folder_path)
-                else
-                    udata.folder_path = dirtools.change_folder(udata.folder_path, udata.hit[2])
-                end
-            end
-
-            nk.nk_layout_row_dynamic(ctx, 25, 2)
-            if (nk.nk_button_label(ctx, "Cancel") == true) then
-                udata.popup_active = 0
-                if(udata.callback) then 
-                    udata.callback(udata, false)
-                    udata.callback = nil
-                end
-            end
-            if (nk.nk_button_label(ctx, "OK") == true) then
-                udata.popup_active = 0
-                if(udata.prop) then 
-                    udata.prop.value = udata.folder_path
-                    udata.prop.ffi = ffi.new("char[?]", udata.prop.slen )
-                    ffi.fill(udata.prop.ffi, udata.prop.slen, 0)
-                    ffi.copy(udata.prop.ffi, ffi.string(udata.prop.value))
-                    udata.prop.len_ffi = ffi.new("int[1]", {string.len(udata.prop.value)})
-                end
-                if(udata.callback) then 
-                    udata.callback(udata, true)
-                    udata.callback = nil
-                end
-            end
-            nk.nk_group_end(ctx)
-        end
-        if(udata.popup_active == 0) then nk.nk_popup_close(ctx) end
-        return udata.popup_active
-    end,
 }
 
 -- --------------------------------------------------------------------------------------
@@ -282,15 +139,16 @@ local function init()
     icons[4] = wdgts.icon_load("./icon/settings.png")
     icons[5] = wdgts.icon_load("./icon/volume.png")   
 
-    folder_select.popup_dim.w = sapp.sapp_width()* 0.4
-    folder_select.popup_dim.h = sapp.sapp_height()* 0.7
-    folder_select.popup_dim.x = sapp.sapp_width()/2-8 - folder_select.popup_dim.w/2
-    folder_select.popup_dim.y = sapp.sapp_height()/2-40 - folder_select.popup_dim.h/2
+    local popup_wide = sapp.sapp_width()* 0.4
+    local popup_high = sapp.sapp_height()* 0.7
 
-    file_select.popup_dim.w = sapp.sapp_width()* 0.4
-    file_select.popup_dim.h = sapp.sapp_height()* 0.7
-    file_select.popup_dim.x = sapp.sapp_width()/2-8 - file_select.popup_dim.w/2
-    file_select.popup_dim.y = sapp.sapp_height()/2-40 - file_select.popup_dim.h/2
+    local dim = nk.nk_rect( sapp.sapp_width()/2-8 - popup_wide/2,
+        sapp.sapp_height()/2-40 - popup_high/2, popup_wide, popup_high)
+    folder_select = fsel.create_file_selector("Select Folder", dim, ".", true)
+
+    local dim2 = nk.nk_rect( sapp.sapp_width()/2-8 - popup_wide/2,
+        sapp.sapp_height()/2-40 - popup_high/2, popup_wide, popup_high)
+    file_select = fsel.create_file_selector("Select File", dim2, ".")
 
     setup_config()
 end
@@ -428,8 +286,12 @@ local function assets_panel(ctx)
         folder_select.callback = function(udata, res) 
             print(udata.folder_path, named_tab, res)
             if(res == true) then
-                print(named_tab)
-                table.insert(config.assets[named_tab], udata.folder_path)
+                local tabinfo = tabs[curr_tab]
+                local newfolder = {
+                    name=ffi.string(udata.folder_path),
+                    select = ffi.new("bool[1]", {0})
+                }
+                table.insert(config.assets[tabinfo.asset_name], newfolder)
             end 
         end
     end
@@ -441,8 +303,12 @@ local function assets_panel(ctx)
         file_select.drives = dirtools.get_drives()
         file_select.callback = function(udata, res) 
             if(res == true) then
-                print(named_tab)
-                table.insert(config.assets[named_tab], udata.file_selected)
+                local tabinfo = tabs[curr_tab]
+                local newfile = {
+                    name=ffi.string(udata.file_selected),
+                    select = ffi.new("bool[1]", {0})
+                }
+                table.insert(config.assets[tabinfo.asset_name], newfile)
             end 
         end
     end    
