@@ -100,6 +100,11 @@ local sel_date          = sel_time
 
 local popup_active = ffi.new("int[1]")
 
+local menu_states = { MENU_NONE = 0,MENU_FILE = 1, MENU_EDIT  = 2,MENU_VIEW = 3,MENU_CHART = 4}
+local menu_state = menu_states.MENU_NONE
+local state = ffi.new("enum nk_collapse_states[1]")
+state[0] = nk.NK_MINIMIZED
+
 -- --------------------------------------------------------------------------------------
 
 local function draw_demo_ui(ctx)
@@ -121,7 +126,6 @@ local function draw_demo_ui(ctx)
         if (show_menu[0] == true) then
 
             -- /* menubar */
-            local menu_states = { MENU_DEFAULT = 0, MENU_WINDOWS = 1}
             nk.nk_menubar_begin(ctx)
 
             -- /* menu #1 */
@@ -148,10 +152,6 @@ local function draw_demo_ui(ctx)
             nk.nk_layout_row_push(ctx, 60)
             if (nk.nk_menu_begin_label(ctx, "ADVANCED", nk.NK_TEXT_LEFT, nk.nk_vec2(200, 600))) then 
 
-                menu_states = { MENU_NONE = 0,MENU_FILE = 1, MENU_EDIT  = 2,MENU_VIEW = 3,MENU_CHART = 4}
-                menu_state = menu_states.MENU_NONE
-                state = ffi.new("enum nk_collapse_states[1]")
- 
                 state[0] = nk.NK_MINIMIZED
                 if(menu_state == menu_states.MENU_FILE) then state[0] = nk.NK_MAXIMIZED end
                 if (nk.nk_tree_state_push(ctx, nk.NK_TREE_TAB, "FILE", state)) then
@@ -167,10 +167,8 @@ local function draw_demo_ui(ctx)
                         menu_state = menu_states.MENU_NONE
                     end
                 end
-
                 state[0] = nk.NK_MINIMIZED
                 if(menu_state == menu_states.MENU_EDIT) then state[0] = nk.NK_MAXIMIZED end
-
                 if (nk.nk_tree_state_push(ctx, nk.NK_TREE_TAB, "EDIT", state)) then
                     menu_state = menu_states.MENU_EDIT
                     nk.nk_menu_item_label(ctx, "Copy", nk.NK_TEXT_LEFT)
@@ -183,7 +181,6 @@ local function draw_demo_ui(ctx)
                         menu_state = menu_states.MENU_NONE
                     end
                 end
-
                 state[0] = nk.NK_MINIMIZED
                 if(menu_state == menu_states.MENU_VIEW) then state[0] = nk.NK_MAXIMIZED end
                 if (nk.nk_tree_state_push(ctx, nk.NK_TREE_TAB, "VIEW", state)) then
@@ -197,7 +194,6 @@ local function draw_demo_ui(ctx)
                         menu_state = menu_states.MENU_NONE
                     end
                 end
-
                 state[0] = nk.NK_MINIMIZED
                 if(menu_state == menu_states.MENU_CHART) then state[0] = nk.NK_MAXIMIZED end
                 if (nk.nk_tree_state_push(ctx, nk.NK_TREE_TAB, "CHART", state)) then

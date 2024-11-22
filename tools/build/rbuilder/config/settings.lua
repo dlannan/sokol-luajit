@@ -2,13 +2,17 @@
 
 local ffi       = require("ffi")
 local json      = require("lua.json")
+local logging   = require("utils.logging")
 
 -- ------------------------------------------------------------------------------------------------------
 
 
 -- ------------------------------------------------------------------------------------------------------
 -- The main module table
-local settings = {}
+local settings = {
+
+    recents = {},
+}
 
 -- Default settings if none are loaded or found
 local platforms = { "Win64", "MacOS", "Linux", "IOS64" }
@@ -96,27 +100,69 @@ end
 
 -- ------------------------------------------------------------------------------------------------------
 
-settings.load = function( projectpath )
+settings.add_recents = function( filename )
+
+    if(settings.recents)  then 
+
+        -- Check it isnt already in the list, add to first and remove the other.
+        local removal = {}
+        for i, v in ipairs(settings.recents) do
+            if string.match(v, filename) then table.insert(removal, i) end
+        end
+        for i, v in ipairs(removal) do 
+            table.remove(settings.recents, v)
+        end
+        table.insert(settings.recents, 1, filename)
+    end
+end
+
+
+-- ------------------------------------------------------------------------------------------------------
+
+settings.load_recents = function( )
 
     -- Grab the recents file list too.
-    settings.recent = nil
     local fh = io.open("config/recent_projects.json", "r")
     if(fh) then 
-        settings.recent = json.decode( fh:read("*a") )
+        settings.recents = json.decode( fh:read("*a") )
         fh:close()
+    else 
+        logging.error(" settings.load_recents: Cannot load recents.")
+    end    
+end
+
+-- ------------------------------------------------------------------------------------------------------
+
+settings.save_recents = function( )
+
+    -- Grab the recents file list too.
+    if(settings.recents) then 
+        local fh = io.open("config/recent_projects.json", "w")
+        if(fh) then 
+            fh:write(json.encode( settings.recents ))
+            fh:close()
+            logging.error(" settings.save_recents.")
+        else 
+            logging.error(" settings.save_recents: Cannot load recents.")
+        end
     end
+end
+
+-- ------------------------------------------------------------------------------------------------------
+
+settings.load = function( projectpath )
 
     if( projectpath == nil ) then 
         print("[Error] settings.load invalid projectpath nil, using default settings.")
         settings.config = default_settings
     else
-
         -- Load the project settings into the local config
         settings.config = loadconfig(projectpath)
     end
 
     local title = settings.config.rbuilder.appname.value.." ("..settings.config.rbuilder.version.value..")"
     settings.config.rbuilder.title = { value = title, slen = 32 }
+
     return settings.config
 end
 
@@ -126,7 +172,6 @@ settings.save = function( projectpath )
 
     -- Grab the recents file list too.
     settings.recent = nil
-    print(projectpath)
     local fh = io.open(projectpath, "w")
     if(fh) then 
         fh:write( json.encode(settings.config) )

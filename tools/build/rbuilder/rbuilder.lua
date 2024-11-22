@@ -82,7 +82,7 @@ local function frame(void)
 
     local ctx = nk.snk_new_frame()
     current_ctx = ctx
-    local config_reset = panel.main_ui(ctx)
+    panel.main_ui(ctx)
 
     -- // the sokol_gfx draw pass
     local pass = ffi.new("sg_pass[1]")
@@ -95,9 +95,6 @@ local function frame(void)
     sg.sg_end_pass()
     sg.sg_commit()
 
-    if(config_reset) then 
-        panel.init()
-    end
     ffi.C.Sleep(3)
 end
 
@@ -141,5 +138,9 @@ for k,v in pairs(package.loaded) do
         print( "["..tostring(k).."] = "..tostring(v)) 
     end
 end
+
+-- --------------------------------------------------------------------------------------
+
+panel.cleanup()
 
 -- --------------------------------------------------------------------------------------

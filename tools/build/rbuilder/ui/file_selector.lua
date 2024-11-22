@@ -21,6 +21,51 @@ local file_selector = {}
 
 -- --------------------------------------------------------------------------------------
 
+file_selector.create_file_list = function( name, rect, recent_files )
+
+    local file_select = {
+        popup_active = 0,
+        popup_dim = rect,
+        file_selected = "",
+        recent_files = recent_files,
+        hit = {0, "", 0},
+
+        ui_func = function(ctx, dim, udata)
+
+            nk.nk_layout_row_dynamic(ctx, dim.h-20, 1)
+            local flags = bit.bor(nk.NK_WINDOW_BORDER, nk.NK_WINDOW_TITLE)
+            flags = bit.bor(flags, nk.NK_WINDOW_NO_SCROLLBAR)
+
+            if (nk.nk_group_begin(ctx, name, flags) == true) then
+            
+                nk.nk_layout_row_dynamic(ctx, dim.h-90, 1)
+
+                local bhit = wdgts.widget_list_buttons(ctx, "recent_file", nil, udata.recent_files, dim.w -40 )
+                if(bhit) then 
+                    udata.file_selected = bhit[2]
+                end
+
+                nk.nk_layout_row_dynamic(ctx, 25, 2)
+                if (nk.nk_button_label(ctx, "Cancel") == true) then
+                    udata.popup_active = 0
+                    if(udata.callback) then udata.callback(udata, false) end
+                end
+                if (nk.nk_button_label(ctx, "OK") == true) then
+                    udata.popup_active = 0
+                    if(udata.callback) then udata.callback(udata, true) end
+                end
+                nk.nk_group_end(ctx)                
+            end
+
+            if(udata.popup_active == 0) then nk.nk_popup_close(ctx) end
+            return udata.popup_active            
+        end,
+    }
+    return file_select
+end
+
+-- --------------------------------------------------------------------------------------
+
 file_selector.create_file_selector = function( name, rect, start_folder, folders_only )
 
     local file_select = {
@@ -114,6 +159,12 @@ file_selector.create_file_selector = function( name, rect, start_folder, folders
                 end
                 if (nk.nk_button_label(ctx, "OK") == true) then
                     udata.popup_active = 0
+                    if(folders_only) then
+                        udata.prop.value = udata.folder_path
+                    else
+                        udata.prop.value = udata.file_selected
+                    end
+
                     if(udata.callback) then 
                         udata.callback(udata, true)
                     end
@@ -145,6 +196,15 @@ file_selector.open = function(select_obj, initial_path, prop, callback)
     select_obj.drives = dirtools.get_drives()
     if(callback) then select_obj.callback = callback end
 end
+
+-- --------------------------------------------------------------------------------------
+
+file_selector.show = function(select_obj)
+
+    select_obj.popup_active = 1
+    if(callback) then select_obj.callback = callback end
+end
+
 
 -- --------------------------------------------------------------------------------------
 

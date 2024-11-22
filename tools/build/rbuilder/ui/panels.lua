@@ -18,9 +18,11 @@ local fsel      = require("ui.file_selector")
 local icons     = ffi.new("struct nk_image [?]", 10)
 
 local themes    = require("lua.themes")
+local logging   = require("utils.logging")
 
 local panel     = {
-    config = nil
+    config          = nil,
+    current_path    = ".",
 }
 
 -- --------------------------------------------------------------------------------------
@@ -43,6 +45,7 @@ local font_list = {
 
 local folder_select = nil
 local file_select = nil
+local recent_files = nil
 
 -- --------------------------------------------------------------------------------------
 local curr_tab          = 1
@@ -156,6 +159,9 @@ panel.init = function()
 
     panel.config = settings.load()
     setup_config()
+
+    settings.load_recents()
+    recent_files = fsel.create_file_list("Choose Recent", dim2, {})
 end
 
 -- --------------------------------------------------------------------------------------
@@ -316,6 +322,22 @@ end
 
 -- --------------------------------------------------------------------------------------
 
+panel.show_recents = function(ctx)
+
+    panel.recent_list = {}
+    for i,v in ipairs(settings.recents) do 
+        local newfile = { name = ffi.string(v) }
+        newfile.select = ffi.new("int[1]")
+        newfile.select[0] = 0
+        table.insert(panel.recent_list, newfile)
+    end
+    recent_files.recent_files = panel.recent_list
+    fsel.show(recent_files, function(udata, res)
+    end)
+end
+
+-- --------------------------------------------------------------------------------------
+
 panel.main_ui = function(ctx)
 
     if(myfonts == nil) then 
@@ -324,12 +346,11 @@ panel.main_ui = function(ctx)
         themes.tech(ctx)
     end
 
-    local config_reset = nil
-
     wdgts.widget_panel_fixed(ctx, "WinMain", 0, 0, sapp.sapp_width(), sapp.sapp_height(), 0, function(data)
 
         folder_select.popup_active = wdgts.widget_popup_panel(ctx, "popup", folder_select.popup_dim, folder_select.ui_func, folder_select, folder_select.popup_active)
         file_select.popup_active = wdgts.widget_popup_panel(ctx, "popup", file_select.popup_dim, file_select.ui_func, file_select, file_select.popup_active)
+        recent_files.popup_active = wdgts.widget_popup_panel(ctx, "popup", recent_files.popup_dim, recent_files.ui_func, recent_files, recent_files.popup_active)
 
         -- /* menubar */
         local menu_states = { MENU_DEFAULT = 0, MENU_WINDOWS = 1}
@@ -338,27 +359,43 @@ panel.main_ui = function(ctx)
         -- /* menu #1 */
         nk.nk_layout_row_begin(ctx, nk.NK_STATIC, 25, 2)
         nk.nk_layout_row_push(ctx, 140)
-        if (nk.nk_menu_begin_label(ctx, "File", nk.NK_TEXT_LEFT, nk.nk_vec2(120, 200))) then 
+        if (nk.nk_menu_begin_label(ctx, "File", nk.NK_TEXT_LEFT, nk.nk_vec2(150, 240))) then 
         
             nk.nk_layout_row_dynamic(ctx, 35, 1)
-            if (nk.nk_menu_item_label(ctx, "New", nk.NK_TEXT_LEFT)) then
-                config_reset = true
+            if (nk.nk_menu_item_label(ctx, "New", nk.NK_TEXT_LEFT)== true) then
             end
+
+            nk.nk_layout_row_dynamic(ctx, 3, 1)
+            nk.nk_menu_item_label(ctx, "------------", nk.NK_TEXT_LEFT)
+
             nk.nk_layout_row_dynamic(ctx, 35, 1)
-            if (nk.nk_menu_item_label(ctx, "Open", nk.NK_TEXT_LEFT)) then 
+            if (nk.nk_menu_item_label(ctx, "Open", nk.NK_TEXT_LEFT)== true) then 
                 panel.loadconfig()
             end
+
             nk.nk_layout_row_dynamic(ctx, 35, 1)
-            if (nk.nk_menu_item_label(ctx, "Save", nk.NK_TEXT_LEFT)) then 
-                panel.saveconfig(true)
+            if(nk.nk_menu_item_label(ctx, "Open Recent", nk.NK_TEXT_LEFT) == true) then 
+                panel.show_recents()
+            end
+
+            nk.nk_layout_row_dynamic(ctx, 3, 1)
+            nk.nk_menu_item_label(ctx, "------------", nk.NK_TEXT_LEFT)
+
+            nk.nk_layout_row_dynamic(ctx, 35, 1)
+            if (nk.nk_menu_item_label(ctx, "Save", nk.NK_TEXT_LEFT)== true) then 
+                panel.saveconfig()
             end
             nk.nk_layout_row_dynamic(ctx, 35, 1)
-            if (nk.nk_menu_item_label(ctx, "SaveAs", nk.NK_TEXT_LEFT)) then 
+            if (nk.nk_menu_item_label(ctx, "SaveAs", nk.NK_TEXT_LEFT)== true) then 
                 panel.saveconfig(true)
             end
+
+            nk.nk_layout_row_dynamic(ctx, 3, 1)
+            nk.nk_menu_item_label(ctx, "------------", nk.NK_TEXT_LEFT)
+
             nk.nk_layout_row_dynamic(ctx, 35, 1)
             if (nk.nk_menu_item_label(ctx, "Quit", nk.NK_TEXT_LEFT)) then 
-                os.exit()
+                sapp.sapp_request_quit()
             end
             nk.nk_menu_end(ctx)
         end
@@ -419,7 +456,6 @@ panel.main_ui = function(ctx)
     end, {ctx=ctx})
 
     -- return not nk.nk_window_is_closed(ctx, "Overview")
-    return config_reset
 end
 
 -- --------------------------------------------------------------------------------------
@@ -438,6 +474,8 @@ panel.input = function(event)
         local dim2 = nk.nk_rect( sapp.sapp_width()/2-8 - popup_wide/2,
             sapp.sapp_height()/2-40 - popup_high/2, popup_wide, popup_high)
         file_select.popup_dim = dim2
+
+        recent_files.popup_dim = dim2
     end
 end
 
@@ -449,7 +487,10 @@ panel.loadconfig = function()
         function(udata, res) 
             if(res == true) then
                 local name=ffi.string(udata.file_selected)
+                panel.current_path = name
+                logging.info(" panel.loadconfig: Loaded path - "..name)
                 settings.load(name)
+                settings.add_recents(name)
             end 
         end)
 end
@@ -457,14 +498,30 @@ end
 -- --------------------------------------------------------------------------------------
 
 panel.saveconfig = function(saveas)
-    
-    fsel.open(file_select, ".", nil, 
-        function(udata, res) 
-            if(res == true) then
-                local name=ffi.string(udata.file_selected)
-                settings.save(name)
-            end 
-        end)
+
+    local init_path = panel.current_path or "."
+    print("Init Path: "..panel.current_path)
+
+    if(saveas) then 
+        fsel.open(file_select, init_path, nil, 
+            function(udata, res) 
+                if(res == true) then
+                    local name=ffi.string(udata.file_selected)
+                    logging.info(" panel.saveconfig: Saved path - "..name)
+                    settings.save(name)
+                end 
+            end)
+    else 
+        settings.save(panel.current_path)
+        logging.info(" panel.saveconfig: Saved path - "..panel.current_path)
+    end
+end
+
+-- --------------------------------------------------------------------------------------
+
+panel.cleanup = function()
+
+    settings.save_recents()
 end
 
 -- --------------------------------------------------------------------------------------
