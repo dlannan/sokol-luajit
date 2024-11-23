@@ -105,13 +105,17 @@ settings.add_recents = function( filename )
     if(settings.recents)  then 
 
         -- Check it isnt already in the list, add to first and remove the other.
-        local removal = {}
+        local cleaned_recents = {}
+
         for i, v in ipairs(settings.recents) do
-            if string.match(v, filename) then table.insert(removal, i) end
+            local testf = string.gsub(filename, "%-", "_")
+            local testv = string.gsub(v, "%-", "_")
+            if string.match(testf, testv) then 
+            else
+                table.insert(cleaned_recents, v) 
+            end
         end
-        for i, v in ipairs(removal) do 
-            table.remove(settings.recents, v)
-        end
+        settings.recents = cleaned_recents
         table.insert(settings.recents, 1, filename)
     end
 end

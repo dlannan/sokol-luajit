@@ -161,7 +161,10 @@ panel.init = function()
     setup_config()
 
     settings.load_recents()
-    recent_files = fsel.create_file_list("Choose Recent", dim2, {})
+    popup_wide = sapp.sapp_width()* 0.8
+    local dim3 = nk.nk_rect( sapp.sapp_width()/2-8 - popup_wide/2,
+        sapp.sapp_height()/2-40 - popup_high/2, popup_wide, popup_high)    
+    recent_files = fsel.create_file_list("Choose Recent", dim3, {})
 end
 
 -- --------------------------------------------------------------------------------------
@@ -333,6 +336,12 @@ panel.show_recents = function(ctx)
     end
     recent_files.recent_files = panel.recent_list
     fsel.show(recent_files, function(udata, res)
+        if(res == true) then 
+            panel.current_path = udata.file_selected
+            settings.load(udata.file_selected)
+            settings.add_recents(udata.file_selected)
+            print("Opened: "..udata.file_selected)
+        end
     end)
 end
 
@@ -475,7 +484,10 @@ panel.input = function(event)
             sapp.sapp_height()/2-40 - popup_high/2, popup_wide, popup_high)
         file_select.popup_dim = dim2
 
-        recent_files.popup_dim = dim2
+        popup_wide = sapp.sapp_width()* 0.8
+        local dim3 = nk.nk_rect( sapp.sapp_width()/2-8 - popup_wide/2,
+        sapp.sapp_height()/2-40 - popup_high/2, popup_wide, popup_high)    
+        recent_files.popup_dim = dim3
     end
 end
 

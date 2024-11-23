@@ -38,12 +38,15 @@ file_selector.create_file_list = function( name, rect, recent_files )
 
             if (nk.nk_group_begin(ctx, name, flags) == true) then
             
-                nk.nk_layout_row_dynamic(ctx, dim.h-90, 1)
+                nk.nk_layout_row_dynamic(ctx, dim.h-115, 1)
 
                 local bhit = wdgts.widget_list_buttons(ctx, "recent_file", nil, udata.recent_files, dim.w -40 )
                 if(bhit) then 
                     udata.file_selected = bhit[2]
                 end
+
+                nk.nk_layout_row_dynamic(ctx, 25, 1)
+                nk.nk_label(ctx, string.format("Selected: %s",udata.file_selected), 1)
 
                 nk.nk_layout_row_dynamic(ctx, 25, 2)
                 if (nk.nk_button_label(ctx, "Cancel") == true) then
@@ -199,7 +202,7 @@ end
 
 -- --------------------------------------------------------------------------------------
 
-file_selector.show = function(select_obj)
+file_selector.show = function(select_obj, callback)
 
     select_obj.popup_active = 1
     if(callback) then select_obj.callback = callback end
