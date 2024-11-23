@@ -91,7 +91,6 @@ local function loadconfig(projectpath)
         else
             res = json.decode(res)
         end
-        print(res)
     else
         print("[Error] settings.load - unable to load config: "..projectpath)
     end

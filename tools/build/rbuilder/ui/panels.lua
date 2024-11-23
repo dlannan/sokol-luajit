@@ -168,6 +168,36 @@ panel.init = function()
 end
 
 -- --------------------------------------------------------------------------------------
+-- Attempts to find sokol in nearby folders (up max 4 directories from builder)
+--    Sets all the sokol properties if it does find it
+local function search_sokol(ctx)
+
+    local r = nk.nk_window_get_content_region(ctx)
+
+    nk.nk_layout_space_begin(ctx, nk.NK_STATIC, 27, 1)
+    nk.nk_layout_space_push(ctx, nk.nk_rect(r.w-40, -195, 27, 27))
+
+
+    nk.nk_style_set_font(ctx, myfonts[1].handle)
+    if(nk.nk_button_label(ctx, "") == true) then
+        -- do search stuff
+        local found = dirtools.find_folder(".", 5, "sokol-luajit")
+        if(found) then 
+            logging.info(string.format("Found Sokol-luajit: %s",found))
+            logging.info("Auto filling sokol paths...")
+            panel.config["sokol"].sokol_path.value = found 
+            panel.config["sokol"].sokol_bin.value = dirtools.combine_path(found, "bin")
+            panel.config["sokol"].sokol_ffi.value = dirtools.combine_path(found, "ffi")
+            panel.config["sokol"].sokol_lua.value = dirtools.combine_path(found, "lua")
+            panel.config["sokol"].sokol_examples.value = dirtools.combine_path(found, "examples")
+            setup_config()
+        end
+    end
+    nk.nk_style_set_font(ctx, myfonts[3].handle)
+    nk.nk_layout_space_end(ctx)
+end
+
+-- --------------------------------------------------------------------------------------
 
 local function display_section(ctx, sectionname)
 
@@ -227,7 +257,6 @@ local function display_section(ctx, sectionname)
             end
             nk.nk_layout_row_end(ctx)
         end
-
         nk.nk_group_end(ctx)
     end
 end
@@ -241,6 +270,7 @@ local project_tabs = {
         func = function(ctx) 
             display_section(ctx, "project") 
             display_section(ctx, "sokol")
+            search_sokol(ctx)
         end,
     }, 
     { 
@@ -338,9 +368,9 @@ panel.show_recents = function(ctx)
     fsel.show(recent_files, function(udata, res)
         if(res == true) then 
             panel.current_path = udata.file_selected
-            settings.load(udata.file_selected)
+            panel.config = settings.load(udata.file_selected)
+            setup_config()
             settings.add_recents(udata.file_selected)
-            print("Opened: "..udata.file_selected)
         end
     end)
 end
@@ -501,7 +531,8 @@ panel.loadconfig = function()
                 local name=ffi.string(udata.file_selected)
                 panel.current_path = name
                 logging.info(" panel.loadconfig: Loaded path - "..name)
-                settings.load(name)
+                panel.config = settings.load(name)
+                setup_config()
                 settings.add_recents(name)
             end 
         end)

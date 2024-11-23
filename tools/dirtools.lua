@@ -30,6 +30,23 @@ if(ffi.os ~= "Windows") then sep = "/" end
 
 ---------------------------------------------------------------------------------------
 
+dirtools.compare_paths = function(p1, p2)
+    -- Remove  minus, they seem to cause the most problems 
+    p1 = string.gsub(p1, "%-", "_")
+    p2 = string.gsub(p2, "%-", "_")
+    return string.match(p1, p2)
+end
+
+---------------------------------------------------------------------------------------
+
+dirtools.combine_path = function( base, addition )
+
+    return base..sep..addition
+end
+
+---------------------------------------------------------------------------------------
+
+
 dirtools.get_drives = function()
     local cmd = "wmic logicaldisk get name"
     -- Note: Add more -t <filetype> to support different file system mounts
@@ -109,16 +126,18 @@ dirtools.get_app_path = function( expected_root_folder )
         if(cmdh) then base_dir = cmdh:read("*a"); cmdh:close() end
     end
 
-    local folder_name = expected_root_folder
-    local last_folder, remain = string.match(base_dir, "(.-"..folder_name..")(.-)")
-    last_folder = last_folder or ""
-    remain = remain or ""
+    if(expected_root_folder) then
+        local folder_name = expected_root_folder
+        local last_folder, remain = string.match(base_dir, "(.-"..folder_name..")(.-)")
+        last_folder = last_folder or ""
+        remain = remain or ""
 
-    remain = remain:gsub("%s+", "")
-    if(ffi.os == "Windows") then 
-        base_dir = last_folder.."\\"
-    else 
-        base_dir = last_folder.."/"
+        remain = remain:gsub("%s+", "")
+        if(ffi.os == "Windows") then 
+            base_dir = last_folder.."\\"
+        else 
+            base_dir = last_folder.."/"
+        end
     end
     -- print("Base Directory: "..base_dir)
     return base_dir
@@ -198,7 +217,6 @@ dirtools.get_dirlist = function(path, cache_update)
         res = fh:read("*a")
         fh:close()
         if(#res == 0) then 
-            print(path)
             list_cache[path] = files
             return files        
         end
@@ -219,10 +237,45 @@ dirtools.get_dirlist = function(path, cache_update)
 end
 
 ---------------------------------------------------------------------------------------
+dirtools.path_match = function(list, path)
+
+    for i,v in ipairs(list) do 
+        if(dirtools.compare_paths(v.name, path)) then 
+            return true
+        end
+    end
+    return false
+end
+
+---------------------------------------------------------------------------------------
 dirtools.get_parent = function( path )
     if(path == nil or path == "") then path = "." end
     local parentpath = dirtools.get_folder(path)
     return parentpath
+end
+
+---------------------------------------------------------------------------------------
+
+dirtools.find_folder = function( start_path, parent_up, folder_name )
+
+    -- If starting in current application folder, convert it to a full path
+    if(start_path == ".") then 
+        start_path = dirtools.get_app_path()
+    end
+    local list = dirtools.get_folderslist(start_path)
+    if(dirtools.path_match(list, "sokol-luajit") == true) then 
+        return start_path
+    end
+
+    local current = start_path
+    for i=1, parent_up do 
+        current = dirtools.get_parent(current)
+        list = dirtools.get_folderslist(current)
+        if(dirtools.path_match(list, "sokol-luajit") == true) then 
+            return current
+        end
+    end
+    return nil
 end
 
 ---------------------------------------------------------------------------------------
