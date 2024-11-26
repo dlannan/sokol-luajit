@@ -144,9 +144,9 @@ settings.save_recents = function( )
         if(fh) then 
             fh:write(json.encode( settings.recents ))
             fh:close()
-            logging.error(" settings.save_recents.")
+            logging.info(" settings.save_recents.")
         else 
-            logging.error(" settings.save_recents: Cannot load recents.")
+            logging.error(" settings.save_recents: Cannot save recents.")
         end
     end
 end

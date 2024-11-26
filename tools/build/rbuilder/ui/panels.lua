@@ -317,11 +317,7 @@ local function assets_panel(ctx)
 
     nk.nk_layout_row_dynamic(ctx, 25, 2)
     if (nk.nk_button_label(ctx, "Add Folder") == true) then
-        folder_select.popup_active = 1
-        folder_select.prop = nil
-        folder_select.folder_path = "."
-        folder_select.drives = dirtools.get_drives()
-        folder_select.callback = function(udata, res) 
+        fsel.open(folder_select, ".", nil, function(udata, res)
             print(udata.folder_path, named_tab, res)
             if(res == true) then
                 local tabinfo = tabs[curr_tab]
@@ -331,15 +327,11 @@ local function assets_panel(ctx)
                 }
                 table.insert(panel.config.assets[tabinfo.asset_name], newfolder)
             end 
-        end
+        end)
     end
 
     if (nk.nk_button_label(ctx, "Add File") == true) then
-        file_select.popup_active = 1
-        file_select.prop = nil
-        file_select.folder_path = dirtools.get_folder(".")
-        file_select.drives = dirtools.get_drives()
-        file_select.callback = function(udata, res) 
+        fsel.open(file_select, ".", nil, function(udata, res)
             if(res == true) then
                 local tabinfo = tabs[curr_tab]
                 local newfile = {
@@ -348,7 +340,7 @@ local function assets_panel(ctx)
                 }
                 table.insert(panel.config.assets[tabinfo.asset_name], newfile)
             end 
-        end
+        end)
     end    
 
 end
