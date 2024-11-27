@@ -270,6 +270,7 @@ widgets.widget_list_removeable = function(ctx, title, flags, items, width, color
     }
     local col = ctx.style.button.normal.data.color
     local obg = nk.nk_rgb(col.r, col.g, col.b)
+    local items_removed = {}
 
     if (nk.nk_group_begin(ctx, title, flags) == true) then
         for i, item in ipairs(items) do
@@ -280,13 +281,16 @@ widgets.widget_list_removeable = function(ctx, title, flags, items, width, color
             nk.nk_style_set_font(ctx, widgets.myfonts[1].handle)
             nk.nk_layout_row_push(ctx, 30)
             if(nk.nk_button_label(ctx, "") == true) then 
-                -- changed
-                print("changed:"..i)
+                table.insert(items_removed, i)
             end
             nk.nk_style_set_font(ctx, widgets.myfonts[3].handle)
             nk.nk_layout_row_end(ctx)
         end
         nk.nk_group_end(ctx)
+
+        for i,v in ipairs(items_removed) do 
+            items[v] = nil
+        end
     end
 
     ctx.style.button.normal.data.color = obg

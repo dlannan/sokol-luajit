@@ -394,6 +394,7 @@ panel.main_ui = function(ctx)
         
             nk.nk_layout_row_dynamic(ctx, 35, 1)
             if (nk.nk_menu_item_label(ctx, "New", nk.NK_TEXT_LEFT)== true) then
+                panel.newconfig()
             end
 
             nk.nk_layout_row_dynamic(ctx, 3, 1)
@@ -512,6 +513,14 @@ panel.input = function(event)
         recent_files.popup_dim = dim3
     end
 end
+
+-- --------------------------------------------------------------------------------------
+
+panel.newconfig = function()
+
+    panel.config = settings.load(nil)
+    setup_config()
+end 
 
 -- --------------------------------------------------------------------------------------
 

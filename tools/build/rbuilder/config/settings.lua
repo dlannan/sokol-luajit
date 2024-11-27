@@ -86,13 +86,13 @@ local function loadconfig(projectpath)
         res = fh:read("*a")
         fh:close()
         if(res == nil or #res == 0) then 
-            print("[Error] loadconfig - cannot read settings file: "..projectpath)
+            logging.error("loadconfig - cannot read settings file: "..projectpath)
             res = nil 
         else
             res = json.decode(res)
         end
     else
-        print("[Error] settings.load - unable to load config: "..projectpath)
+        logging.error("settings.load - unable to load config: "..projectpath)
     end
     return res
 end 
@@ -130,7 +130,7 @@ settings.load_recents = function( )
         settings.recents = json.decode( fh:read("*a") )
         fh:close()
     else 
-        logging.error(" settings.load_recents: Cannot load recents.")
+        logging.error("settings.load_recents: Cannot load recents.")
     end    
 end
 
@@ -144,9 +144,9 @@ settings.save_recents = function( )
         if(fh) then 
             fh:write(json.encode( settings.recents ))
             fh:close()
-            logging.info(" settings.save_recents.")
+            logging.info("settings.save_recents.")
         else 
-            logging.error(" settings.save_recents: Cannot save recents.")
+            logging.error("settings.save_recents: Cannot save recents.")
         end
     end
 end
@@ -156,11 +156,15 @@ end
 settings.load = function( projectpath )
 
     if( projectpath == nil ) then 
-        print("[Error] settings.load invalid projectpath nil, using default settings.")
+        logging.info("settings.load projectpath nil, using default settings.")
         settings.config = default_settings
     else
         -- Load the project settings into the local config
         settings.config = loadconfig(projectpath)
+        if(settings.config == nil) then 
+            logging.error("settings.load invalid projectpath nil, using default settings.")
+            settings.config = default_settings 
+        end 
     end
 
     local title = settings.config.rbuilder.appname.value.." ("..settings.config.rbuilder.version.value..")"
@@ -179,6 +183,8 @@ settings.save = function( projectpath )
     if(fh) then 
         fh:write( json.encode(settings.config) )
         fh:close()
+    else 
+        logging.error("settings.save - Failed to save config: "..tostring(projectpath))
     end
 end
 
