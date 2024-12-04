@@ -23,6 +23,35 @@ local logging   = require("utils.logging")
 local panel     = {
     config          = nil,
     current_path    = ".",
+
+    build           = {
+        mode    = nil,
+        active  = 0,
+        progress = ffi.new("size_t[1]", { 0 } ),
+        status  = "",
+        handler = nil, 
+        ui_func = function(ctx, dim, build) 
+
+            nk.nk_layout_row_dynamic(ctx, dim.h-20, 1)
+
+            local flags = bit.bor(nk.NK_WINDOW_BORDER, nk.NK_WINDOW_TITLE)
+            flags = bit.bor(flags, nk.NK_WINDOW_NO_SCROLLBAR)
+            if (nk.nk_group_begin(ctx, "Building...", flags) == true) then
+            
+                nk.nk_layout_row_dynamic(ctx, dim.h-dim.h/2 - 50, 1)
+                nk.nk_layout_row_dynamic(ctx, 25, 1)
+                nk.nk_label(ctx, "Please wait. Build mode: "..build.mode, nk.NK_TEXT_CENTERED)
+                nk.nk_layout_row_dynamic(ctx, 25, 1)
+                nk.nk_progress(ctx, build.progress, 1000, nk.NK_FIXED)
+                nk.nk_group_end(ctx)  
+            end
+
+            if(build.handler) then build.handler(ctx, build) end
+
+            if(build.active == 0) then nk.nk_popup_close(ctx) end
+            return build.active
+        end,
+    }
 }
 
 -- --------------------------------------------------------------------------------------
@@ -281,6 +310,11 @@ local project_tabs = {
     }, 
     { 
         name = "Logs",
+        func = function(ctx)
+            local bounds = nk.nk_window_get_content_region(ctx)
+            nk.nk_layout_row_dynamic(ctx, bounds.h, 1)
+            wdgts.widget_list(ctx, "Logs", nk.NK_WINDOW_BORDER, logging.loglines)
+        end,
     } 
 }
 -- --------------------------------------------------------------------------------------
@@ -294,13 +328,13 @@ local function project_panel(ctx)
     -- display_section(ctx, "audio")
 
     nk.nk_layout_row_dynamic(ctx, 25, 2)
-    local add_folder = false
     if (nk.nk_button_label(ctx, "Build Release") == true) then
-        add_folder = true
+        panel.build.mode = "release"
+        panel.build.active = 1
     end
-    local add_file = false
     if (nk.nk_button_label(ctx, "Clean All") == true) then
-        add_file = true
+        panel.build.mode = "clean"
+        panel.build.active = 1
     end    
 
     -- Awesome little radial popup.
@@ -379,9 +413,10 @@ panel.main_ui = function(ctx)
 
     wdgts.widget_panel_fixed(ctx, "WinMain", 0, 0, sapp.sapp_width(), sapp.sapp_height(), 0, function(data)
 
-        folder_select.popup_active = wdgts.widget_popup_panel(ctx, "popup", folder_select.popup_dim, folder_select.ui_func, folder_select, folder_select.popup_active)
-        file_select.popup_active = wdgts.widget_popup_panel(ctx, "popup", file_select.popup_dim, file_select.ui_func, file_select, file_select.popup_active)
-        recent_files.popup_active = wdgts.widget_popup_panel(ctx, "popup", recent_files.popup_dim, recent_files.ui_func, recent_files, recent_files.popup_active)
+        panel.build.active = wdgts.widget_popup_panel(ctx, "popup_build", folder_select.popup_dim, panel.build.ui_func, panel.build, panel.build.active)
+        folder_select.popup_active = wdgts.widget_popup_panel(ctx, "popup_folder", folder_select.popup_dim, folder_select.ui_func, folder_select, folder_select.popup_active)
+        file_select.popup_active = wdgts.widget_popup_panel(ctx, "popup_fileselect", file_select.popup_dim, file_select.ui_func, file_select, file_select.popup_active)
+        recent_files.popup_active = wdgts.widget_popup_panel(ctx, "popup_recentfiles", recent_files.popup_dim, recent_files.ui_func, recent_files, recent_files.popup_active)
 
         -- /* menubar */
         local menu_states = { MENU_DEFAULT = 0, MENU_WINDOWS = 1}
@@ -464,24 +499,20 @@ panel.main_ui = function(ctx)
         local height = sapp.sapp_height()
         nk.nk_layout_row_dynamic(ctx, height-20, 2)
 
-        -- wdgts.widget_panel_fixed(ctx, "Project", 10, 10, width, height, flags, function(data)
         if (nk.nk_group_begin(ctx, "Settings", flags) == true) then
 
             local padding = ctx[0].style.window.padding
             ctx[0].style.window.padding = nk.nk_vec2(10,10)
     
             project_panel(data.ctx)
-        -- end, {ctx=ctx})
             nk.nk_group_end(ctx)
         end
 
         nk.nk_style_set_font(ctx, myfonts[4].handle)
 
-        -- wdgts.widget_panel_fixed(ctx, "Assets", 10+width+10, 10, width, height, flags, function(data)
         if (nk.nk_group_begin(ctx, "Assets", flags) == true) then           
     
             assets_panel(data.ctx)
-        -- end, {ctx=ctx})
         nk.nk_group_end(ctx)
         end
 
@@ -566,6 +597,7 @@ end
 panel.cleanup = function()
 
     settings.save_recents()
+    logging.cleanup()
 end
 
 -- --------------------------------------------------------------------------------------

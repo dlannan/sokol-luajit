@@ -241,6 +241,19 @@ end
 
 --------------------------------------------------------------------------------
 
+widgets.widget_list = function(ctx, title, flags, items)
+
+    if (nk.nk_group_begin(ctx, title, flags) == true) then
+        nk.nk_layout_row_dynamic(ctx, 22, 1);
+        for i, item in ipairs(items) do
+            nk.nk_label(ctx, item, nk.NK_TEXT_LEFT)
+        end
+        nk.nk_group_end(ctx)
+    end
+end
+
+--------------------------------------------------------------------------------
+
 widgets.widget_list_selectable = function(ctx, title, flags, items, width)
 
     if (nk.nk_group_begin(ctx, title, flags) == true) then

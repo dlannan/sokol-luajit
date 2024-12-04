@@ -28,6 +28,23 @@ ffi.cdef[[
 ]]
 
 -- --------------------------------------------------------------------------------------
+local ticker = nil
+
+function default_handler(ctx, build)
+    ticker = (ticker or 0) + 0.016
+    if(ticker > 0.01) then 
+        build.progress[0] = build.progress[0] + 1
+        ticker = ticker - 0.01 
+    end
+    if(panel.build.progress[0] >= 999) then 
+        ticker = nil
+        build.progress[0] = 0.0 
+        build.active = 0 
+        build.mode = nil
+    end 
+end
+
+-- --------------------------------------------------------------------------------------
 
 local function init(void)
     -- // setup sokol-gfx, sokol-time and sokol-imgui
@@ -46,6 +63,7 @@ local function init(void)
     sapp.sapp_show_mouse(false)
 
     panel.init()
+    panel.build.handler = default_handler
     sapp.sapp_set_window_title(panel.config.rbuilder.title.value)
 end
 
