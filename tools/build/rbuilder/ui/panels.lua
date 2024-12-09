@@ -20,38 +20,17 @@ local icons     = ffi.new("struct nk_image [?]", 10)
 local themes    = require("lua.themes")
 local logging   = require("utils.logging")
 
+local build     = require("ui.panels_build")
+local assets    = require("ui.panels_assets")
+
+-- --------------------------------------------------------------------------------------
+
 local panel     = {
     config          = nil,
     current_path    = ".",
 
-    build           = {
-        mode    = nil,
-        active  = 0,
-        progress = ffi.new("size_t[1]", { 0 } ),
-        status  = "",
-        handler = nil, 
-        ui_func = function(ctx, dim, build) 
-
-            nk.nk_layout_row_dynamic(ctx, dim.h-20, 1)
-
-            local flags = bit.bor(nk.NK_WINDOW_BORDER, nk.NK_WINDOW_TITLE)
-            flags = bit.bor(flags, nk.NK_WINDOW_NO_SCROLLBAR)
-            if (nk.nk_group_begin(ctx, "Building...", flags) == true) then
-            
-                nk.nk_layout_row_dynamic(ctx, dim.h-dim.h/2 - 50, 1)
-                nk.nk_layout_row_dynamic(ctx, 25, 1)
-                nk.nk_label(ctx, "Please wait. Build mode: "..build.mode, nk.NK_TEXT_CENTERED)
-                nk.nk_layout_row_dynamic(ctx, 25, 1)
-                nk.nk_progress(ctx, build.progress, 1000, nk.NK_FIXED)
-                nk.nk_group_end(ctx)  
-            end
-
-            if(build.handler) then build.handler(ctx, build) end
-
-            if(build.active == 0) then nk.nk_popup_close(ctx) end
-            return build.active
-        end,
-    }
+    build           = build,
+    assets          = assets,
 }
 
 -- --------------------------------------------------------------------------------------
@@ -77,45 +56,6 @@ local file_select = nil
 local recent_files = nil
 
 -- --------------------------------------------------------------------------------------
-local curr_tab          = 1
-
-local tabs = { 
-    { 
-        name = "Lua Source",
-        func = function(ctx) 
-            
-            local bounds = nk.nk_window_get_content_region(ctx)
-            nk.nk_layout_row_dynamic(ctx, bounds.h, 1)
-            local files = panel.config.assets.lua 
-            wdgts.widget_list_removeable(ctx, "source_files", nk.NK_WINDOW_BORDER, files, bounds.w -40 )
-        end,
-        asset_name = "lua",
-    }, 
-    { 
-        name = "Images",
-        func = function(ctx) 
-            
-            local bounds = nk.nk_window_get_content_region(ctx)
-            nk.nk_layout_row_dynamic(ctx, bounds.h, 1)
-            local files = panel.config.assets.images 
-            wdgts.widget_list_removeable(ctx, "source_files", nk.NK_WINDOW_BORDER, files, bounds.w -40 )
-        end,
-        asset_name = "images",
-    }, 
-    { 
-        name = "Data",
-        func = function(ctx) 
-            
-            local bounds = nk.nk_window_get_content_region(ctx)
-            nk.nk_layout_row_dynamic(ctx, bounds.h, 1)
-            local files = panel.config.assets.data
-            wdgts.widget_list_removeable(ctx, "source_files", nk.NK_WINDOW_BORDER, files, bounds.w -40 )
-        end,
-        asset_name = "data",
-    } 
-}
-
--- --------------------------------------------------------------------------------------
 -- Extract config and build ffi objects for them 
 --   Each config property shall have a shadow ffi property labeled with _ffi
 
@@ -132,6 +72,8 @@ local function setup_config()
                 prop.len_ffi = ffi.new("int[1]", {string.len(prop.value)})
             elseif(prop.ptype == "combo") then
                 prop.ffi = ffi.new("int[1]", prop.value)
+            elseif(prop.ptype == "check") then
+                prop.ffi = ffi.new("bool[1]", prop.value)
             elseif(prop.ptype == "int") then
                 prop.ffi = ffi.new("int[1]", prop.value)
             elseif(prop.ptype == "float") then
@@ -149,6 +91,13 @@ local function setup_config()
             end
         end
     end
+
+    assets.config = panel.config
+    assets.folder_select = folder_select
+    assets.file_select = file_select
+    build.config = panel.config
+    build.folder_select = folder_select
+    build.file_select = file_select
 end 
 
 -- --------------------------------------------------------------------------------------
@@ -197,189 +146,6 @@ panel.init = function()
 end
 
 -- --------------------------------------------------------------------------------------
--- Attempts to find sokol in nearby folders (up max 4 directories from builder)
---    Sets all the sokol properties if it does find it
-local function search_sokol(ctx)
-
-    local r = nk.nk_window_get_content_region(ctx)
-
-    nk.nk_layout_space_begin(ctx, nk.NK_STATIC, 27, 1)
-    nk.nk_layout_space_push(ctx, nk.nk_rect(r.w-40, -195, 27, 27))
-
-
-    nk.nk_style_set_font(ctx, myfonts[1].handle)
-    if(nk.nk_button_label(ctx, "") == true) then
-        -- do search stuff
-        local found = dirtools.find_folder(".", 5, "sokol-luajit")
-        if(found) then 
-            logging.info(string.format("Found Sokol-luajit: %s",found))
-            logging.info("Auto filling sokol paths...")
-            panel.config["sokol"].sokol_path.value = found 
-            panel.config["sokol"].sokol_bin.value = dirtools.combine_path(found, "bin")
-            panel.config["sokol"].sokol_ffi.value = dirtools.combine_path(found, "ffi")
-            panel.config["sokol"].sokol_lua.value = dirtools.combine_path(found, "lua")
-            panel.config["sokol"].sokol_examples.value = dirtools.combine_path(found, "examples")
-            setup_config()
-        end
-    end
-    nk.nk_style_set_font(ctx, myfonts[3].handle)
-    nk.nk_layout_space_end(ctx)
-end
-
--- --------------------------------------------------------------------------------------
-
-local function display_section(ctx, sectionname)
-
-    local section = panel.config[sectionname]
-    -- Collect the number of properties in the section
-    local count = 0
-    local sorted = {}
-    for k,v in pairs(section) do
-        count = count + 1
-        v.key = k
-        sorted[v.index] = v
-    end
-
-    nk.nk_layout_row_dynamic(ctx, 28 * count + 60, 1)
-    local bounds = nk.nk_window_get_content_region(ctx)
-    local prop_col = bounds.w * 0.23
-    local value_col = bounds.w * 0.73
-
-    local flags = bit.bor(nk.NK_WINDOW_BORDER, nk.NK_WINDOW_TITLE)
-    flags = bit.bor(flags, nk.NK_WINDOW_NO_SCROLLBAR)
-    if (nk.nk_group_begin(ctx, sectionname, flags) == true) then
-    
-        for k,v in ipairs(sorted) do
-            nk.nk_layout_row_begin(ctx, nk.NK_STATIC, 28, 3)
-            nk.nk_layout_row_push(ctx, prop_col)
-            nk.nk_label(ctx, v.key..":", nk.NK_TEXT_LEFT)
-            if(v.ptype == "string" or v.ptype == nil) then
-                nk.nk_layout_row_push(ctx, value_col)
-                nk.nk_edit_string(ctx, nk.NK_EDIT_SIMPLE, v.ffi, v.len_ffi, v.slen, nk.nk_filter_default)
-            elseif(v.ptype == "path") then
-                nk.nk_layout_row_push(ctx, value_col - 34)
-                nk.nk_edit_string(ctx, nk.NK_EDIT_SIMPLE, v.ffi, v.len_ffi, v.slen, nk.nk_filter_default)
-                nk.nk_style_set_font(ctx, myfonts[1].handle)
-                nk.nk_layout_row_push(ctx, 30)               
-                if(nk.nk_button_label(ctx, "") == true) then 
-                    fsel.open(folder_select, v.value, v)
-                end
-                nk.nk_style_set_font(ctx, myfonts[3].handle)
-            elseif(v.ptype == "file") then
-                nk.nk_layout_row_push(ctx, value_col - 34)
-                nk.nk_edit_string(ctx, nk.NK_EDIT_SIMPLE, v.ffi, v.len_ffi, v.slen, nk.nk_filter_default)
-                nk.nk_style_set_font(ctx, myfonts[1].handle)
-                nk.nk_layout_row_push(ctx, 30)
-                if(nk.nk_button_label(ctx, "") == true) then 
-                    fsel.open(file_select, v.value, v)
-                end
-                nk.nk_style_set_font(ctx, myfonts[3].handle)
-            elseif(v.ptype == "combo") then 
-                nk.nk_layout_row_push(ctx, value_col)
-                v.value = wdgts.widget_combo_box(ctx, v.plist, v.value, 200)
-            elseif(v.ptype == "int") then
-                nk.nk_layout_row_push(ctx, value_col)
-                nk.nk_property_int(ctx, "", v.vmin, v.ffi, v.vmax, v.vstep, v.vinc)
-            elseif(v.ptype == "float") then
-                nk.nk_layout_row_push(ctx, value_col)
-                nk.nk_property_float(ctx, "", v.vmin, v.ffi, v.vmax, v.vstep, v.vinc)
-            end
-            nk.nk_layout_row_end(ctx)
-        end
-        nk.nk_group_end(ctx)
-    end
-end
-
--- --------------------------------------------------------------------------------------
-
-local project_curr_tab = 1
-local project_tabs = { 
-    { 
-        name = "Settings",
-        func = function(ctx) 
-            display_section(ctx, "project") 
-            display_section(ctx, "sokol")
-            search_sokol(ctx)
-        end,
-    }, 
-    { 
-        name = "Build",
-        func = function(ctx) 
-            display_section(ctx, "platform") 
-        end,
-    }, 
-    { 
-        name = "Logs",
-        func = function(ctx)
-            local bounds = nk.nk_window_get_content_region(ctx)
-            nk.nk_layout_row_dynamic(ctx, bounds.h, 1)
-            wdgts.widget_list(ctx, "Logs", nk.NK_WINDOW_BORDER, logging.loglines)
-        end,
-    } 
-}
--- --------------------------------------------------------------------------------------
-
-local function project_panel(ctx)
-
-    nk.nk_style_set_font(ctx, myfonts[3].handle)
-
-    project_curr_tab = wdgts.widget_notebook(ctx, "assets", project_tabs, project_curr_tab, 500, 120)
-    -- display_section(ctx, "graphics")
-    -- display_section(ctx, "audio")
-
-    nk.nk_layout_row_dynamic(ctx, 25, 2)
-    if (nk.nk_button_label(ctx, "Build Release") == true) then
-        panel.build.mode = "release"
-        panel.build.active = 1
-    end
-    if (nk.nk_button_label(ctx, "Clean All") == true) then
-        panel.build.mode = "clean"
-        panel.build.active = 1
-    end    
-
-    -- Awesome little radial popup.
-    local res = wdgts.make_pie_popup(ctx, icons, 100, 6)
-end
-
-
--- --------------------------------------------------------------------------------------
-
-local function assets_panel(ctx)
-
-    nk.nk_style_set_font(ctx, myfonts[3].handle)
-    curr_tab, named_tab = wdgts.widget_notebook(ctx, "assets", tabs, curr_tab, 500, 120)
-
-    nk.nk_layout_row_dynamic(ctx, 25, 2)
-    if (nk.nk_button_label(ctx, "Add Folder") == true) then
-        fsel.open(folder_select, ".", nil, function(udata, res)
-            print(udata.folder_path, named_tab, res)
-            if(res == true) then
-                local tabinfo = tabs[curr_tab]
-                local newfolder = {
-                    name=ffi.string(udata.folder_path),
-                    select = ffi.new("bool[1]", {0})
-                }
-                table.insert(panel.config.assets[tabinfo.asset_name], newfolder)
-            end 
-        end)
-    end
-
-    if (nk.nk_button_label(ctx, "Add File") == true) then
-        fsel.open(file_select, ".", nil, function(udata, res)
-            if(res == true) then
-                local tabinfo = tabs[curr_tab]
-                local newfile = {
-                    name=ffi.string(udata.file_selected),
-                    select = ffi.new("bool[1]", {0})
-                }
-                table.insert(panel.config.assets[tabinfo.asset_name], newfile)
-            end 
-        end)
-    end    
-
-end
-
--- --------------------------------------------------------------------------------------
 
 panel.show_recents = function(ctx)
 
@@ -409,6 +175,9 @@ panel.main_ui = function(ctx)
         myfonts = fonts.setup_font(ctx, font_list)
         wdgts.myfonts = myfonts
         themes.tech(ctx)
+
+        assets.font = myfonts 
+        build.font = myfonts
     end
 
     wdgts.widget_panel_fixed(ctx, "WinMain", 0, 0, sapp.sapp_width(), sapp.sapp_height(), 0, function(data)
@@ -504,7 +273,8 @@ panel.main_ui = function(ctx)
             local padding = ctx[0].style.window.padding
             ctx[0].style.window.padding = nk.nk_vec2(10,10)
     
-            project_panel(data.ctx)
+            build.panel(data.ctx)
+            if(build.run_config) then setup_config() end
             nk.nk_group_end(ctx)
         end
 
@@ -512,7 +282,7 @@ panel.main_ui = function(ctx)
 
         if (nk.nk_group_begin(ctx, "Assets", flags) == true) then           
     
-            assets_panel(data.ctx)
+            assets.panel(data.ctx)
         nk.nk_group_end(ctx)
         end
 

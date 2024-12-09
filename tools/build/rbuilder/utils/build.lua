@@ -2,6 +2,19 @@
 
 -- Use ffi for arch and os detection
 local ffi = require("ffi")
+local logging   = require("utils.logging")
+local combine   = require("utils.combine")
+
+local dirtools = require("tools.dirtools")
+local base_path = dirtools.get_app_path("sokol%-luajit")
+
+local tinsert   = table.insert
+
+-- ----------------------------------------------------------------------------------
+
+local luajit_builder = {
+
+}
 
 -- ----------------------------------------------------------------------------------
 local function run_cmd(command) 
@@ -11,67 +24,105 @@ local function run_cmd(command)
         local output = fh:read("*a")
         fh:close()
         io.write(output)
-        print("[Success]")
+        logging.info("Success")
     else 
-        print("[Error] Cannot execute command: "..command)
+        logging.error("Cannot execute command: "..command)
     end
 end
 
 -- ----------------------------------------------------------------------------------
 -- srlua and glue for each os
-local plaform_cmds = {
-    ["Windows"] = { 
-        srlua = ".\\tools\\srlua\\win64\\srlua.exe", 
-        glue = ".\\tools\\srlua\\win64\\glue.exe", 
+
+local plaform_cmds = {}
+
+luajit_builder.configure = function(config)
+
+    plaform_cmds["Windows"] = { 
+        build_path = config["sokol"].sokol_path.value.."\\tools\\build\\",
+        srlua = config["sokol"].sokol_path.value.."\\tools\\build\\srlua\\bin\\win64\\srlua.exe", 
+        glue = config["sokol"].sokol_path.value.."\\tools\\build\\srlua\\bin\\win64\\glue.exe", 
         ext = ".exe", 
         sep = "\\",
-        luajit = ".\\bin\\win64\\luajit.exe",
-        src_dll = ".\\bin\\win64\\*.dll",
+        luajit = config["sokol"].sokol_bin.value.."\\win64\\luajit.exe",
+        src_dll = config["sokol"].sokol_bin.value.."\\win64\\*.dll",
         src_cfg = ".\\config",
-    },
-    ["OSX"]     = { 
-        srlua = "./tools/srlua/macos/srlua", 
-        glue = "./tools/srlua/macos/glue", 
+    }
+    plaform_cmds["OSX"]     = { 
+        build_path = config["sokol"].sokol_path.value.."/tools/build/",
+        srlua = config["sokol"].sokol_path.value.."/tools/build/srlua/bin/macos/srlua", 
+        glue = config["sokol"].sokol_path.value.."/tools/build/srlua/bin/macos/glue", 
         ext = "", 
         sep = "/",
-        luajit = "./bin/macos/luajit",
-        src_dll = "./bin/macos/*.dylib",
+        luajit = config["sokol"].sokol_bin.value.."/macos/luajit",
+        src_dll = config["sokol"].sokol_bin.value.."/macos/*.dylib",
         src_cfg = "./config",
-    },
-    ["Linux"]   = { 
-        srlua = "./tools/srlua/linux/srlua", 
-        glue = "./tools/srlua/linux/glue", 
+    }
+    plaform_cmds["Linux"]   = { 
+        build_path = config["sokol"].sokol_path.value.."/tools/build/",
+        srlua = config["sokol"].sokol_path.value.."/tools/build/srlua/bin/linux/srlua", 
+        glue = config["sokol"].sokol_path.value.."/tools/build/srlua/bin/linux/glue", 
         ext = "", 
         sep = "/",
-        luajit = "./bin/linux/luajit",
-        src_dll = "./bin/linux/*.so",
+        luajit = config["sokol"].sokol_bin.value.."/linux/luajit",
+        src_dll = config["sokol"].sokol_bin.value.."/linux/*.so",
         src_cfg = "./config",
-    },
-}
+    }
+end
 
-local cmds = plaform_cmds[ffi.os]
-local outputfolder = "."..cmds.sep.."tools"..cmds.sep.."bin"..cmds.sep..string.lower(ffi.os)..cmds.sep
-local outputexe = "minikeybd_"..ffi.os..cmds.ext
+-- --------------------------------------------------------------------------------------
 
--- Have to build a bytecode "chunk" first.
-local buildchunk = cmds.luajit.." ."..cmds.sep.."tools"..cmds.sep.."combine.lua "
-buildchunk = buildchunk.."."..cmds.sep.."lua"..cmds.sep.."minikeybd.lua -L "
-buildchunk = buildchunk.."."..cmds.sep.."ffi"..cmds.sep.."hidwin.lua "
-buildchunk = buildchunk.."."..cmds.sep.."ffi"..cmds.sep.."lusb.lua "
-buildchunk = buildchunk.."."..cmds.sep.."lua"..cmds.sep.."mapcodes.lua "
-buildchunk = buildchunk.."."..cmds.sep.."lua"..cmds.sep.."wchar_win.lua "
-run_cmd(buildchunk)
+luajit_builder.run = function( config )
 
--- Build the exe
-local command = cmds.glue.." "..cmds.srlua.." luac.out "..outputfolder..outputexe
-run_cmd(command)
+    local cmds = plaform_cmds[ffi.os]
+    local outputfolder = config["project"].build_path.value..cmds.sep..string.lower(ffi.os)..cmds.sep
+    local outputexe = config["project"].project_name.value..cmds.ext
 
-local copycmd = "cp -rf "..cmds.src_dll.." "..outputfolder
-if(ffi.os == "Windows") then copycmd = "xcopy /C /I /Y "..cmds.src_dll.." "..outputfolder end
--- Copy in the dlls/dylib/sos 
-run_cmd(copycmd)
+    -- Add the startup file
+    local startfiles = { config["project"].project_start.value }
 
--- Copy in config folder
-local copyconfig = "cp -rf "..cmds.src_cfg.." "..outputfolder..cmds.sep.."config"
-if(ffi.os == "Windows") then copyconfig = "xcopy /S /E /C /I /Y "..cmds.src_cfg.." "..outputfolder.."config" end
-run_cmd(copyconfig)
+    -- Iterate Lua source to add 
+    local libfiles = {}
+    for i,v in ipairs(config["assets"].lua) do 
+        if(v.folder) then 
+
+        else
+            local rpath = dirtools.get_relative_path(v.name, config["sokol"].sokol_path.value)
+            if(rpath == nil) then rpath = v.name end
+            tinsert(libfiles, { name = rpath, fullpath = v.name })
+        end
+    end
+    local combine_out = outputfolder.."combine.out"
+    combine.run( combine_out, startfiles, libfiles)
+
+    -- Build the exe
+    local command = cmds.glue.." "..cmds.srlua.." "..combine_out.." "..outputfolder..outputexe
+    run_cmd(command)
+
+    local copycmd = "cp -rf "..cmds.src_dll.." "..outputfolder
+    if(ffi.os == "Windows") then copycmd = "xcopy /C /I /Y "..cmds.src_dll.." "..outputfolder end
+    -- Copy in the dlls/dylib/sos 
+    run_cmd(copycmd)
+
+    -- -- Copy in image files
+    -- local copyimages = "cp -rf "..cmds.src_cfg.." "..outputfolder..cmds.sep.."config"
+    -- if(ffi.os == "Windows") then copyimages = "xcopy /S /E /C /I /Y "..cmds.src_cfg.." "..outputfolder.."config" end
+
+    -- -- Iterate Lua source to add 
+    -- for i,v in ipairs(config["assets"].lua) do 
+    --     if(v.folder) then 
+
+    --     else
+    --         buildchunk = buildchunk..v.name.." "
+    --         run_cmd(copyimages)
+    --     end
+    -- end
+
+    -- Copy in data files
+
+end
+
+-- --------------------------------------------------------------------------------------
+
+return luajit_builder
+
+-- --------------------------------------------------------------------------------------

@@ -59,19 +59,19 @@ local colors = {
     oxford_blue = make_nk_color(0xff0b132b),
     space_cadet = make_nk_color(0xff1c2541),
     yinmin_blue = make_nk_color(0xff3a506b),
-    vedigris    = make_nk_color(0xff5bc0be),
+    vedigris    = nk.nk_rgba_hex("5bc0be"),
     white       = make_nk_color(0xffffffff),
 
     gunmetal    = make_nk_color(0xff253237),
     paynes_dark = make_nk_color(0xff2c3b43),
     paynes_gray = make_nk_color(0xff5c6b73),
     cadet_gray  = make_nk_color(0xff6d94a0),
-    light_blue  = make_nk_color(0xff627f93),
+    light_blue  = nk.nk_rgba_hex("ADD8E6"),
     light_cyan  = make_nk_color(0xffc0dbdc),
 
     techalpha   = make_nk_color(0x00177772),
     techbg1     = make_nk_color(0xff177772),
-    techbg2     = make_nk_color(0xff29f9e5),
+    techbg2     = nk.nk_rgba_hex("29f9e5"),
     techfg1     = make_nk_color(0x800c3d46),
     tech_black  = make_nk_color(0xff000000),
 
@@ -180,9 +180,9 @@ local themes = {
     color_tbl[indexes.NK_COLOR_BUTTON_HOVER] = colors.tech_primary[3]      -- button hover color
     color_tbl[indexes.NK_COLOR_BUTTON_ACTIVE] = colors.tech_primary[4]      -- button active color
 
-    color_tbl[indexes.NK_COLOR_TOGGLE] = colors.tech_primary[6]      -- toggle color
-    color_tbl[indexes.NK_COLOR_TOGGLE_HOVER] = colors.tech_primary[5]      -- toggle hover color
-    color_tbl[indexes.NK_COLOR_TOGGLE_CURSOR] = colors.tech_primary[4]       -- toggle active color
+    color_tbl[indexes.NK_COLOR_TOGGLE] = colors.white --tech_primary[6]      -- toggle color
+    color_tbl[indexes.NK_COLOR_TOGGLE_HOVER] =  colors.vedigris     -- toggle hover color
+    --color_tbl[indexes.NK_COLOR_TOGGLE_CURSOR] = colors.tech_primary[4]       -- toggle active color
 
     color_tbl[indexes.NK_COLOR_SELECT] = colors.tech_primary[2]                -- select color
     color_tbl[indexes.NK_COLOR_SELECT_ACTIVE] = colors.tech_mixed[1]        -- select active color

@@ -46,27 +46,43 @@ end
 
 ---------------------------------------------------------------------------------------
 
-
 dirtools.get_drives = function()
-    local cmd = "wmic logicaldisk get name"
-    -- Note: Add more -t <filetype> to support different file system mounts
-    if(ffi.os ~= "Windows") then cmd = "df -h -t ext4 --output=target" end
 
     local drives = {}
-    local fh = io.popen(cmd, "r")
-    if(fh) then 
-        local data = fh:read("*a")
-        local count = 0
-        for f in string.gmatch(data, "(.-)\n") do 
-            f = string.gsub(f, "%s+", "")
-            if(count > 0) then 
-                if(#f > 0) then
+    if(ffi.os == "Windows") then 
+
+        local cmd = "fsutil fsinfo drives"
+        local fh = io.popen(cmd, "r")
+        if(fh) then 
+            local data = fh:read("*a")
+            fh:close() 
+            if(string.match(data, "Drives: ")) then 
+                data = string.sub(data, 10, -1)
+                for f in string.gmatch(data, "([^%s]+)") do 
+                    f = string.sub(f, 1, -2)
                     tinsert(drives, f)
                 end
-            end 
-            count = count + 1
+            end
         end
-        fh:close()
+    else 
+        -- Note: Add more -t <filetype> to support different file system mounts
+        local cmd = "df -h -t ext4 --output=target" 
+
+        local fh = io.popen(cmd, "r")
+        if(fh) then 
+            local data = fh:read("*a")
+            local count = 0
+            for f in string.gmatch(data, "(.-)\n") do 
+                f = string.gsub(f, "%s+", "")
+                if(count > 0) then 
+                    if(#f > 0) then
+                        tinsert(drives, f)
+                    end
+                end 
+                count = count + 1
+            end
+            fh:close()
+        end
     end
     return drives
 end
@@ -111,6 +127,18 @@ else
         end
         return false
     end
+end
+
+---------------------------------------------------------------------------------------
+
+dirtools.get_relative_path = function( fullpath, parent_path )
+
+    local rpath = nil 
+    local str_st, str_end = string.find( fullpath, parent_path, 1, true )
+    if(str_st and str_end) then 
+        rpath = string.sub(fullpath, str_end+2, -1)        
+    end
+    return rpath
 end
 
 ---------------------------------------------------------------------------------------

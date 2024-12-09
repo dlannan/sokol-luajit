@@ -16,11 +16,12 @@ local settings = {
 
 -- Default settings if none are loaded or found
 local platforms = { "Win64", "MacOS", "Linux", "IOS64" }
+local buildtypes = { "Release", "Debug", "Release Remotery", "Debug Remotery" }
 local resolutions = { "1920x1080", "1680x1050", "1600x900", "1440x900", "1376x768" }
 local arch = { "x86", "x64", "arm", "arm64", "arm64be", "ppc", "mips", "mipsel", "mips64", "mips64el", "mips64r6", "mips64r6el" }
 local oss = { "Windows", "Linux", "OSX", "BSD", "POSIX", "Other" }
 
-local default_settings = {
+settings.default_settings = {
 
     rbuilder = {
         appname         = { index = 1, value = "rbuild", slen = 7 },
@@ -32,6 +33,12 @@ local default_settings = {
         srlua_path      = { index = 2, value = "../srlua/", ptype = "path", slen = 256 },     -- initially rbuild will run for the tools/build/rbuilder folder
         arch            = { index = 3, value = 2, ptype = "combo", plist = arch },
         os              = { index = 4, value = 1, ptype = "combo", plist = oss },
+    },
+
+    options = {
+        build_type      = { index = 1, value = 1, ptype = "combo", plist = buildtypes },
+        build_relative  = { index = 2, value = false, ptype = "check" },
+        build_bytecode  = { index = 3, value = true, ptype = "check" },
     },
 
     project = {
@@ -157,13 +164,13 @@ settings.load = function( projectpath )
 
     if( projectpath == nil ) then 
         logging.info("settings.load projectpath nil, using default settings.")
-        settings.config = default_settings
+        settings.config = settings.default_settings
     else
         -- Load the project settings into the local config
         settings.config = loadconfig(projectpath)
         if(settings.config == nil) then 
             logging.error("settings.load invalid projectpath nil, using default settings.")
-            settings.config = default_settings 
+            settings.config = settings.default_settings 
         end 
     end
 

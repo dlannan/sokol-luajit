@@ -19,11 +19,7 @@
 
 -- ---------------------------------------------------------------------------------------------------
 
-local NAME="luac"
-local OUTPUT=NAME..".out"
-
-local n=#arg
-local m=n
+local combine = {}
 
 -- ---------------------------------------------------------------------------------------------------
 -- Load a chunk manually so we can name it
@@ -38,37 +34,39 @@ local function loader(filepath)
 end
 
 -- ---------------------------------------------------------------------------------------------------
--- Process args
-for i=1,n do
-	if arg[i]=="-L" then m=i-1 break end
+
+combine.run =  function(tempfile, startup_files, lib_files)
+
+  local outfile=tempfile
+
+  -- Iterate libs to prepend them to the chunk list
+  local ts = {}
+  table.insert(ts, 1, "local t=package.preload;")
+
+  for k,v in ipairs(lib_files) do
+    local modulename = string.gsub(v.name, "^%.[/\\]", "")
+    modulename = string.gsub(modulename, "[/\\]", "%.")
+    modulename = string.gsub(modulename, "%.lua", "")
+
+    local loaded_chunk = assert(load( loader(v.fullpath),modulename ))
+    table.insert(ts, ("t['%s']=load(%q);"):format(modulename, string.dump(loaded_chunk)) )
+  end
+
+  -- Add core scripts that will be executed
+  for k,v in ipairs(startup_files) do
+    table.insert(ts, ("load(%q)(...);"):format(string.dump(assert(loadfile(v)))) )
+  end
+
+  -- Assemble chunks into one file to dump. 
+  local chunks = assert(load(table.concat(ts)))
+  local f=assert(io.open(outfile,"wb"))
+  local data = string.dump(chunks)
+  f:write(data)
+  assert(f:close())
 end
 
 -- ---------------------------------------------------------------------------------------------------
--- Iterate libs to prepend them to the chunk list
-local ts = {}
-table.insert(ts, 1, "local t=package.preload;")
 
-for i=m+2,n do
-  local modulename = string.gsub(arg[i], "^%.[/\\]", "")
-  modulename = string.gsub(modulename, "[/\\]", "%.")
-  modulename = string.gsub(modulename, "%.lua", "")
-  
-  local loaded_chunk = assert(load( loader(arg[i]),modulename ))
-  table.insert(ts, ("t['%s']=load(%q);"):format(modulename, string.dump(loaded_chunk)) )
-end
-
--- ---------------------------------------------------------------------------------------------------
--- Add core scripts that will be executed
-for i=1,m do
-  table.insert(ts, ("load(%q)(...);"):format(string.dump(assert(loadfile(arg[i])))) )
-end
-
--- ---------------------------------------------------------------------------------------------------
--- Assemble chunks into one file to dump. 
-local chunks = assert(load(table.concat(ts)))
-local f=assert(io.open(OUTPUT,"wb"))
-local data = string.dump(chunks)
-f:write(data)
-assert(f:close())
+return combine 
 
 -- ---------------------------------------------------------------------------------------------------

@@ -20,6 +20,7 @@ local stb       = require("stb")
 local ffi       = require("ffi")
 
 local panel     = require("ui.panels")
+local builder   = require("utils.build")
 
 -- --------------------------------------------------------------------------------------
 -- For win - sleep so as to not consume all proc cycles for ui
@@ -31,17 +32,21 @@ ffi.cdef[[
 local ticker = nil
 
 function default_handler(ctx, build)
-    ticker = (ticker or 0) + 0.016
-    if(ticker > 0.01) then 
-        build.progress[0] = build.progress[0] + 1
-        ticker = ticker - 0.01 
-    end
-    if(panel.build.progress[0] >= 999) then 
-        ticker = nil
+
+    builder.configure(panel.config)
+    builder.run(panel.config)
+
+    -- ticker = (ticker or 0) + 0.016
+    -- if(ticker > 0.01) then 
+    --     build.progress[0] = build.progress[0] + 1
+    --     ticker = ticker - 0.01 
+    -- end
+    -- if(panel.build.progress[0] >= 999) then 
+        -- ticker = nil
         build.progress[0] = 0.0 
         build.active = 0 
         build.mode = nil
-    end 
+    -- end 
 end
 
 -- --------------------------------------------------------------------------------------
