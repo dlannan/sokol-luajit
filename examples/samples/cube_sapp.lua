@@ -185,11 +185,10 @@ app_desc[0].cleanup_cb  = cleanup
 app_desc[0].width       = 1920
 app_desc[0].height      = 1080
 app_desc[0].window_title = "Cube (sokol-app)"
+app_desc[0].fullscreen  = true
 app_desc[0].icon.sokol_default = true 
 app_desc[0].logger.func = slib.slog_func 
 
 sapp.sapp_run( app_desc )
 
 -- --------------------------------------------------------------------------------------
-
-print(utils.tdump(package))

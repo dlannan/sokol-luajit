@@ -140,27 +140,27 @@ sapp.sapp_run( app_desc )
 
 -- --------------------------------------------------------------------------------------
 
-local default_libs = {
-    ["os"] = true,
-    ["_G"] = true,
-    ["jit"] = true,
-    ["table"] = true, 
-    ["jit.opt"] = true,
-    ["ffi"] = true, 
-    ["string"] = true,
-    ["io"] = true, 
-    ["coroutine"] = true,
-    ["package"] = true,
-    ["math"] = true,
-    ["debug"] = true,
-    ["bit"] = true, 
-}
-for k,v in pairs(package.loaded) do 
+-- local default_libs = {
+--     ["os"] = true,
+--     ["_G"] = true,
+--     ["jit"] = true,
+--     ["table"] = true, 
+--     ["jit.opt"] = true,
+--     ["ffi"] = true, 
+--     ["string"] = true,
+--     ["io"] = true, 
+--     ["coroutine"] = true,
+--     ["package"] = true,
+--     ["math"] = true,
+--     ["debug"] = true,
+--     ["bit"] = true, 
+-- }
+-- for k,v in pairs(package.loaded) do 
 
-    if(type(v) ~= "userdata" and default_libs[tostring(k)] == nil) then
-        print( "["..tostring(k).."] = "..tostring(v)) 
-    end
-end
+--     if(type(v) ~= "userdata" and default_libs[tostring(k)] == nil) then
+--         print( "["..tostring(k).."] = "..tostring(v)) 
+--     end
+-- end
 
 -- --------------------------------------------------------------------------------------
 
