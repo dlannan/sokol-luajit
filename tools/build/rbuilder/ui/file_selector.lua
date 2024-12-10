@@ -124,20 +124,22 @@ file_selector.create_file_selector = function( name, rect, start_folder, folders
                     local bhit = wdgts.widget_list_buttons(ctx, "select_file", nil, files, dim.w -40 )
                     
                     if(bhit) then
+                        local isfolder = nil 
+
                         udata.hit = bhit 
                         if(bhit[2] == "..") then 
                             udata.folder_path = dirtools.get_parent(udata.folder_path)
                         else
-                            local isfolder = files[udata.hit[1]].folder ~= nil
+                            isfolder = files[udata.hit[1]].folder ~= nil
                             if(isfolder == true) then 
                                 udata.folder_path = dirtools.change_folder(udata.folder_path, udata.hit[2])
                             else 
-                                udata.file_selected  = dirtools.change_folder(udata.folder_path, udata.hit[2])
+                                udata.file_selected = dirtools.change_folder(udata.folder_path, udata.hit[2])
                             end
                         end
 
                         local full_path = udata.file_selected
-                        if(folders_only) then full_path = udata.folder_path end            
+                        if(isfolder == true) then full_path = udata.folder_path end            
                         ffi.copy(udata.prop.ffi, ffi.string(full_path))
                         udata.prop.len_ffi[0] = #full_path
                     end

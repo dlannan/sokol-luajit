@@ -5,8 +5,8 @@ local ffi 		= require("ffi")
 
 -- ---------------------------------------------------------------------------
 
-local struct    = require("struct")
-local tween 	= require("tween")
+local struct    = require("lua.struct")
+local tween 	= require("lua.tween")
 
 -- ---------------------------------------------------------------------------
 

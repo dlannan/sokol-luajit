@@ -181,7 +181,7 @@ widgets.widget_notebook = function(ctx, tab_name, flags, tabs, current_tab, heig
     ctx.style.window.spacing = nk.nk_vec2(0,0)
     local rounding = ctx.style.button.rounding
     ctx.style.button.rounding = 0
-    nk.nk_layout_row_begin(ctx, nk.NK_STATIC, 24, 3)
+    nk.nk_layout_row_begin(ctx, nk.NK_STATIC, 24, #tabs)
     for i, v in ipairs(tabs) do
         -- /* make sure button perfectly fits text */
         local f = ctx.style.font

@@ -20,13 +20,25 @@ dirtools.add_default_paths = function(path)
     }
 
     package.cpath   = package.cpath..";"..path.."bin/"..folders[ffi.os].."/?."..extensions[ffi.os]
+    package.cpath   = package.cpath..";".."?."..extensions[ffi.os]
     package.path    = package.path..";"..path.."/ffi/sokol/?.lua"
     package.path    = package.path..";"..path.."lua/?.lua"
     package.path    = package.path..";"..path.."/?.lua"
+    package.path    = package.path..";?.lua"
 end
 
 local sep = "\\"
 if(ffi.os ~= "Windows") then sep = "/" end
+
+---------------------------------------------------------------------------------------
+
+local function log_info( str )
+    print(string.format("[Info] %s", str))
+end
+
+local function log_error( str )
+    print(string.format("[Error] %s", str))
+end
 
 ---------------------------------------------------------------------------------------
 
@@ -131,6 +143,24 @@ end
 
 ---------------------------------------------------------------------------------------
 
+dirtools.make_folder = function(folderpath)
+
+    if(dirtools.is_folder(folderpath) == false) then 
+        local cmd = "mkdir -f "..folderpath
+        if(ffi.os == "Windows") then cmd = "mkdir "..folderpath end
+        local fh = io.popen(cmd, "r")
+        if(fh) then 
+            local data = fh:read("*a")
+            fh:close() 
+            log_info(data)
+        else 
+            log_error("Cannot make folder: "..folderpath)
+        end
+    end
+end
+
+---------------------------------------------------------------------------------------
+
 dirtools.get_relative_path = function( fullpath, parent_path )
 
     local rpath = nil 
@@ -161,10 +191,14 @@ dirtools.get_app_path = function( expected_root_folder )
         remain = remain or ""
 
         remain = remain:gsub("%s+", "")
-        if(ffi.os == "Windows") then 
-            base_dir = last_folder.."\\"
+        if(string.len(last_folder) > 0) then             
+            if(ffi.os == "Windows") then 
+                base_dir = last_folder..sep
+            else 
+                base_dir = last_folder..sep
+            end
         else 
-            base_dir = last_folder.."/"
+            base_dir = "" 
         end
     end
     -- print("Base Directory: "..base_dir)
@@ -205,7 +239,7 @@ dirtools.get_folderslist = function(path, cache_update)
         res = fh:read("*a")
         fh:close()
     else 
-        print("[Error] dirtools.get_folderslist bad path: "..tostring(path))
+        log_error("dirtools.get_folderslist bad path: "..tostring(path))
         return files
     end
 
@@ -249,7 +283,7 @@ dirtools.get_dirlist = function(path, cache_update)
             return files        
         end
     else 
-        print("[Error] dirtools.get_dirlist bad path: "..tostring(path))
+        log_error("dirtools.get_dirlist bad path: "..tostring(path))
         return {}        
     end
 

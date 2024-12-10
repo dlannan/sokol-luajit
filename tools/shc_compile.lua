@@ -1,15 +1,15 @@
 -- A way to run the tool as part of a runtime or a build stage.
-local ffi   = require("ffi")
-local sg    = sg or require("sokol_gfx")
-local dirtools = require("tools.dirtools")
+local ffi           = require("ffi")
+local sg            = sg or require("ffi.sokol.sokol_gfx")
+local dirtools      = require("tools.dirtools")
 
-local base_dir = nil
-local tools_dir = nil
+local base_dir      = nil
+local tools_dir     = nil
 
 -- Setup some defaults
-local sh_compiler = {}
-local exec_opts = nil
-local exec = nil
+local sh_compiler   = {}
+local exec_opts     = nil
+local exec          = nil
 
 -- --------------------------------------------------------------------------------------
 -- Set the base path from where you are running your app from
@@ -20,8 +20,10 @@ sh_compiler.init = function(base_path, debug_shader, tools_path)
     base_dir = dirtools.get_app_path(base_path)
     tools_dir = base_dir
     if(tools_path) then 
-        tools_dir = base_dir..tools_path.."/"
+        tools_dir = base_dir..tools_path..dirtools.sep
     end 
+
+    print("Tmpfile: "..base_dir)
 
     sh_compiler.target_tmp      = base_dir.."bin/shaderbin/shader_gen.h"
     sh_compiler.target_lang     = "glsl410"
@@ -34,7 +36,7 @@ sh_compiler.init = function(base_path, debug_shader, tools_path)
     exec_opts = {
         ["Linux"]       = tools_dir.."tools/shader_compiler/linux/sokol-shdc",
         ["Windows"]     = tools_dir.."tools\\shader_compiler\\win32\\sokol-shdc.exe",
-        ["MacOSX"]      = tools_dir.."tools/shader_compiler/win32/sokol-shdc",
+        ["MacOSX"]      = tools_dir.."tools/shader_compiler/osx/sokol-shdc",
     }
     exec = exec_opts[ffi.os]    
     return sh_compiler

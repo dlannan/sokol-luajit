@@ -37,9 +37,21 @@ local tabs = {
             local bounds = nk.nk_window_get_content_region(ctx)
             nk.nk_layout_row_dynamic(ctx, bounds.h, 1)
             local files = assets.config.assets.lua 
-            wdgts.widget_list_removeable(ctx, "source_files", nk.NK_WINDOW_BORDER, files, bounds.w -40 )
+            wdgts.widget_list_removeable(ctx, "lua_source_files", nk.NK_WINDOW_BORDER, files, bounds.w -40 )
         end,
         asset_name = "lua",
+    }, 
+    { 
+        name = "Shaders",
+        func = function(ctx) 
+            
+            local bounds = nk.nk_window_get_content_region(ctx)
+            nk.nk_layout_row_dynamic(ctx, bounds.h, 1)
+            if(assets.config.assets.shaders == nil) then assets.config.assets.shaders = settings.default_settings.assets.shaders end
+            local files = assets.config.assets.shaders 
+            wdgts.widget_list_removeable(ctx, "shader_source_files", nk.NK_WINDOW_BORDER, files, bounds.w -40 )
+        end,
+        asset_name = "shaders",
     }, 
     { 
         name = "Images",
@@ -48,7 +60,7 @@ local tabs = {
             local bounds = nk.nk_window_get_content_region(ctx)
             nk.nk_layout_row_dynamic(ctx, bounds.h, 1)
             local files = assets.config.assets.images 
-            wdgts.widget_list_removeable(ctx, "source_files", nk.NK_WINDOW_BORDER, files, bounds.w -40 )
+            wdgts.widget_list_removeable(ctx, "image_source_files", nk.NK_WINDOW_BORDER, files, bounds.w -40 )
         end,
         asset_name = "images",
     }, 
@@ -59,7 +71,7 @@ local tabs = {
             local bounds = nk.nk_window_get_content_region(ctx)
             nk.nk_layout_row_dynamic(ctx, bounds.h, 1)
             local files = assets.config.assets.data
-            wdgts.widget_list_removeable(ctx, "source_files", nk.NK_WINDOW_BORDER, files, bounds.w -40 )
+            wdgts.widget_list_removeable(ctx, "data_source_files", nk.NK_WINDOW_BORDER, files, bounds.w -40 )
         end,
         asset_name = "data",
     } 

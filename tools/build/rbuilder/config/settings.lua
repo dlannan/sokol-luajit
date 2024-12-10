@@ -81,9 +81,10 @@ settings.default_settings = {
 
     -- Assets will be populated by project file
     assets = {
-        lua     = {},
-        images  = {},
-        data    = {},
+        lua         = {},
+        shaders     = {},
+        images      = {},
+        data        = {},
     },
 }
 

@@ -47,6 +47,7 @@ combine.run =  function(tempfile, startup_files, lib_files)
     local modulename = string.gsub(v.name, "^%.[/\\]", "")
     modulename = string.gsub(modulename, "[/\\]", "%.")
     modulename = string.gsub(modulename, "%.lua", "")
+    print(">>>> Module: "..modulename.."   "..v.fullpath)
 
     local loaded_chunk = assert(load( loader(v.fullpath),modulename ))
     table.insert(ts, ("t['%s']=load(%q);"):format(modulename, string.dump(loaded_chunk)) )

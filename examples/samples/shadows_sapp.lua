@@ -1,21 +1,21 @@
-package.cpath   = package.cpath..";../bin/win64/?.dll"
-package.path    = package.path..";../ffi/sokol/?.lua"
 package.path    = package.path..";../?.lua"
+local dirtools  = require("tools.dirtools").init("sokol%-luajit")
 
 --_G.SOKOL_DLL    = "sokol_debug_dll"
-local sapp      = require("sokol_app")
-local sg        = require("sokol_gfx")
-local slib      = require("sokol_libs") -- Warn - always after gfx!!
+local sapp      = require("ffi.sokol.sokol_app")
+local sg        = require("ffi.sokol.sokol_gfx")
+local slib      = require("ffi.sokol.sokol_libs") -- Warn - always after gfx!!
 
-local sshape    = require("sokol_shape")
-local hmm       = require("hmm")
-local hutils    = require("hmm_utils")
+local hmm       = require("ffi.sokol.hmm")
+local hutils    = require("ffi.sokol.hmm_utils")
+
+local utils     = require("lua.utils")
 
 local ffi       = require("ffi")
 
 -- --------------------------------------------------------------------------------------
 -- Shader debug enabled
-local shc       = require("tools.shc_compile").init( "sokol%-luajit", true )
+local shc       = require("tools.shc_compile").init( "sokol%-luajit", false )
 
 -- Need to use default because this is whats used for first unnamed program
 local shadow_shader   = shc.compile("./samples/shadows-sapp.glsl", "shadow")

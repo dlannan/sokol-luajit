@@ -38,7 +38,7 @@ local function apply_config(startfile, config)
     if(fh) then 
         local script = fh:read("*a")
         fh:close() 
-        
+
     else 
         logging.error("File not found: "..startfile)
     end
@@ -90,6 +90,9 @@ luajit_builder.run = function( config )
     local cmds = plaform_cmds[ffi.os]
     local outputfolder = config["project"].build_path.value..cmds.sep..string.lower(ffi.os)..cmds.sep
     local outputexe = config["project"].project_name.value..cmds.ext
+
+    -- make sure output folder exists - make it if not
+    dirtools.make_folder(outputfolder)
 
     -- Add the startup file
     local startfiles = { config["project"].project_start.value }
@@ -143,7 +146,7 @@ luajit_builder.run = function( config )
     -- Remove temp files
     local cleanupcmd = "rm -f "..combine_out
     if(ffi.os == "Windows") then cleanupcmd = "del /f "..combine_out end
-    run_cmd(cleanupcmd)
+    --run_cmd(cleanupcmd)
 end
 
 -- --------------------------------------------------------------------------------------
