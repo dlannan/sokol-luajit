@@ -17,9 +17,10 @@ local settings = {
 -- Default settings if none are loaded or found
 local platforms = { "Win64", "MacOS", "Linux", "IOS64" }
 local buildtypes = { "Release", "Debug", "Release Remotery", "Debug Remotery" }
-local resolutions = { "1920x1080", "1680x1050", "1600x900", "1440x900", "1376x768" }
+local resolutions = { "1920x1080", "1680x1050", "1600x900", "1440x900", "1376x768", "Custom" }
 local arch = { "x86", "x64", "arm", "arm64", "arm64be", "ppc", "mips", "mipsel", "mips64", "mips64el", "mips64r6", "mips64r6el" }
 local oss = { "Windows", "Linux", "OSX", "BSD", "POSIX", "Other" }
+local optimisations = { "None", "Level 1", "Level 2", "Level 3" }
 
 settings.default_settings = {
 
@@ -30,9 +31,9 @@ settings.default_settings = {
 
     platform = {
         target          = { index = 1, value = 1, ptype = "combo", plist = platforms },
-        srlua_path      = { index = 2, value = "../srlua/", ptype = "path", slen = 256 },     -- initially rbuild will run for the tools/build/rbuilder folder
-        arch            = { index = 3, value = 2, ptype = "combo", plist = arch },
-        os              = { index = 4, value = 1, ptype = "combo", plist = oss },
+        arch            = { index = 2, value = 2, ptype = "combo", plist = arch },
+        os              = { index = 3, value = 1, ptype = "combo", plist = oss },
+        performance     = { index = 4, value = 1, ptype = "combo", plist = optimisations },
     },
 
     options = {
@@ -48,14 +49,17 @@ settings.default_settings = {
     },
 
     graphics = {
+        -- If custom is set then width and height can be customized as needed
         display_res     = { index = 1, value = 1, ptype = "combo", plist = resolutions },
         display_width   = { index = 2, value = 1024, vmin = 640, vmax = 8192, vstep = 32, vinc = 0.1, ptype = "int" },
         display_height  = { index = 3, value = 768, vmin = 480, vmax = 8192, vstep = 32, vinc = 0.1, ptype = "int" },
         display_fps     = { index = 4, value = 60, vmin = 25, vmax = 200, vstep = 5, vinc = 0.1, ptype = "int" },
-        antialias       = { index = 5, value = "fxaa", slen = 16 },
+        antialias       = { index = 5, value = "fxaa", slen = 16, ptype = "string" },
+        fullscreen      = { index = 6, value = false, ptype = "check" },
     },
 
     audio = {
+        -- For tweaking deploy audio defaults
         master_volume   = { index = 1, value = 1.0, vmin = 0.0, vmax = 1.0, vstep = 0.02, vinc = 0.1, ptype = "float" },
         effects_volume  = { index = 2, value = 1.0, vmin = 0.0, vmax = 1.0, vstep = 0.02, vinc = 0.1, ptype = "float" },
         music_volume    = { index = 3, value = 1.0, vmin = 0.0, vmax = 1.0, vstep = 0.02, vinc = 0.1, ptype = "float" },

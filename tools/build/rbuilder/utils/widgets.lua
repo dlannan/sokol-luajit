@@ -173,7 +173,7 @@ end
 
 --------------------------------------------------------------------------------
 
-widgets.widget_notebook = function(ctx, tab_name, tabs, current_tab, height, tab_fixed_width)
+widgets.widget_notebook = function(ctx, tab_name, flags, tabs, current_tab, height, tab_fixed_width)
 
     -- /* Header */
     local spacing = ctx.style.window.spacing
@@ -199,13 +199,14 @@ widgets.widget_notebook = function(ctx, tab_name, tabs, current_tab, height, tab
             if(nk.nk_button_label(ctx, v.name) == true) then current_tab = i end
         end
     end
+    nk.nk_layout_row_end(ctx)
     ctx.style.button.rounding = rounding
     ctx.style.window.spacing = spacing
 
     -- /* Body */
     local named_tab = nil
     nk.nk_layout_row_dynamic(ctx, height, 1)
-    if (nk.nk_group_begin(ctx, tab_name, nk.NK_WINDOW_BORDER) == true) then
+    if (nk.nk_group_begin(ctx, tab_name, flags) == true) then
     
         for i,v in ipairs(tabs) do
             if(current_tab == i) then

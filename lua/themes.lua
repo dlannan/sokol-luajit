@@ -180,9 +180,9 @@ local themes = {
     color_tbl[indexes.NK_COLOR_BUTTON_HOVER] = colors.tech_primary[3]      -- button hover color
     color_tbl[indexes.NK_COLOR_BUTTON_ACTIVE] = colors.tech_primary[4]      -- button active color
 
-    color_tbl[indexes.NK_COLOR_TOGGLE] = colors.white --tech_primary[6]      -- toggle color
-    color_tbl[indexes.NK_COLOR_TOGGLE_HOVER] =  colors.vedigris     -- toggle hover color
-    --color_tbl[indexes.NK_COLOR_TOGGLE_CURSOR] = colors.tech_primary[4]       -- toggle active color
+    color_tbl[indexes.NK_COLOR_TOGGLE] = colors.tech_primary[6]      -- toggle color
+    color_tbl[indexes.NK_COLOR_TOGGLE_HOVER] =  colors.tech_mixed[4]    -- toggle hover color
+    color_tbl[indexes.NK_COLOR_TOGGLE_CURSOR] = colors.white       -- toggle active color
 
     color_tbl[indexes.NK_COLOR_SELECT] = colors.tech_primary[2]                -- select color
     color_tbl[indexes.NK_COLOR_SELECT_ACTIVE] = colors.tech_mixed[1]        -- select active color

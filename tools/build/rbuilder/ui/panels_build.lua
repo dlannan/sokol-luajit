@@ -120,7 +120,10 @@ local function display_section(ctx, sectionname)
             nk.nk_label(ctx, v.key..":", nk.NK_TEXT_LEFT)
             if(v.ptype == "string" or v.ptype == nil) then
                 nk.nk_layout_row_push(ctx, value_col)
-                nk.nk_edit_string(ctx, nk.NK_EDIT_SIMPLE, v.ffi, v.len_ffi, v.slen, nk.nk_filter_default)
+                local flags = nk.nk_edit_string(ctx, nk.NK_EDIT_SIMPLE, v.ffi, v.len_ffi, v.slen, nk.nk_filter_default)
+                if(flags ~= nk.NK_EDIT_ACTIVE and flags ~= nk.NK_EDIT_ACTIVATED) then 
+                    v.value = ffi.string(v.ffi)
+                end 
             elseif(v.ptype == "path") then
                 nk.nk_layout_row_push(ctx, value_col - 34)
                 nk.nk_edit_string(ctx, nk.NK_EDIT_SIMPLE, v.ffi, v.len_ffi, v.slen, nk.nk_filter_default)
@@ -144,13 +147,23 @@ local function display_section(ctx, sectionname)
                 v.value = wdgts.widget_combo_box(ctx, v.plist, v.value, 200)
             elseif(v.ptype == "check") then
                 nk.nk_layout_row_push(ctx, value_col)
-                nk.nk_checkbox_label(ctx, "", v.ffi)
+                -- Hide the text for the key (nasty hack make text alpha)
+                local tmpn = ctx.style.checkbox.text_normal
+                local tmph = ctx.style.checkbox.text_hover
+                local tmpa = ctx.style.checkbox.text_active
+                ctx.style.checkbox.text_normal = nk.nk_rgba(255,0,0,0)
+                ctx.style.checkbox.text_hover = nk.nk_rgba(255,0,0,0)
+                ctx.style.checkbox.text_active = nk.nk_rgba(255,0,0,0)
+                nk.nk_checkbox_label(ctx, v.key, v.ffi)
+                ctx.style.checkbox.text_normal = nk.nk_rgba(tmpn.r, tmpn.g, tmpn.b, tmpn.a)
+                ctx.style.checkbox.text_hover = nk.nk_rgba(tmph.r, tmph.g, tmph.b, tmph.a)
+                ctx.style.checkbox.text_active = nk.nk_rgba(tmpa.r, tmpa.g, tmpa.b, tmpa.a)
             elseif(v.ptype == "int") then
                 nk.nk_layout_row_push(ctx, value_col)
-                nk.nk_property_int(ctx, "", v.vmin, v.ffi, v.vmax, v.vstep, v.vinc)
+                nk.nk_property_int(ctx, v.key, v.vmin, v.ffi, v.vmax, v.vstep, v.vinc)
             elseif(v.ptype == "float") then
                 nk.nk_layout_row_push(ctx, value_col)
-                nk.nk_property_float(ctx, "", v.vmin, v.ffi, v.vmax, v.vstep, v.vinc)
+                nk.nk_property_float(ctx, v.key, v.vmin, v.ffi, v.vmax, v.vstep, v.vinc)
             end
             nk.nk_layout_row_end(ctx)
         end
@@ -167,6 +180,7 @@ local project_tabs = {
             display_section(ctx, "project") 
             display_section(ctx, "sokol")
             search_sokol(ctx)
+            display_section(ctx, "graphics")
         end,
     }, 
     { 
@@ -192,7 +206,9 @@ build.panel = function(ctx)
 
     nk.nk_style_set_font(ctx, build.font[3].handle)
 
-    build.curr_tab = wdgts.widget_notebook(ctx, "assets", project_tabs, build.curr_tab, 500, 120)
+    local r = nk.nk_window_get_content_region(ctx)
+    local flags = nk.NK_WINDOW_BORDER
+    build.curr_tab = wdgts.widget_notebook(ctx, "assets", flags, project_tabs, build.curr_tab, r.h-60, 120)
     -- display_section(ctx, "graphics")
     -- display_section(ctx, "audio")
 

@@ -71,13 +71,13 @@ local function setup_config()
                 ffi.copy(prop.ffi, ffi.string(prop.value))
                 prop.len_ffi = ffi.new("int[1]", {string.len(prop.value)})
             elseif(prop.ptype == "combo") then
-                prop.ffi = ffi.new("int[1]", prop.value)
+                prop.ffi = ffi.new("int[1]", {prop.value})
             elseif(prop.ptype == "check") then
-                prop.ffi = ffi.new("bool[1]", prop.value)
+                prop.ffi = ffi.new("bool[1]", {prop.value})
             elseif(prop.ptype == "int") then
-                prop.ffi = ffi.new("int[1]", prop.value)
+                prop.ffi = ffi.new("int[1]", {prop.value})
             elseif(prop.ptype == "float") then
-                prop.ffi = ffi.new("float[1]", prop.value)
+                prop.ffi = ffi.new("float[1]", {prop.value})
             elseif(prop.ptype == "path") then
                 prop.ffi = ffi.new("char[?]", prop.slen )
                 ffi.fill(prop.ffi, prop.slen, 0)

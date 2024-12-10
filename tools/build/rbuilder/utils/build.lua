@@ -31,6 +31,20 @@ local function run_cmd(command)
 end
 
 -- ----------------------------------------------------------------------------------
+
+local function apply_config(startfile, config) 
+
+    local fh = io.open(startfile, "r")
+    if(fh) then 
+        local script = fh:read("*a")
+        fh:close() 
+        
+    else 
+        logging.error("File not found: "..startfile)
+    end
+end
+
+-- ----------------------------------------------------------------------------------
 -- srlua and glue for each os
 
 local plaform_cmds = {}
@@ -80,6 +94,12 @@ luajit_builder.run = function( config )
     -- Add the startup file
     local startfiles = { config["project"].project_start.value }
 
+    -- Check first start file (must be sokol setup file) to see if resolution and gfx settings
+    --  can be applied from project side.
+    if(startfiles[1]) then 
+        apply_config(startfiles[1], config)
+    end
+
     -- Iterate Lua source to add 
     local libfiles = {}
     for i,v in ipairs(config["assets"].lua) do 
@@ -119,6 +139,11 @@ luajit_builder.run = function( config )
 
     -- Copy in data files
 
+
+    -- Remove temp files
+    local cleanupcmd = "rm -f "..combine_out
+    if(ffi.os == "Windows") then cleanupcmd = "del /f "..combine_out end
+    run_cmd(cleanupcmd)
 end
 
 -- --------------------------------------------------------------------------------------
