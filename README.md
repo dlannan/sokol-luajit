@@ -1,4 +1,9 @@
 # sokol-luajit
+
+Update 11/12/2024 
+- Breaking changes happening. The build system works but Ive decided to change to use an FBP styled system (see FBP readme).
+- I hope to have a 'usable' new system in the next couple of weeeks. 
+
 A luajit set of ffi wrappers for the excellent sokol framework,
 
 - [x] Win64 Binaries - samples and remotery working
