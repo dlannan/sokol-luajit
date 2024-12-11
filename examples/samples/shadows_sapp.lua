@@ -1,5 +1,5 @@
 package.path    = package.path..";../?.lua"
-local dirtools  = require("tools.dirtools").init("sokol%-luajit")
+local dirtools  = require("tools.vfs.dirtools").init("sokol%-luajit")
 
 --_G.SOKOL_DLL    = "sokol_debug_dll"
 local sapp      = require("ffi.sokol.sokol_app")
@@ -15,7 +15,7 @@ local ffi       = require("ffi")
 
 -- --------------------------------------------------------------------------------------
 -- Shader debug enabled
-local shc       = require("tools.shc_compile").init( "sokol%-luajit", false )
+local shc       = require("tools.shader_compiler.shc_compile").init( "sokol%-luajit", false )
 
 -- Need to use default because this is whats used for first unnamed program
 local shadow_shader   = shc.compile("./samples/shadows-sapp.glsl", "shadow")

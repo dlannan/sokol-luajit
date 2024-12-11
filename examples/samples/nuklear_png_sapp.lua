@@ -1,5 +1,5 @@
 package.path    = package.path..";../?.lua"
-local dirtools = require("tools.dirtools")
+local dirtools = require("tools.vfs.dirtools")
 local base_path = dirtools.get_app_path("sokol%-luajit")
 
 package.cpath   = package.cpath..";"..base_path.."bin/win64/?.dll"

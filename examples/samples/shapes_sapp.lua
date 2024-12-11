@@ -13,7 +13,7 @@ local ffi       = require("ffi")
 
 -- --------------------------------------------------------------------------------------
 
-local shc       = require("tools.shc_compile").init( "sokol%-luajit", false )
+local shc       = require("tools.shader_compiler.shc_compile").init( "sokol%-luajit", false )
 local shader    = shc.compile("./samples/shapes-sapp.glsl")
 
 -- --------------------------------------------------------------------------------------

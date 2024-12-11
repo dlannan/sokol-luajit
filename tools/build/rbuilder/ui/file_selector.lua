@@ -3,7 +3,7 @@
 
 local ffi       = require("ffi")
 
-local dirtools  = require("tools.dirtools")
+local dirtools  = require("tools.vfs.dirtools")
 local sapp      = require("sokol_app")
 sg              = require("sokol_nuklear")
 local nk        = sg

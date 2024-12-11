@@ -5,7 +5,7 @@ local ffi = require("ffi")
 local logging   = require("utils.logging")
 local combine   = require("utils.combine")
 
-local dirtools = require("tools.dirtools")
+local dirtools = require("tools.vfs.dirtools")
 local base_path = dirtools.get_app_path("sokol%-luajit")
 
 local tinsert   = table.insert
