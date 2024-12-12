@@ -1,0 +1,152 @@
+
+                <div class="main-content">
+                    <div class="container-fluid">
+
+                        <div class="page-header">
+                            <div class="row align-items-end">
+                                <div class="col-lg-8">
+                                    <div class="page-header-title">
+                                        <i class="ik ik-globe bg-blue"></i>
+                                        <div class="d-inline">
+                                            <h5>Worlds</h5>
+                                            <span>Select current world to view. Add notes for the world.</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <nav class="breadcrumb-container" aria-label="breadcrumb">
+                                        <ol class="breadcrumb">
+                                            <li class="breadcrumb-item">
+                                                <a href="/index.html"><i class="ik ik-home"></i></a>
+                                            </li>
+                                            <li class="breadcrumb-item">
+                                                <a href="#">General</a>
+                                            </li>
+                                            <li class="breadcrumb-item active" aria-current="page">Worlds</li>
+                                        </ol>
+                                    </nav>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="card">
+                                    <div class="card-header"><h3>Systems Select</h3></div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+<div class="btn-group">
+    <button id="worlds-title" type="button" data="-1" class="btn btn-secondary">World Select: </button>
+    <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      <i class="ik ik-chevron-down"></i>
+    </button>
+    <div id="worlds-select" class="dropdown-menu">
+    </div>
+</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="system-information">
+                        <div class="row">                            
+                            <div class="col-md-12">
+
+                                <div class="card">
+                                    <div id="worlds-card-title" class="card-header">
+                                        <h3>World Information</h3>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <h4 class="sub-title">World</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <div class="row">     
+                            <div class="col-xl-4 col-md-12">
+                                <div class="card proj-t-card">
+                                    <div class="card-body">
+                                        <div class="row align-items-center mb-10">
+                                            <div class="col-auto">
+                                                <i class="far ik ik-box text-blue f-30"></i>
+                                            </div>
+                                            <div class="col pl-0">
+                                                <h6 class="mb-5">Entities</h6>
+                                                <h6 class="mb-0 text-blue">Live Update</h6>
+                                            </div>
+                                        </div>
+                                        <h6 id="worlds-entities" class="pt-badge bg-blue">5</h6>
+                                    </div>
+                                </div>
+                            </div>            
+                            <div class="col-xl-4 col-md-12">
+                                <div class="card proj-t-card">
+                                    <div class="card-body">
+                                        <div class="row align-items-center mb-10">
+                                            <div class="col-auto">
+                                                <i class="far ik ik-aperture text-red f-30"></i>
+                                            </div>
+                                            <div class="col pl-0">
+                                                <h6 class="mb-5">Filters</h6>
+                                                <h6 class="mb-0 text-red">Live Update</h6>
+                                            </div>
+                                        </div>
+                                        <h6 id="worlds-filters" class="pt-badge bg-red">2</h6>
+                                    </div>
+                                </div>
+                            </div>   
+                            <div class="col-xl-4 col-md-12">
+                                <div class="card proj-t-card">
+                                    <div class="card-body">
+                                        <div class="row align-items-center mb-10">
+                                            <div class="col-auto">
+                                                <i class="far ik ik-list text-green f-30"></i>
+                                            </div>
+                                            <div class="col pl-0">
+                                                <h6 class="mb-5">Cameras</h6>
+                                                <h6 class="mb-0 text-green">Live Update</h6>
+                                            </div>
+                                        </div>
+                                        <h6 id="worlds-cameras" class="pt-badge bg-green">1</h6>
+                                    </div>
+                                </div>
+                            </div>                                                                       
+                        </div>                        
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="card">
+                                    <div class="card-header"><h3>Entity Summary</h3></div>
+                                    <div id="worlds-filters" class="card-body">
+                                        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                                            <text>Holy guacamole!</text>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="card">
+                                    <div class="card-header"><h3>System Notes</h3></div>
+                                    <div class="card-body">
+                                        <textarea class="form-control worlds-html-editor" rows="10"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+<script src="plugins/summernote/dist/summernote-bs4.min.js"></script>
+<script src="js/worlds.js"></script>
