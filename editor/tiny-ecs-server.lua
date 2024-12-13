@@ -170,8 +170,8 @@ end
 tinyserver.update = function ()
     if(tinyserver.change_camera) then 
         print('Changing camera to: '..tinyserver.change_camera)
-        msg.post(tinyserver.current_camera, "release_camera_focus")
-        msg.post(tinyserver.change_camera, "acquire_camera_focus")
+        -- msg.post(tinyserver.current_camera, "release_camera_focus")
+        -- msg.post(tinyserver.change_camera, "acquire_camera_focus")
         tinyserver.current_camera = tinyserver.change_camera
         tinyserver.change_camera = nil
     end

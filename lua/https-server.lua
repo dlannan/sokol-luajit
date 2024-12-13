@@ -9,6 +9,7 @@ local tinsert       = table.insert
 local tconcat       = table.concat
 
 ------------------------------------------------------------------------------------------------------------
+-- Currently just http (will become websocket/https capable)
 
 local http_server = {
     --{{Options
@@ -77,6 +78,7 @@ end
 ------------------------------------------------------------------------------------------------------------
 
 http_server.update = function()
+    -- roughly 60Hz update rate (step depends alot on traffic)
     copas.step(0.01666666)
 end
 
@@ -85,7 +87,7 @@ end
 http_server.html = function( html )
 
     local resp = "HTTP/1.0 200 OK\nContent-Type: text/html\n\n"
-    resp = resp..tostring(html)
+    resp = string.format("%s%s", resp, tostring(html))
     return resp
 end
 
@@ -93,7 +95,7 @@ end
 
 http_server.json = function(json)
     local resp = "HTTP/1.0 200 OK\nContent-Type: application/json\n\n"
-    resp = resp..tostring(json)
+    resp = string.format("%s%s", resp, tostring(json))
     return resp
 end
 
@@ -101,7 +103,7 @@ end
 
 http_server.file = function(data)
     local resp = "HTTP/1.0 200 OK\nContent-Type: application/octet-stream\n\n"
-    resp = resp..tostring(data)
+    resp = string.format("%s%s", resp, tostring(data))
     return resp
 end
 
@@ -109,7 +111,7 @@ end
 
 http_server.ttf = function(data)
     local resp = "HTTP/1.0 200 OK\nContent-Type: font/truetype\n\n"
-    resp = resp..tostring(data)
+    resp = string.format("%s%s", resp, tostring(data))
     return resp
 end
 
@@ -117,7 +119,7 @@ end
 
 http_server.woff = function(data)
     local resp = "HTTP/1.0 200 OK\nContent-Type: font/woff2\n\n"
-    resp = resp..tostring(data)
+    resp = string.format("%s%s", resp, tostring(data))
     return resp
 end
 
@@ -126,7 +128,7 @@ end
 
 http_server.script = function(data)
     local resp = "HTTP/1.0 200 OK\nContent-Type: text/javascript\n\n"
-    resp = resp..tostring(data)
+    resp = string.format("%s%s", resp, tostring(data))
     return resp
 end
 
@@ -134,23 +136,22 @@ end
 
 http_server.tscript = function(data)
     local resp = "HTTP/1.0 200 OK\nContent-Type: text/x.typescript\n\n"
-    resp = resp..tostring(data)
+    resp = string.format("%s%s", resp, tostring(data))
     return resp
 end
-
 
 ------------------------------------------------------------------------------------------------------------
 
 http_server.css = function(data)
     local resp = "HTTP/1.0 200 OK\nContent-Type: text/css\n\n"
-    resp = resp..tostring(data)
+    resp = string.format("%s%s", resp, tostring(data))
     return resp
 end
 
 ------------------------------------------------------------------------------------------------------------
 
 http_server.html_error = function( errno )
-    local resp = "HTTP/1.0 "..errno.." ERROR\n\n"
+    local resp = string.format("HTTP/1.0 %s ERROR\n\n", errno) 
     return resp
 end
 

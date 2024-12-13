@@ -7,7 +7,7 @@ local route = {
 local index_root = {
     pattern = "/index%.html[.+]?$", 
     func = function(matches, stream, headers, body)
-        local index = utils.loaddata(base_www_path.."index.html")		
+        local index = utils.loaddata(base_www_path.."index.html")
         return route.http_server.html(index)
     end,
 }

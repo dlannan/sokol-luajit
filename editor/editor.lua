@@ -11,33 +11,18 @@ local utils     = require("utils")
 
 local ffi       = require("ffi")
 
-------------------------------------------------------------------------------------------------------------
-
-local tiny 		= require('editor.tiny-ecs')
-local tinysrv	= require('editor.tiny-ecs-server')
-
-local tinsert 	= table.insert
-
-------------------------------------------------------------------------------------------------------------
-
-local worldmanager = {
-	worlds = {},
-	worlds_lookup = {},
-	systems = {},
-	systems_lookup = {},
-	entities = {},
-	entities_lookup = {},
-	cameras_lookup = {},
-}
+-- --------------------------------------------------------------------------------------
+-- Tiny ECS will be our core object manager. 
+--    Rendering, physics collision and more will be components to this system
+--    Rendering specifically will be built with a ldb that will run all the culling, sorting
+--      and binning needed. This will be decoupled from the editor itself. 
+local tiny          = require('editor.world-manager')
 
 -- --------------------------------------------------------------------------------------
 
 local function init()
 
-	tinysrv.init()
-	tinysrv.setWorlds(worldmanager.worlds)
-	tinysrv.setEntities(worldmanager.entities, worldmanager.entities_lookup, worldmanager.cameras_lookup)
-	tinysrv.setSystems(worldmanager.systems)    
+    tiny:init({noserver = false})
 
     local desc = ffi.new("sg_desc[1]")
     desc[0].environment = slib.sglue_environment()
@@ -66,12 +51,7 @@ local function frame()
     local h         = sapp.sapp_heightf()
     local t         = (sapp.sapp_frame_duration() * 60.0)
 
-	-- Handle direct world swapping
-	tinysrv.current_world = worldmanager.current_world
-	for k,v in pairs(worldmanager.worlds) do
-		v:update(dt)
-	end
-	tinysrv.update(dt)
+    tiny:update(sapp.sapp_frame_duration())
 
     -- Display frame stats in console.
     -- hutils.show_stats()
@@ -82,9 +62,7 @@ end
 local function cleanup()
     sg.sg_shutdown()
 
-	tinysrv.final()
-	tiny.clearEntities(worldmanager.current_world)
-	tiny.clearSystems(worldmanager.current_world)    
+    tiny:final() 
 end
 
 -- --------------------------------------------------------------------------------------
