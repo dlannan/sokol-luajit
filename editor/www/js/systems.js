@@ -18,7 +18,7 @@ $(document).ready(function() {
     let system = g_systems.systems[index];
     let senddata = { enabled: enabled, system: system };
     // Probably should check status and data
-    postData("/systems/enable", senddata, function(data, status) {
+    postData("/systems/enable", senddata, function( data, status) {
     });
   });
 

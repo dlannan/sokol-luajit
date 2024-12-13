@@ -76,10 +76,10 @@ Tutorial:
 
 2. To make this node available in the context menu you need to add it to the markup in [index.html](index.html)
 ```html
-<div class="context-menu-items">Begin</div>
-<div class="context-menu-items">Print</div>  <!-- this is the title of the newly added node -->
-<div class="context-menu-items">Alert</div>
-<div class="context-menu-items">Confirm</div>
+<div class="module-editor-context-menu-items">Begin</div>
+<div class="module-editor-context-menu-items">Print</div>  <!-- this is the title of the newly added node -->
+<div class="module-editor-context-menu-items">Alert</div>
+<div class="module-editor-context-menu-items">Confirm</div>
 ```
 <b>Result</b>
 ![](images/print_node.JPG)

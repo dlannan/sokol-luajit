@@ -1,14 +1,14 @@
-import { setLocationOfNode } from '../setLocationOfNode/setLocationOfNode.js'
-import { Nodes } from '../Nodes/nodes.js'
-import { variableList } from '../Variable/variable.js'
-import { deleteProgramNode, deleteWire } from '../Delete/delete.js'
+import { setLocationOfNode } from './setLocationOfNode.js'
+import { Nodes } from './nodes.js'
+import { variableList } from './variable.js'
+import { deleteProgramNode, deleteWire } from './delete.js'
 
 export var ContextMenu = {
     contextMenu: function (stage, layer) {
-        let contextMenu = document.getElementById("ctx-menu-container");
-        let deleteCtxMenu = document.getElementById("delete-ctx-container");
-        let getSetCtxMenu = document.getElementById("get-set-ctx-menu-container");
-        let searchBar = document.getElementById("ctx-search-bar");
+        let contextMenu = document.getElementById("module-editor-ctx-menu-container");
+        let deleteCtxMenu = document.getElementById("module-editor-delete-ctx-container");
+        let getSetCtxMenu = document.getElementById("module-editor-get-set-ctx-menu-container");
+        let searchBar = document.getElementById("module-editor-ctx-search-bar");
         let draggedVariableInfo = {
             name: null,
             dataType: null,

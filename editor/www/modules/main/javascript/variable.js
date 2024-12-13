@@ -1,5 +1,5 @@
-import {colorMap} from '../ColorMap/colorMap.js'
-import {ContextMenu } from '../ContextMenu/contextMenu.js'
+import {colorMap} from './colorMap.js'
+import {ContextMenu } from './contextMenu.js'
 class VariableList {
 
     constructor()
@@ -9,7 +9,7 @@ class VariableList {
     }
     makeContextMenuItem(variable, setOrGet){
         let div = document.createElement("div");
-        div.classList.toggle("context-menu-items", true);
+        div.classList.toggle("module-editor-context-menu-items", true);
         div.setAttribute('data-datatype', `${variable.dataType}`);
         // div.id=`${variable.dataType}-${variable.name}-${setOrGet}`;
         div.innerHTML = `${(setOrGet == 'set') ? 'Set': 'Get'} ${variable.name}`;
@@ -32,8 +32,8 @@ class VariableList {
         let set = this.makeContextMenuItem(variable, 'set');
         let get = this.makeContextMenuItem(variable, 'get');
         // console.log(set, get);
-        document.getElementById("context-menu").appendChild(get);
-        document.getElementById("context-menu").appendChild(set);
+        document.getElementById("module-editor-context-menu").appendChild(get);
+        document.getElementById("module-editor-context-menu").appendChild(set);
         ContextMenu.addEventToCtxMenuItems(set);
         ContextMenu.addEventToCtxMenuItems(get);
         this.variablesElements.push(set);

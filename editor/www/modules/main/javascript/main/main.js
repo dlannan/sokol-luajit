@@ -1,17 +1,17 @@
-import { AppStage } from '../AppStage/intiStage.js'
-// import {SelectionBox} from '../SelectionBox/SelectionBox.js'
-import { DragAndDrop } from '../DragAndDrop/DragAndDrop.js'
-import { Wiring } from '../Wiring/Wiring.js'
-import { ContextMenu } from '../ContextMenu/contextMenu.js'
-import { leftPanel } from '../LeftPanel/LeftPanel.js'
-import { VSToJS } from '../VisualScriptToJavascript/VisualScriptToJavascript.js'
-import { Delete } from '../Delete/delete.js'
-import { Export, Import, Save, prompLastSave } from '../SaveAndLoad/SaveAndLoad.js'
+import { AppStage } from '../intiStage.js'
+// import {SelectionBox} from '../SelectionBox.js'
+import { DragAndDrop } from '../DragAndDrop.js'
+import { Wiring } from '../Wiring.js'
+import { ContextMenu } from '../contextMenu.js'
+import { leftPanel } from '../LeftPanel.js'
+import { VSToJS } from '../VisualScriptToJavascript.js'
+import { Delete } from '../delete.js'
+import { Export, Import, Save, prompLastSave } from '../SaveAndLoad.js'
 import { showAlert, prompRefreshOrStarter } from './alertBox.js'
-import { refresh } from '../VisualScriptToJavascript/liveCode.js'
+import { refresh } from '../liveCode.js'
 // var width = window.innerWidth;
 // var height = window.innerHeight;
-let stage = AppStage.getStage(document.getElementById("container").clientWidth, document.getElementById("container").clientHeight, 'container');
+let stage = AppStage.getStage(document.getElementById("module-editor-container").clientWidth, document.getElementById("module-editor-container").clientHeight, 'module-editor-container');
 var layer = new Konva.Layer({
     id: 'main_layer'
 });
@@ -87,7 +87,7 @@ document.getElementById("import").addEventListener("click", () => {
                 fr.readAsText(file.item(0));
             }
             catch (err) {
-                document.getElementById("console-window").classList.toggle("hidden", false);
+                document.getElementById("module-editor-console-window").classList.toggle("hidden", false);
                 let codeDoc = document.getElementById("console").contentWindow.document;
                 codeDoc.open();
                 codeDoc.writeln(
@@ -112,34 +112,34 @@ document.getElementById("import").addEventListener("click", () => {
         }
     });
 })
-document.getElementById("live-code-refresh").addEventListener("click", () => {
-    let script = new VSToJS(stage, layer, "live-code-refresh").script;
+document.getElementById("module-editor-live-code-refresh").addEventListener("click", () => {
+    let script = new VSToJS(stage, layer, "module-editor-live-code-refresh").script;
     refresh(script);
 }
 );
 document.onkeydown = (e) => {
     // e.preventDefault();
     if (e.code == 'KeyQ' && e.ctrlKey) {
-        let script = new VSToJS(stage, layer, "live-code-refresh").script;
+        let script = new VSToJS(stage, layer, "module-editor-live-code-refresh").script;
         refresh(script);
     }
 }
-document.getElementById("live-code-arrow").addEventListener("click", () => {
-    document.getElementById("live-code-container").classList.toggle("live-code-closed");
-    document.getElementById("live-code-arrow").classList.toggle("live-code-arrow-clicked");
+document.getElementById("module-editor-live-code-arrow").addEventListener("click", () => {
+    document.getElementById("module-editor-live-code-container").classList.toggle("module-editor-live-code-closed");
+    document.getElementById("module-editor-live-code-arrow").classList.toggle("module-editor-live-code-arrow-clicked");
 });
 document.getElementById("Code").addEventListener("click", () => {
-    document.getElementById("live-code-container").classList.toggle("live-code-closed");
-    document.getElementById("live-code-refresh").click();
-    document.getElementById("live-code-arrow").classList.toggle("live-code-arrow-clicked");
+    document.getElementById("module-editor-live-code-container").classList.toggle("module-editor-live-code-closed");
+    document.getElementById("module-editor-live-code-refresh").click();
+    document.getElementById("module-editor-live-code-arrow").classList.toggle("module-editor-live-code-arrow-clicked");
 })
 document.getElementById("Console").addEventListener("click", (e) => {
-    document.getElementById("console-window").classList.toggle("hidden");
+    document.getElementById("module-editor-console-window").classList.toggle("hidden");
 })
-document.getElementById("cross-console").addEventListener("click", (e) => {
-    document.getElementById("console-window").classList.toggle("hidden", true);
+document.getElementById("module-editor-cross-console").addEventListener("click", (e) => {
+    document.getElementById("module-editor-console-window").classList.toggle("hidden", true);
 });
-document.getElementById("cross-upload-cross").addEventListener("click", (e) => {
+document.getElementById("module-editor-cross-upload-cross").addEventListener("click", (e) => {
     document.getElementById("import-menu").classList.toggle("hidden", true);
 });
 document.getElementById("reload").addEventListener("click", (e) => {

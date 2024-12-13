@@ -1,5 +1,5 @@
-import { deleteWire, deleteHalfWire } from '../Delete/delete.js'
-import { colorMap } from '../ColorMap/colorMap.js'
+import { deleteWire, deleteHalfWire } from './delete.js'
+import { colorMap } from './colorMap.js'
 let placeLocation = function (location, stage) {
     return {
         x: (location.x - stage.x()) / stage.scaleX(),

@@ -1,6 +1,6 @@
-import { colorMap } from '../ColorMap/colorMap.js'
-import { variableList } from '../Variable/variable.js'
-import { showAlert } from '../main/alertBox.js'
+import { colorMap } from './colorMap.js'
+import { variableList } from './variable.js'
+import { showAlert } from './main/alertBox.js'
 export class leftPanel {
     constructor() {
         let isBooleanValid = false;
@@ -9,34 +9,34 @@ export class leftPanel {
         let isArrayValid = false;
 
         // this.variablesNameList = {};
-        document.getElementById("slide-left-panel").addEventListener("click", () => {
-            document.getElementById("left-panel").classList.toggle("closed-left-panel");
-            document.getElementById("slide-left-panel").children[0].classList.toggle("slider-icon-closed");
+        document.getElementById("module-editor-slide-left-panel").addEventListener("click", () => {
+            document.getElementById("module-editor-left-panel").classList.toggle("module-editor-closed-left-panel");
+            document.getElementById("module-editor-slide-left-panel").children[0].classList.toggle("module-editor-slider-icon-closed");
         });
-        document.getElementById("list-of-variables").addEventListener("click", () => {
+        document.getElementById("module-editor-list-of-variables").addEventListener("click", () => {
             // console.log("clicked");
             // document.getElementById("list-of-variables-down-icon").classList.toggle("list-of-variables-down-icon-closed");
-            document.getElementById("list-of-variables-content").classList.toggle("hidden");
-            document.getElementById("list-of-variables-down-icon").classList.toggle("left-panel-tab-arrow-up");
+            document.getElementById("module-editor-list-of-variables-content").classList.toggle("hidden");
+            document.getElementById("module-editor-list-of-variables-down-icon").classList.toggle("module-editor-left-panel-tab-arrow-up");
         });
-        document.getElementById("add-variables").addEventListener("click", () => {
-            document.getElementById("add-variables-content").classList.toggle("hidden");
-            document.getElementById("add-variables-plus-icon").classList.toggle("left-panel-tab-arrow-up");
+        document.getElementById("module-editor-add-variables").addEventListener("click", () => {
+            document.getElementById("module-editor-add-variables-content").classList.toggle("hidden");
+            document.getElementById("module-editor-add-variables-plus-icon").classList.toggle("module-editor-left-panel-tab-arrow-up");
         });
-        let createVariableForm = document.getElementById("create-variables");
+        let createVariableForm = document.getElementById("module-editor-create-variables");
         let forms = {
-            numberForm: document.getElementById("number-default-form"),
-            stringForm: document.getElementById("string-default-form"),
-            boolForm: document.getElementById("bool-default-form"),
-            arrayForm: document.getElementById("array-default-form"),
+            numberForm: document.getElementById("module-editor-number-default-form"),
+            stringForm: document.getElementById("module-editor-string-default-form"),
+            boolForm: document.getElementById("module-editor-bool-default-form"),
+            arrayForm: document.getElementById("module-editor-array-default-form"),
         }
         let formInputsField = {
-            numberFormField: document.getElementById("number-default-value"),
-            stringFormField: document.getElementById("string-default-value"),
-            boolFormField: document.getElementById("bool-default-value"),
-            arrayFormField: document.getElementById("array-default-value"),
+            numberFormField: document.getElementById("module-editor-number-default-value"),
+            stringFormField: document.getElementById("module-editor-string-default-value"),
+            boolFormField: document.getElementById("module-editor-bool-default-value"),
+            arrayFormField: document.getElementById("module-editor-array-default-value"),
         }
-        let variableDataTypeForm = document.getElementById("variable-data-type");
+        let variableDataTypeForm = document.getElementById("module-editor-variable-data-type");
         variableDataTypeForm.addEventListener("input", (e) => {
             let dataType = variableDataTypeForm.value;
             if (dataType == "Number") {
@@ -64,8 +64,8 @@ export class leftPanel {
                 forms.arrayForm.classList.toggle("hidden", false);
             }
         });
-        document.getElementById("create-btn").addEventListener("click", () => {
-            let variableName = document.getElementById("variable-name").value;
+        document.getElementById("module-editor-create-btn").addEventListener("click", () => {
+            let variableName = document.getElementById("module-editor-variable-name").value;
             if (variableName.length == 0) {
                 showAlert("Variable Name Can't be empty!");
             }
@@ -80,7 +80,7 @@ export class leftPanel {
             }
             else {
                 let value;
-                let type = document.getElementById("variable-data-type").value;
+                let type = document.getElementById("module-editor-variable-data-type").value;
                 if (type == "Boolean") {
                     value = formInputsField.boolFormField.value;
                     isBooleanValid = true;
@@ -107,13 +107,13 @@ export class leftPanel {
                 if (isBooleanValid || isNumberValid || isStringValid || isArrayValid) {
                     let variable = {
                         name: variableName,
-                        dataType: document.getElementById("variable-data-type").value,
+                        dataType: document.getElementById("module-editor-variable-data-type").value,
                         value: value,
                     };
                     // this.variablesNameList[variableName] = variableName;
                     variableList.addVariable(variable);
-                    document.getElementById("list-of-variables-content").classList.toggle("hidden", false);
-                    document.getElementById("list-of-variables-down-icon").classList.toggle("left-panel-tab-arrow-up", false);
+                    document.getElementById("module-editor-list-of-variables-content").classList.toggle("hidden", false);
+                    document.getElementById("module-editor-list-of-variables-down-icon").classList.toggle("module-editor-left-panel-tab-arrow-up", false);
                     isBooleanValid = isNumberValid = isStringValid = isArrayValid = false;
                 }
                 else {

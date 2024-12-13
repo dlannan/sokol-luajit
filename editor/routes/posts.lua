@@ -1,4 +1,5 @@
 local utils 		    = require("utils")
+local json              = require("json")
 local route = {
     http_server = nil,
     ecs_server = nil,
@@ -22,7 +23,6 @@ local posts_systems = {
         if(body == nil) then 
             return route.http_server.html("failed. no post data.")
         end
-
         local rdata = json.decode(body)
         local sys = route.ecs_server.current_world.systems[rdata.system.index]
         if( rdata.enabled == true) then

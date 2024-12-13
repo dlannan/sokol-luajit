@@ -1,4 +1,4 @@
-import { setLocationOfNode } from '../setLocationOfNode/setLocationOfNode.js'
+import { setLocationOfNode } from './setLocationOfNode.js'
 export var SelectionBox = {
     setSelectionBox: function (layer, stage) {
         this.selectionRectangle = new Konva.Rect({

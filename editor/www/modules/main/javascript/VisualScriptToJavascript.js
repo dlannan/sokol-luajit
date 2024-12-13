@@ -1,5 +1,5 @@
-import { variableList } from '../Variable/variable.js'
-import { showAlert } from '../main/alertBox.js'
+import { variableList } from './variable.js'
+import { showAlert } from './main/alertBox.js'
 import { BuilInFunctions } from './builtInFunctions.js'
 export var VSToJS = class {
 
@@ -18,8 +18,8 @@ export var VSToJS = class {
                 this.coreAlgorithm(begin);
                 // console.log(this.script);
                 if (this.isRunOrCode == "Run") {
-                    document.getElementById("console-window").classList.toggle("hidden", false);
-                    let codeDoc = document.getElementById("console").contentWindow.document;
+                    document.getElementById("module-editor-console-window").classList.toggle("hidden", false);
+                    let codeDoc = document.getElementById("module-editor-console").contentWindow.document;
                     // console.log("run");
                     codeDoc.open();
                     codeDoc.writeln(
@@ -58,8 +58,8 @@ export var VSToJS = class {
                 }
             }
             catch (err) {
-                document.getElementById("console-window").classList.toggle("hidden", false);
-                let codeDoc = document.getElementById("console").contentWindow.document;
+                document.getElementById("module-editor-console-window").classList.toggle("hidden", false);
+                let codeDoc = document.getElementById("module-editor-console").contentWindow.document;
                 this.script = '';
                 this.builtin_functions = {};
                 codeDoc.open();
