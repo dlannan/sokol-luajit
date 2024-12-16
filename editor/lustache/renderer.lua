@@ -1,5 +1,5 @@
-local Scanner  = require "lustache.scanner"
-local Context  = require "lustache.context"
+local Scanner  = require "editor.lustache.scanner"
+local Context  = require "editor.lustache.context"
 
 local error, ipairs, pairs, setmetatable, tostring, type = 
       error, ipairs, pairs, setmetatable, tostring, type 

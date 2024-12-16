@@ -1,6 +1,7 @@
 
-package.path    = package.path..";../?.lua"
-local dirtools  = require("tools.vfs.dirtools").init("sokol%-luajit")
+local dirtools  = require("tools.vfs.dirtools")
+dirtools.init("sokol%-luajit")
+dirtools.add_package_path("editor"..dirtools.sep.."twig")
 
 --_G.SOKOL_DLL    = "sokol_debug_dll"
 local sapp      = require("sokol_app")

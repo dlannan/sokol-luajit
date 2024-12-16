@@ -209,7 +209,6 @@ end
 
 http_server.process_post = function( req, lines )
     local pfunc = http_server.router.post_funcs
-    print(table.concat(lines, "\n"))
     local header, body = get_header_body(lines)
     for k,v in ipairs(pfunc) do
         local matches = {}
@@ -258,7 +257,6 @@ http_server.handler = function(skt)
 
     while true do 
         local indata, err  = copas.receive(skt)
-        print(indata, err)
         if(indata == nil or string.len(indata) == 0 or err ~= nil) then 
             break
         end   

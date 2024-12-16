@@ -9,12 +9,16 @@
 local tinsert 		= table.insert
 
 local utils 		= require("lua.utils")
+local json          = require("lua.json")
 local tf 			= require("lua.transforms")
 local tiny          = require("editor.tiny-ecs")
 local http_server   = require("lua.https-server")
 
 local fps 		    = require("lua.metrics.fps")
 local mem 		    = require("lua.metrics.mem")
+
+local twig          = require("editor.twig.twig")
+local dirtools      = require("tools.vfs.dirtools")
 
 base_www_path       = "editor/www/"
 
@@ -33,6 +37,8 @@ local tinyserver	= {
     fps                 = 0,
     mem                 = 0, 
     deltas              = {},
+
+    vars                = {},
 }
 
 ------------------------------------------------------------------------------------------------------------
@@ -65,6 +71,8 @@ local function register_get( route )
 
     routes[route].ecs_server = tinyserver 
     routes[route].http_server = http_server
+    routes[route].twig = twig
+
     for k,v in ipairs(routes[route].routes) do 
         http_server.router.get( v.pattern, v.func )
     end
@@ -76,6 +84,8 @@ local function register_post( route )
 
     routes[route].ecs_server = tinyserver 
     routes[route].http_server = http_server
+    routes[route].twig = twig
+
     for k,v in ipairs(routes[route].routes) do 
         http_server.router.post( v.pattern, v.func )
     end
@@ -160,6 +170,13 @@ end
 ------------------------------------------------------------------------------------------------------------
 
 tinyserver.init = function()
+
+    local base_path = dirtools.get_app_path()
+    local editor_path = dirtools.combine_path(base_path, "editor")
+    editor_path = dirtools.combine_path(editor_path, "www")
+
+    tinyserver.vars = {}
+    twig.init( editor_path, tinyserver )
 
     -- Start the server
     startServer( tinyserver.host, tinyserver.port)

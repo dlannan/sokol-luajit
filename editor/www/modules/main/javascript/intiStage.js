@@ -56,7 +56,7 @@ export var AppStage = {
             }
         })
         window.addEventListener('resize', () => {
-            let container = document.querySelector('#container');
+            let container = document.querySelector('#module-editor-container');
             // console.log("Resized");
             let containerWidth = container.offsetWidth;
             let scale = containerWidth / stage.width();

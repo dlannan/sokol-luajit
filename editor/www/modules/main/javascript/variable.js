@@ -25,7 +25,7 @@ class VariableList {
         this.variables.push(variable);
         let el = this.makeLeftPanelVariableListItem(variable);
         //<button type="button" class="btn btn-outline-danger position-absolute end-0 me-1"">Delete</button>
-        document.getElementById("variable-list").appendChild(el);
+        document.getElementById("module-editor-variable-list").appendChild(el);
         // <div class="context-menu-items">GetRandom</div>
         // document.getElementById("context-menu").innerHTML += `<div class="context-menu-items" data-datatype=${variable.dataType} id="${variable.dataType}-${variable.name}-set">Set ${variable.name}</div>`;
         // document.getElementById("context-menu").innerHTML += `<div class="context-menu-items" data-datatype=${variable.dataType} id="${variable.dataType}-${variable.name}-get">Get ${variable.name}</div>`;
@@ -72,7 +72,7 @@ class VariableList {
     deleteAllVariables()
     {
         this.variables = [];
-        document.getElementById("variable-list").innerHTML = '';
+        document.getElementById("module-editor-variable-list").innerHTML = '';
         this.variablesElements.forEach((elem, index) => {
                 elem.remove();
         })

@@ -34,6 +34,7 @@ local tconcat   = table.concat
 
 local sep = "\\"
 if(ffi.os ~= "Windows") then sep = "/" end
+dirtools.sep = sep
 
 ---------------------------------------------------------------------------------------
 
@@ -58,6 +59,18 @@ end
 
 ---------------------------------------------------------------------------------------
 
+dirtools.add_cpath = function( new_path )
+    package.cpath    = package.cpath..";"..new_path
+end
+
+---------------------------------------------------------------------------------------
+
+dirtools.add_package_path = function( new_path )
+    package.path    = package.path..";"..new_path.."/?.lua"
+end
+
+---------------------------------------------------------------------------------------
+
 local function log_info( str )
     print(string.format("[Info] %s", str))
 end
@@ -78,8 +91,10 @@ end
 ---------------------------------------------------------------------------------------
 
 dirtools.combine_path = function( base, addition )
-
-    return base..sep..addition
+    -- remove any returns and tabs from both 
+    base = string.gsub(base, "[\n\t\r]+","")
+    addition = string.gsub(addition, "[\n\t\r]+","")
+    return string.format("%s%s%s",base,sep,addition)
 end
 
 ---------------------------------------------------------------------------------------

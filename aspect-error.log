@@ -1,0 +1,19 @@
+syntax error: unknown tag 'subsub_active' in layouts/master.html:20
+Callstack:
+	begin
+	layouts/master.html:20
+Lua stack traceback:
+	editor\twig/aspect\error.lua:49: in function 'compiler_error'
+	editor\twig/aspect\compiler.lua:264: in function <editor\twig/aspect\compiler.lua:202>
+	[C]: in function 'pcall'
+	editor\twig/aspect\compiler.lua:126: in function 'run'
+	editor\twig/aspect\template.lua:232: in function 'compile'
+	editor\twig/aspect\template.lua:311: in function 'get_view'
+	editor\twig/aspect\template.lua:140: in function 'get'
+	editor\twig/aspect\funcs.lua:151: in function 'include'
+	[string "layouts/master.html.lua"]:39: in function <[string "layouts/master.html.lua"]:8>
+	[C]: in function 'pcall'
+	editor\twig/aspect\template.lua:371: in function 'render'
+	.\editor\twig\twig.lua:40: in function 'parse'
+	.\editor\routes\xml.lua:14: in function 'process_requests'
+	.\lua\https-server.lua:270: in function <.\lua\https-server.lua:252>

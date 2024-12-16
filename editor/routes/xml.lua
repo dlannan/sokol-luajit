@@ -1,13 +1,18 @@
 local utils 		    = require("utils")
+
 local route = {
     http_server = nil,
     ecs_server = nil,
+    twig = nil,
 }
 
 local xml_html = {
     pattern = "/(.-%.html)", 
     func = function(matches, stream, headers, body)
-        local html = utils.loaddata(base_www_path..matches[1])
+        -- local html = utils.loaddata(base_www_path..matches[1])
+        route.ecs_server.vars.filename = matches[1]
+        print("------>>>"..route.ecs_server.vars.filename)
+        html, html_len = route.twig.parse( matches[1], route.ecs_server.vars )
         return route.http_server.html(html)
     end,
 }

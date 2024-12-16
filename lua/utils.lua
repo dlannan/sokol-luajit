@@ -155,21 +155,6 @@ end
 
 -- ---------------------------------------------------------------------------
 
-local function loaddata(filepath)
-	local data = nil
-	local fh = io.open(filepath, "rb")
-	print(filepath)
-	if(fh) then 
-		data = fh:read("*a")
-		fh:close()
-	else 
-		print("[Error] utils.loaddata: Unable to load - "..filepath)
-	end
-	return data 
-end
-
--- ---------------------------------------------------------------------------
-
 local function tickround(self, dt, callback)
 
 	if(self.round == nil) then return end 
@@ -197,6 +182,21 @@ local function cleanstring(str)
 	-- str = string.gsub(str, "'", "")
 	-- str = string.gsub(str, '"', "")
 	return str
+end
+
+-- ---------------------------------------------------------------------------
+
+local function loaddata(filepath)
+	local data = nil
+	local fh = io.open(filepath, "rb")
+	print(filepath)
+	if(fh) then 
+		data = fh:read("*a")
+		fh:close()
+	else 
+		print("[Error] utils.loaddata: Unable to load - "..filepath)
+	end
+	return data 
 end
 
 ------------------------------------------------------------------------------------------------------------
