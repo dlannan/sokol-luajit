@@ -42,23 +42,13 @@
 
         <div id="wrapper">
 
-            {% include 'partials/navigation.html' %}
+            {{ include('partials/navigation.html') }}
 
-            {% include 'partials/sidebar.html' %}
+            {{ include('partials/sidebar.html') }}
 
             <div id="page-wrapper">
-                <div class="container-fluid">
-                    {% if menu_select == 'dashboard' %}
-                    {% include 'partials/dashboard.html' %}
-                    {% endif %}
+                <div id="main-module" class="container-fluid">
 
-                    {% if menu_select == 'tables' %}
-                    {% include 'partials/tables.html' %}
-                    {% endif %}
-
-                    {% if menu_select == 'charts' %}
-                    {% include 'partials/charts.html' %}
-                    {% endif %}
                 </div>
                 <!-- /.container-fluid -->
             </div>
@@ -118,10 +108,19 @@
         <script src="../js/startmin.js"></script>        
         {% endif %}
 
-    </body>
-    <script>
+
+        <script>
         console.log("{{html.params.menuitem}}");
         console.log("{{ menu_select }}");
         console.log("{{ html.params.menuitem|length }}");
-    </script>
+
+        $(document).ready(function () {
+            $('.menu_select > a').on( "click", function(e) {
+                e.preventDefault();
+                console.log("------>>", $this.attr("href"));
+
+            });
+        });
+        </script>
+    </body>
 </html>

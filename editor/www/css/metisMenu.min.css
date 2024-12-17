@@ -50,7 +50,7 @@
 }
 
 .fa.plus-minus:before {
-    content: "\f067"
+    content: "\f067" 
 }
 
 .active>a>.fa.plus-minus:before {

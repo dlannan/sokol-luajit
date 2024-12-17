@@ -1,10 +1,7 @@
-syntax error: unexpected token '?', expecting end of tag in pages/index.html:39
-Context:  set menu_select ?  <-- there
+internal error: editor\twig/aspect\utils.lua:184: bad argument #1 to 'pairs' (table expected, got string) in pages/index.html:47
 Lua stack traceback:
-	editor\twig/aspect\error.lua:49: in function 'compiler_error'
-	editor\twig/aspect\compiler.lua:261: in function <editor\twig/aspect\compiler.lua:202>
-	[C]: in function 'pcall'
-	editor\twig/aspect\compiler.lua:126: in function 'run'
+	editor\twig/aspect\error.lua:103: in function 'new'
+	editor\twig/aspect\compiler.lua:130: in function 'run'
 	editor\twig/aspect\template.lua:232: in function 'compile'
 	editor\twig/aspect\template.lua:311: in function 'get_view'
 	editor\twig/aspect\template.lua:393: in function 'render'
