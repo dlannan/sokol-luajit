@@ -66,14 +66,11 @@
         <!-- Metis Menu Plugin JavaScript -->
         <script src="../js/metisMenu.min.js"></script>
 
-        <div id="dashboard_js"></div>
-        <div id="tables_js"></div>
-        <div id="charts_js"></div>
-        <div id="entities_js"></div>
+        <!-- Main module being displayed - its associated js -->
+        <div id="module_js"></div>
 
         <!-- Custom Theme JavaScript -->
         <script src="../js/startmin.js"></script>
-
 
         <script>
         console.log("{{ html.params.menuitem }}");
@@ -87,13 +84,13 @@
                 if(name !== "#") {
                     console.log("------>>" + name);
                     $("#main-module").load( "/partials/" + name + ".html");
-                    $("#" + name + "_js").load( "/partials/" + name + "_js.html");
+                    $("#module_js").load( "/partials/" + name + "_js.html");
                 }
             });
 
             // Default start always load the dashbaord 
             $("#main-module").load( "/partials/dashboard.html");
-            $("#dashboard_js").load( "/partials/dashboard_js.html");
+            $("#module_js").load( "/partials/dashboard_js.html");
         });
         </script>
     </body>
