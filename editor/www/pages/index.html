@@ -66,60 +66,34 @@
         <!-- Metis Menu Plugin JavaScript -->
         <script src="../js/metisMenu.min.js"></script>
 
-        {% if menu_select == 'dashboard' %}
-        <!-- Morris Charts JavaScript -->
-        <script src="../js/raphael.min.js"></script>
-        <script src="../js/morris.min.js"></script>
-        <script src="../js/morris-data.js"></script>
-
-        <!-- Custom Theme JavaScript -->
-        <script src="../js/startmin.js"></script>
-        {% endif %}
-
-        {% if menu_select == 'tables' %}
-        <!-- DataTables JavaScript -->
-        <script src="../js/dataTables/jquery.dataTables.min.js"></script>
-        <script src="../js/dataTables/dataTables.bootstrap.min.js"></script>
+        <div id="dashboard_js"></div>
+        <div id="tables_js"></div>
+        <div id="charts_js"></div>
+        <div id="entities_js"></div>
 
         <!-- Custom Theme JavaScript -->
         <script src="../js/startmin.js"></script>
 
-        <!-- Page-Level Demo Scripts - Tables - Use for reference -->
-        <script>
-            $(document).ready(function () {
-                $('#dataTables-example').DataTable({
-                    responsive: true
-                });
-            });
-        </script>
-        {% endif %}
-
-        {% if menu_select == 'charts' %}
-        <!-- Flot Charts JavaScript -->
-        <script src="../js/flot/excanvas.min.js"></script>
-        <script src="../js/flot/jquery.flot.js"></script>
-        <script src="../js/flot/jquery.flot.pie.js"></script>
-        <script src="../js/flot/jquery.flot.resize.js"></script>
-        <script src="../js/flot/jquery.flot.time.js"></script>
-        <script src="../js/flot/jquery.flot.tooltip.min.js"></script>
-        <script src="../js/flot-data.js"></script>
-
-        <!-- Custom Theme JavaScript -->
-        <script src="../js/startmin.js"></script>        
-        {% endif %}
-
 
         <script>
-        console.log("{{html.params.menuitem}}");
+        console.log("{{ html.params.menuitem }}");
         console.log("{{ menu_select }}");
         console.log("{{ html.params.menuitem|length }}");
 
         $(document).ready(function () {
             $('.menu_select > a').on( "click", function(e) {
                 e.preventDefault();
-                console.log("------>>", $this.attr("href"));
-
+                let name = $(this).attr('href');
+                if(name !== "#") {
+                    console.log("------>>" + name);
+                    $("#main-module").load( "/partials/" + name + ".html");
+                    $("#" + name + "_js").load( "/partials/" + name + "_js.html");
+                }
             });
+
+            // Default start always load the dashbaord 
+            $("#main-module").load( "/partials/dashboard.html");
+            $("#dashboard_js").load( "/partials/dashboard_js.html");
         });
         </script>
     </body>
