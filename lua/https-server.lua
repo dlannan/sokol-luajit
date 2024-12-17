@@ -195,8 +195,9 @@ http_server.process_get = function( req, lines )
     local header, body = get_header_body(lines)
     for k,v in ipairs(pfunc) do
         local matches = {}
-        for capture in string.gmatch(req[2], v.pattern) do
-            tinsert(matches, capture)
+        for capture1, capture2 in string.gmatch(req[2], v.pattern) do
+            if(capture1) then tinsert(matches, capture1) end
+            if(capture2) then tinsert(matches, capture2) end
         end
         if(utils.tcount(matches) > 0) then 
             return  v.func(matches, req, header, body)
@@ -212,8 +213,9 @@ http_server.process_post = function( req, lines )
     local header, body = get_header_body(lines)
     for k,v in ipairs(pfunc) do
         local matches = {}
-        for capture in string.gmatch(req[2], v.pattern) do
-            tinsert(matches, capture)
+        for capture1, capture2 in string.gmatch(req[2], v.pattern) do
+            if(capture1) then tinsert(matches, capture1) end
+            if(capture2) then tinsert(matches, capture2) end
         end
         if(utils.tcount(matches) > 0) then 
             return v.func(matches, req, header, body)

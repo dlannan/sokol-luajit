@@ -38,7 +38,10 @@ local tinyserver	= {
     mem                 = 0, 
     deltas              = {},
 
-    vars                = {},
+    html                = {
+        current_page    = "index.html",
+        sb_menu_select  = "dashboard",
+    },
 }
 
 ------------------------------------------------------------------------------------------------------------

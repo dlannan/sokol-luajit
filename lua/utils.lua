@@ -301,30 +301,49 @@ function table.val_to_str ( v )
 	  return "table" == type( v ) and table.tostring( v ) or
 		tostring( v )
 	end
-  end
-  
-  function table.key_to_str ( k )
+end
+
+function table.key_to_str ( k )
 	if "string" == type( k ) and string.match( k, "^[_%a][_%a%d]*$" ) then
-	  return k
+		return k
 	else
-	  return "[" .. table.val_to_str( k ) .. "]"
+		return "[" .. table.val_to_str( k ) .. "]"
 	end
-  end
-  
-  function table.tostring( tbl )
-	local result, done = {}, {}
+end
+
+function table.tostring( tbl )
+local result, done = {}, {}
 	for k, v in ipairs( tbl ) do
-	  table.insert( result, table.val_to_str( v ) )
-	  done[ k ] = true
+		table.insert( result, table.val_to_str( v ) )
+		done[ k ] = true
 	end
 	for k, v in pairs( tbl ) do
-	  if not done[ k ] then
+		if not done[ k ] then
 		table.insert( result,
-		  table.key_to_str( k ) .. "=" .. table.val_to_str( v ) )
-	  end
+			table.key_to_str( k ) .. "=" .. table.val_to_str( v ) )
+		end
 	end
 	return "{" .. table.concat( result, "," ) .. "}"
-  end
+end
+
+-- ---------------------------------------------------------------------------
+
+function urldecode(s)
+	s = s:gsub('+', ' ')
+		 :gsub('%%(%x%x)', function(h)
+							 return string.char(tonumber(h, 16))
+						   end)
+	return s
+end
+  
+function parseurl(s)
+	if(s == nil) then return {} end
+	local ans = {}
+	for k,v in s:gmatch('([^&=?]-)=([^&=?]+)' ) do
+		ans[ k ] = urldecode(v)
+	end
+	return ans
+end
 
 -- ---------------------------------------------------------------------------
 return {
@@ -350,5 +369,8 @@ return {
 	tickround		= tickround,
 
 	loaddata		= loaddata,
+
+	urldecode		= urldecode,
+	parseurl 		= parseurl,
 }
 -- ---------------------------------------------------------------------------

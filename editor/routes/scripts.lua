@@ -12,7 +12,6 @@ local scripts_json = {
     end,
 }
 
-
 local scripts_js = {
     pattern = "/(.*%.js)%??.*$", 
     func = function(matches, stream, headers, body)
