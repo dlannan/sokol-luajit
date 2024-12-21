@@ -39,7 +39,7 @@ local function parse( fullpath, vars )
 
     local output, err = aspect:render(fullpath, vars)
     if(err) then
-        local errfile = io.open("aspect-error.log", "w")
+        local errfile = io.open("editor/aspect-error.log", "w")
         errfile:write( tostring(err) )
         errfile:close()
         print("Error in twig parse: ", fname)

@@ -13,6 +13,14 @@ local utils     = require("utils")
 local ffi       = require("ffi")
 
 -- --------------------------------------------------------------------------------------
+local shell32   = ffi.load("shell32")
+
+ffi.cdef[[
+    void Sleep(uint32_t ms);
+    void *  ShellExecuteA(const void * hwnd, const char * lpOperation, const char * lpFile, const char * lpParameters, char* lpDirectory, int nShowCmd);
+]]
+
+-- --------------------------------------------------------------------------------------
 -- Tiny ECS will be our core object manager. 
 --    Rendering, physics collision and more will be components to this system
 --    Rendering specifically will be built with a ldb that will run all the culling, sorting
@@ -32,8 +40,13 @@ local function init()
     sg.sg_setup( desc )
     print("Sokol Is Valid: "..tostring(sg.sg_isvalid()))
 
-    local cmd = [[start "" http://localhost:9190/index.html]]
-    io.popen(cmd, "r")
+    local hwnd = sapp.sapp_win32_get_hwnd()
+
+    local cmd = [[http://localhost:9190/index.html]]
+    local proc = shell32.ShellExecuteA( hwnd, "open", cmd, nil, nil, 1)
+--    io.popen(cmd, "r")
+    ffi.C.Sleep(500)
+
 end
 
 

@@ -6,7 +6,7 @@
 --				Can update objects remotely from http (localip)
 ------------------------------------------------------------------------------------------------------------
 
-local tinsert 		= table.insert
+local ffi           = require("ffi")
 
 local utils 		= require("lua.utils")
 local json          = require("lua.json")
@@ -20,7 +20,18 @@ local mem 		    = require("lua.metrics.mem")
 local twig          = require("editor.twig.twig")
 local dirtools      = require("tools.vfs.dirtools")
 
+local socket        = require("socket.core")
+local copas         = require("copas")
+local cmds          = require("editor.tiny-ecs-commands")
+local websocket     = require("websocket")
+                      require("utf8")
+
 base_www_path       = "editor/www/"
+
+------------------------------------------------------------------------------------------------------------
+
+local tinsert       = table.insert
+local tconcat       = table.concat
 
 ------------------------------------------------------------------------------------------------------------
 
@@ -69,6 +80,64 @@ local routes = {
 tinyserver.routes = routes
 
 ------------------------------------------------------------------------------------------------------------
+-- Websocket server
+
+local WS = {
+    WEBSOCK = "websocket",
+    HDR_KEY = "Sec-WebSocket-Key",
+    HDR_VER = "Sec-WebSocket-Version",
+    HDR_ACP = "Sec-WebSocket-Accept",
+    HDR_ORG = "Origin",
+    HDR_HST = "Host",
+    HDR_UPG = "Upgrade",
+    HDR_CON = "Connection",
+}
+
+------------------------------------------------------------------------------------------------------------
+
+ws_create = function( port )
+
+    websocket.ws_server = websocket.server.copas.listen(
+        {
+            interface = "127.0.0.1",
+            port = 8080,
+
+            -- the protocols field holds
+            --   key: protocol name
+            --   value: callback on new connection
+            protocols = {
+                -- this callback is called, whenever a new client connects.
+                -- ws is a new websocket instance
+                cmds = function(ws)
+
+                    while true do
+                        local message = ws:receive(websocket.BINARY)
+                        if message then
+                            local message = json.decode(message)
+                            cmds.process_command(ws, message)
+                            local outstr = json.encode({ Hello = "World"})
+                            ws:send( outstr )
+                        else
+                            ws:close()
+                            return
+                        end
+                    end
+                end
+            },
+
+            on_error = function( err )
+                print(string.format("[Error] %s", err))
+            end,
+
+        }
+    )
+    -- websocket.ws_server:setoption('reuseaddr', true)
+    -- assert(websocket.ws_server:bind("*", port or 8080))
+    -- websocket.ws_server:listen(5)
+    -- copas.addserver(websocket.ws_server, websocket.handler)
+end
+
+------------------------------------------------------------------------------------------------------------
 
 local function register_get( route )
 
@@ -97,7 +166,9 @@ end
 ------------------------------------------------------------------------------------------------------------
 
 local function startServer( host, port )
-    
+
+    ws_create()
+
     tinyserver.http_server = http_server.create(port)
 
     -- Add routes here if you need to load in specific asset/mime types

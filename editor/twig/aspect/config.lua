@@ -121,24 +121,24 @@ do
 end
 
 --- Detect UTF8 module
-do
-    local utf8
-    for _, name in ipairs({"lua-utf8", "utf8", "lutf8"}) do
-        local ok, module = pcall(require, name)
-        if ok then
-            utf8 = module
-            break
-        end
-    end
-    if utf8 then
-        config.utf8.len   = utf8.len or utf8.length
-        config.utf8.upper = utf8.upper
-        config.utf8.lower = utf8.lower
-        config.utf8.sub   = utf8.sub
-        config.utf8.match = utf8.match
-        config.utf8.find  = utf8.find
-    end
-end
+-- do
+--     local utf8
+--     for _, name in ipairs({"lua-utf8", "utf8", "lutf8"}) do
+--         local ok, module = pcall(require, name)
+--         if ok then
+--             utf8 = module
+--             break
+--         end
+--     end
+--     if utf8 then
+--         config.utf8.len   = utf8.len or utf8.length
+--         config.utf8.upper = utf8.upper
+--         config.utf8.lower = utf8.lower
+--         config.utf8.sub   = utf8.sub
+--         config.utf8.match = utf8.match
+--         config.utf8.find  = utf8.find
+--     end
+-- end
 
 --- Compiler configuration
 config.compiler = {

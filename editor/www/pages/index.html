@@ -66,6 +66,9 @@
         <!-- Metis Menu Plugin JavaScript -->
         <script src="../js/metisMenu.min.js"></script>
 
+        <!-- Used for fast messaging between luajit and js -->
+        <script src="../js/cbor.js" type="text/javascript"></script>
+
         <!-- Main module being displayed - its associated js -->
         <div id="module_js"></div>
 
@@ -78,19 +81,24 @@
         console.log("{{ html.params.menuitem|length }}");
 
         $(document).ready(function () {
+
             $('.menu_select > a').on( "click", function(e) {
                 e.preventDefault();
                 let name = $(this).attr('href');
                 if(name !== "#") {
                     console.log("------>>" + name);
-                    $("#main-module").load( "/partials/" + name + ".html");
-                    $("#module_js").load( "/partials/" + name + "_js.html");
+                    $("#main-module").load( "/partials/" + name + ".html", null, function()
+                    {
+                        $("#module_js").load( "/partials/" + name + "_js.html", null, function() {
+                        });
+                    });
                 }
             });
 
             // Default start always load the dashbaord 
-            $("#main-module").load( "/partials/dashboard.html");
-            $("#module_js").load( "/partials/dashboard_js.html");
+            $("#main-module").load( "/partials/dashboard.html", function(){
+                $("#module_js").load( "/partials/dashboard_js.html");
+            });
         });
         </script>
     </body>
