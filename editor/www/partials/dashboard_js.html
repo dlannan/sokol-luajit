@@ -2,3 +2,24 @@
 <script src="/js/raphael.min.js"></script>
 <script src="/js/morris.min.js"></script>
 <script src="/js/morris-data.js"></script>
+
+<script>
+
+// If there is no current project set (on the server side) then request a load or selection.
+$(document).ready(function () {
+
+    var current_project = {{ current_project? current_project:0 }};
+    console.log(current_project);
+    // Show project load/selection modal
+    if(current_project === 0) {
+        console.log("Show modal");
+        $("#modalProjectSelect").modal({
+            backdrop: 'static',
+            keyboard: false
+        });
+    }
+});
+
+</script>
+
+{% include("/modals/project_selection_js.html") %}

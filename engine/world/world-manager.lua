@@ -2,21 +2,27 @@
 
 local tinsert 	= table.insert
 
-local tiny 		= require('editor.tiny-ecs')
-local tinysrv	= require('editor.tiny-ecs-server')
+local tiny 		= require('engine.world.tiny-ecs')
+local tinysrv	= require('engine.world.tiny-ecs-server')
+local assetmgr 	= require("engine.world.asset-manager")
 local utils 	= require('lua.utils')
 local ffi 		= require("ffi")
 
 ------------------------------------------------------------------------------------------------------------
 
 local worldmanager = {
+
 	worlds = {},
 	worlds_lookup = {},
+	world_current = nil,
+
 	systems = {},
 	systems_lookup = {},
 	entities = {},
 	entities_lookup = {},
 	cameras_lookup = {},
+
+	assetmgr 	= assetmgr,
 }
 
 ------------------------------------------------------------------------------------------------------------
@@ -166,6 +172,48 @@ worldmanager.addSystem = function( self, systemname, filters, processFunc )
 end
 
 ------------------------------------------------------------------------------------------------------------
+-- Add an asset to the world - to be used by objects within the world
+--   This will be passed to the asset manager which determines the asset type and 
+--   populates with asset obj with the correct data.
+worldmanager.addAsset = function(self, assetFilename)
+
+
+end
+
+------------------------------------------------------------------------------------------------------------
+-- Each world thats created we make a default proc to process for http server
+worldmanager.loadDefaultAssets = function(self)
+
+	local thisworld = self.current_world
+	-- Always start with an empty asset pool when creating a new world.
+	local assetpool = {}
+
+	-- Add a default env (simple plane) 
+
+	-- Add the default skydome (so there is a decent bg)
+
+	-- Add some gizmos needed for editing and such (like xyz axis gizmo, bound cube gizmo etc)
+
+end
+
+------------------------------------------------------------------------------------------------------------
+-- Each world thats created we make a default proc to process for http server
+worldmanager.loadDefaultScenes = function(self)
+
+	return { { name = "Default", id = 0 } }
+end
+
+------------------------------------------------------------------------------------------------------------
+-- Each world thats created we make a default proc to process for http server
+worldmanager.loadDefaultScripts = function(self)
+
+	return { 
+		{ name = "global", id = 0, script = "engine.script.global", ref = "Global" },
+		{ name = "scene", id = 1, script = "engine.script.scene", ref = "Default" } 
+	}
+end
+
+------------------------------------------------------------------------------------------------------------
 -- Each world thats created we make a default proc to process for http server
 worldmanager.addWorld = function(self, worldname)
 
@@ -175,6 +223,14 @@ worldmanager.addWorld = function(self, worldname)
 	else
 		self.current_world = tiny.world()
 		self.current_world.name = worldname
+		-- These are asset groups for the world
+		self.current_world.groups = { { id = 0, name = "default", tags = "default,all" } } 
+		-- World assets. Some default assets are added automatically (mainly for editor)
+		self.current_world.assets = worldmanager.loadDefaultAssets(self)
+		self.current_world.scenes = worldmanager.loadDefaultScenes(self)
+		self.current_world.entities = {}
+		self.current_world.scripts = worldmanager.loadDefaultScripts(self)
+
 		-- Add an updater for entities in the httpserver
 		self:addSystem( worldname.."_Entities", { "name", "etype" }, tinysrv.entitySystemProc )
 

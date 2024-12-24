@@ -3,57 +3,25 @@ $(function() {
     $('#side-menu').metisMenu();     
 });
 
-
-function setup_websocket() {
-
-    var websocket = new WebSocket("ws://127.0.0.1:8080", "cmds");
-    websocket.binaryType = "arraybuffer";
-
-    websocket.onmessage = function(event) {
-        var message = CBOR.decode(event.data);
-        console.log(message);
-    };
-
-    websocket.onopen = function(event) {
-    // Handle connection open
-    };
-
-    websocket.onclose = function(event) {
-    // Handle connection close
-    };
-
-    function sendMessage(message) {
-        websocket.send(message);
-    }   
-
-    return websocket;
-}
-
-function Utf8ArrayToStr(str) {
-    const encoder = new TextEncoder(); // Uses 'utf-8' encoding by default
-    return encoder.encode(str).buffer;
-}
-
 (() => {
     console.log("Starting websocket...");
     const ws = new WebSocket("ws://127.0.0.1:8080", "cmds")
     ws.binaryType = "arraybuffer";
 
     ws.onopen = () => {
-      console.log('ws opened on browser')
+        console.log('ws opened on browser')
     }
   
     ws.onmessage = (event) => {
-        console.log(event);
+
         if (event.data instanceof ArrayBuffer) {
             const array = new Uint8Array(event.data);
             console.log('Received binary data: ', array);
         } 
         else {
+            // TODO: Process cmds/responses from server
             const jobj = JSON.parse(event.data);
-            console.log(jobj);
-
-            console.log('Received text data: ', event.data);
+            console.log('Received text data: ', jobj);
         }
     }
 
@@ -61,15 +29,16 @@ function Utf8ArrayToStr(str) {
         event.returnValue = ''; // Some browsers require this line
         console.log("Closing websocket...");
         ws.close();
-        return ''; // Some browsers require this line too
+        return ''; 
     });
 
     console.log("Ready websocket."); 
 
-    setTimeout( function() {
-        let json = { Hello: "World" };
-        ws.send(JSON.stringify(json));  
-    }, 1000);
+    // TODO: Make some send message helper funcs
+    // setTimeout( function() {
+    //     let json = { Hello: "World" };
+    //     ws.send(JSON.stringify(json));  
+    // }, 1000);
 
 })();
 

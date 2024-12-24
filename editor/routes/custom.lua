@@ -27,7 +27,7 @@ local entitydata = {
 }
 
 local worlddata = {
-    pattern = "/data/worlds$", 
+    pattern = "/data/world_assets$", 
     func = function(matches, stream, headers, body)
         local copy = {}
         for k,v in pairs(route.ecs_server.worlds) do 
@@ -44,6 +44,7 @@ local worlddata = {
         return route.http_server.json(worlds)
     end,
 }
+
 
 local systemdata = {
     pattern = "/data/systems$", 

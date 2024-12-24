@@ -215,53 +215,6 @@ local function csplit(str,sep)
 	return ret
 end
 
-------------------------------------------------------------------------------------------------------------
-
-local function windows_dir( folder )
-	local result = nil
-	local f = io.popen("dir /AD /b \""..tostring(folder).."\"")
-	if f then
-		result = f:read("*a")
-	else
-		print("[Error] failed to read - "..tostring(folder))
-	end
-	return result
-end
-
-------------------------------------------------------------------------------------------------------------
-
-local function unix_dir( folder )
-	local result = nil
-	local f = io.popen("ls -d -A -G -N -1 * \""..tostring(folder).."\"")
-	if f then
-		result = f:read("*a")
-	else
-		print("[Error] failed to read - "..tostring(folder))
-	end
-	return result
-end
-
-------------------------------------------------------------------------------------------------------------
-
-local function getdirs( folder )
-	local dirstr = ""
-	if ffi.os == "HTML5" then
-
-	elseif ffi.os == "Windows" then
-		dirstr = windows_dir(folder)
-	else
-		dirstr = unix_dir(folder)
-	end
-
-	-- split string by line endings into a nice table
-	local restbl = nil
-	if(dirstr) then 
-		restbl = csplit(dirstr, "\n")
-	end
-
-	return restbl
-end
-
 -- ---------------------------------------------------------------------------
 
 local function ByteCRC(sum, data)

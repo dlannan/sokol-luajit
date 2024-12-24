@@ -197,6 +197,10 @@ body {
     color: #fff;
 }
 
+.dropdown {
+    display: inline-block;
+}
+
 .chat {
     margin: 0;
     padding: 0;
@@ -657,3 +661,51 @@ table.dataTable thead .sorting:after {
     color: #fff; /* active text color */
     background-color: #a94442; /* active bg color */
 }
+
+
+/* tiny-ecs css specific */
+
+.h1-slim {
+    margin-bottom: 0;
+}
+
+.page-header-right {
+    top: -35px;
+    position: relative;
+}
+
+.world-select {
+    float: right;
+}
+
+.world-select > h4 {
+    float: left;
+}
+
+.world-select .dropdown {
+    text-align: right;
+}
+
+.world-select .dropdown .btn,
+.world-select .dropdown .dropdown-menu {
+    min-width: 200px;
+}
+
+.sys-folders {
+    height: 30vh;
+}
+
+.sys-folders-list thead, 
+.sys-folders-list tbody, 
+.sys-folders-list tr, 
+.sys-folders-list td, 
+.sys-folders-list th { 
+    display: block; 
+}
+
+.sys-folders-list tbody { 
+    overflow-y: scroll;
+    height: 28vh;
+}
+
+

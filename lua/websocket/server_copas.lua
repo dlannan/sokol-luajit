@@ -57,7 +57,7 @@ local listen = function(opts)
   local listener = assert(socket.tcp())
   listener:setoption('reuseaddr', true)
   listener:bind(opts.interface or '*',opts.port or 80)
-  listener:listen(5)
+  listener:listen(1)
   
   local protocols = {}
   if opts.protocols then

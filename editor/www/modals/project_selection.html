@@ -1,0 +1,82 @@
+<!-- Modal -->
+<div class="modal fade" id="modalProjectSelect" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Projects</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">
+                            Project Load
+                        </div>
+                        <div class="panel-body">
+                            <p>Creating a New Project will create a folder with the project name in the selected Folder Path.</p>
+                            <p> <i>Note: The project name does not support symbols.</i></p>
+
+                            <form role="form">
+                                <div class="form-group input-group">
+                                    <span class="input-group-addon">Project Name</span>
+                                    <input type="text" class="form-control" placeholder="MegaProject">
+                                </div>
+                            </form>
+
+                            <p>Configuration for the project can be modified after the project has been created.</p>
+
+                            <p>
+                                Drives: 
+                                {% for drive in projectmgr.sys.drives %}
+                                <button type="button" class="btn btn-primary drive-select" data="{{ drive }}">{{ drive }}</button>
+                                {% endfor %}
+                            </p>
+                            <div id="sys-folders-select" class="sys-folders"></div>
+                        </div>
+                        <div class="panel-footer modal-footer">
+                            <button type="button" class="btn btn-primary">New Project</button>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.col-lg-6 -->
+
+                <div class="row">
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">
+                            Recent Projects
+                        </div>
+                        <div class="panel-body">
+                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum tincidunt est vitae
+                                ultrices
+                                accumsan. Aliquam ornare lacus adipiscing, posuere lectus et, fringilla augue.</p>
+                            <div class="table-responsive">
+                                <table class="table table-striped table-bordered table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Project Name</th>
+                                            <th>Folder Path</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for project in projectmgr.recents %}
+                                        <tr>
+                                            <td>{{ project.name }}</td>
+                                            <td>{{ project.folderpath }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <!-- /.table-responsive -->
+                        </div>
+                        <div class="panel-footer modal-footer">
+                            <button type="button" class="btn btn-primary">Load Project</button>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.col-lg-6 -->
+            </div>
+        </div>
+    </div>
+</div>

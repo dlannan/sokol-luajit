@@ -11,7 +11,7 @@ local ffi           = require("ffi")
 local utils 		= require("lua.utils")
 local json          = require("lua.json")
 local tf 			= require("lua.transforms")
-local tiny          = require("editor.tiny-ecs")
+local tiny          = require("engine.world.tiny-ecs")
 local http_server   = require("lua.https-server")
 
 local fps 		    = require("lua.metrics.fps")
@@ -22,11 +22,18 @@ local dirtools      = require("tools.vfs.dirtools")
 
 local socket        = require("socket.core")
 local copas         = require("copas")
-local cmds          = require("editor.tiny-ecs-commands")
+local cmds          = require("engine.world.tiny-ecs-commands")
 local websocket     = require("websocket")
                       require("utf8")
 
 base_www_path       = "editor/www/"
+
+-- --------------------------------------------------------------------------------------
+-- The project manager handles configuration of the project data (build, debug etc)
+--   Project manager defines what worlds, assets and folders are accessible for the project
+--   Note: the editor should _always_ have an active project. If it doesnt have one, it will 
+--         show a load panel to load one. 
+local projectmgr    = require("engine.world.project-manager")
 
 ------------------------------------------------------------------------------------------------------------
 
@@ -53,6 +60,8 @@ local tinyserver	= {
         current_page    = "index.html",
         sb_menu_select  = "dashboard",
     },
+
+    projectmgr          = projectmgr,
 }
 
 ------------------------------------------------------------------------------------------------------------
@@ -80,20 +89,6 @@ local routes = {
 tinyserver.routes = routes
 
 ------------------------------------------------------------------------------------------------------------
--- Websocket server
-
-local WS = {
-    WEBSOCK = "websocket",
-    HDR_KEY = "Sec-WebSocket-Key",
-    HDR_VER = "Sec-WebSocket-Version",
-    HDR_ACP = "Sec-WebSocket-Accept",
-    HDR_ORG = "Origin",
-    HDR_HST = "Host",
-    HDR_UPG = "Upgrade",
-    HDR_CON = "Connection",
-}
-
-------------------------------------------------------------------------------------------------------------
 
 ws_create = function( port )
 
@@ -111,7 +106,7 @@ ws_create = function( port )
                 cmds = function(ws)
 
                     while true do
-                        local message = ws:receive(websocket.BINARY)
+                        local message = ws:receive()
                         if message then
                             local message = json.decode(message)
                             cmds.process_command(ws, message)
@@ -131,10 +126,6 @@ ws_create = function( port )
 
         }
     )
-    -- websocket.ws_server:setoption('reuseaddr', true)
-    -- assert(websocket.ws_server:bind("*", port or 8080))
-    -- websocket.ws_server:listen(5)
-    -- copas.addserver(websocket.ws_server, websocket.handler)
 end
 
 ------------------------------------------------------------------------------------------------------------
@@ -245,6 +236,8 @@ end
 
 tinyserver.init = function()
 
+    projectmgr:init()
+
     local base_path = dirtools.get_app_path()
     local editor_path = dirtools.combine_path(base_path, "editor")
     editor_path = dirtools.combine_path(editor_path, "www")
@@ -271,6 +264,8 @@ tinyserver.update = function ()
     tinyserver.fps = fps.fps()
     tinyserver.mem = mem.mem()
     tinyserver.deltas = fps.deltas()
+
+    cmds.process_queue()
     
     http_server.update()
 end

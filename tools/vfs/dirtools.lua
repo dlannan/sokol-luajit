@@ -32,6 +32,17 @@ local tconcat   = table.concat
 --         the specific pathing and file types as part of the require system.
 ---------------------------------------------------------------------------------------
 
+
+local allfolders_cmd = "dir /ON /AD /B %s"
+if(ffi.os ~= "Windows") then allfolders_cmd = "ls -p %s | grep /" end
+local allfiles_cmd = "dir /ON /A-D /B %s"
+if(ffi.os ~= "Windows") then allfiles_cmd = "ls -p %s | grep -v /" end
+
+-- --------------------------------------------------------------------------------------
+
+local list_folders_cache = {}
+local list_cache = {}
+
 local sep = "\\"
 if(ffi.os ~= "Windows") then sep = "/" end
 dirtools.sep = sep
@@ -59,6 +70,16 @@ end
 
 ---------------------------------------------------------------------------------------
 
+local function log_info( str )
+    print(string.format("[Info] %s", str))
+end
+
+local function log_error( str )
+    print(string.format("[Error] %s", str))
+end
+
+---------------------------------------------------------------------------------------
+
 dirtools.add_cpath = function( new_path )
     package.cpath    = package.cpath..";"..new_path
 end
@@ -67,16 +88,6 @@ end
 
 dirtools.add_package_path = function( new_path )
     package.path    = package.path..";"..new_path.."/?.lua"
-end
-
----------------------------------------------------------------------------------------
-
-local function log_info( str )
-    print(string.format("[Info] %s", str))
-end
-
-local function log_error( str )
-    print(string.format("[Error] %s", str))
 end
 
 ---------------------------------------------------------------------------------------
@@ -244,16 +255,6 @@ end
 
 -- --------------------------------------------------------------------------------------
 
-local allfolders_cmd = "dir /ON /AD /B %s"
-if(ffi.os ~= "Windows") then allfolders_cmd = "ls -p %s | grep /" end
-local allfiles_cmd = "dir /ON /A-D /B %s"
-if(ffi.os ~= "Windows") then allfiles_cmd = "ls -p %s | grep -v /" end
-
--- --------------------------------------------------------------------------------------
-
-local list_folders_cache = {}
-local list_cache = {}
-
 dirtools.get_folderslist = function(path, cache_update)
 
     -- Check path first. If its a drive on windows then no caching
@@ -353,6 +354,53 @@ dirtools.get_parent = function( path )
     return parentpath
 end
 
+------------------------------------------------------------------------------------------------------------
+
+local function windows_dir( folder )
+	local result = nil
+	local f = io.popen("dir /AD /b \""..tostring(folder).."\"")
+	if f then
+		result = f:read("*a")
+	else
+		print("[Error] failed to read - "..tostring(folder))
+	end
+	return result
+end
+
+------------------------------------------------------------------------------------------------------------
+
+local function unix_dir( folder )
+	local result = nil
+	local f = io.popen("ls -d -A -G -N -1 * \""..tostring(folder).."\"")
+	if f then
+		result = f:read("*a")
+	else
+		print("[Error] failed to read - "..tostring(folder))
+	end
+	return result
+end
+
+------------------------------------------------------------------------------------------------------------
+
+dirtools.getdirs = function ( folder )
+	local dirstr = ""
+	if ffi.os == "HTML5" then
+
+	elseif ffi.os == "Windows" then
+		dirstr = windows_dir(folder)
+	else
+		dirstr = unix_dir(folder)
+	end
+
+	-- split string by line endings into a nice table
+	local restbl = nil
+	if(dirstr) then 
+		restbl = csplit(dirstr, "\n")
+	end
+
+	return restbl
+end
+
 ---------------------------------------------------------------------------------------
 
 dirtools.find_folder = function( start_path, parent_up, folder_name )
@@ -375,6 +423,13 @@ dirtools.find_folder = function( start_path, parent_up, folder_name )
         end
     end
     return nil
+end
+
+---------------------------------------------------------------------------------------
+
+dirtools.fileparts = function( path )
+
+    return string.match(path, "(.-)([^\\/]-([^%.]+))$")
 end
 
 ---------------------------------------------------------------------------------------

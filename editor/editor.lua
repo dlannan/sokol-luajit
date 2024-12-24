@@ -25,7 +25,7 @@ ffi.cdef[[
 --    Rendering, physics collision and more will be components to this system
 --    Rendering specifically will be built with a ldb that will run all the culling, sorting
 --      and binning needed. This will be decoupled from the editor itself. 
-local tiny          = require('editor.world-manager')
+local tiny          = require('engine.world.world-manager')
 
 -- --------------------------------------------------------------------------------------
 

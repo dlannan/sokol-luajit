@@ -1,5 +1,7 @@
 local utils 		    = require("utils")
 local json              = require("json")
+local dirtools          = require("tools.vfs.dirtools")
+
 local route = {
     http_server = nil,
     ecs_server = nil,
@@ -62,12 +64,77 @@ local posts_cameraeffect = {
     end,
 }
 
+local posts_assetloaddata = {
+    pattern = "/world/assets/loaddata$",
+    func = function(matches, stream, headers, body)
+
+        if(body == nil) then 
+            return route.http_server.html("failed. no post data.")
+        end
+
+        print("Asset Loaddata: ", body)
+
+        local cdata = json.decode(body)
+        --if(cdata.effect) then msg.post("/ecs", cdata.effect) end
+        if(cdata.filename) then 
+            route.ecs_server.assetmgr.loaddata(cdata)
+        end
+        return route.http_server.json("success")
+    end,
+}
+
+local posts_projectsysgetfolder = {
+    pattern = "/project/sys/get_folder$",
+    func = function(matches, stream, headers, body)
+
+        if(body == nil) then 
+            return route.http_server.html("failed. no post data.")
+        end
+
+        local cdata = json.decode(body)
+        print("Folder selected: ", cdata.folder)
+        if(cdata.folder) then 
+            if(cdata.folder == "..") then 
+                route.ecs_server.projectmgr.sys.current_folder = dirtools.get_parent(route.ecs_server.projectmgr.sys.current_folder)
+            else 
+                route.ecs_server.projectmgr.sys.current_folder = dirtools.combine_path(route.ecs_server.projectmgr.sys.current_folder, cdata.folder)
+            end
+            route.ecs_server.projectmgr.sys.folders = dirtools.get_folderslist(route.ecs_server.projectmgr.sys.current_folder, true)
+        end
+        return route.http_server.json("success")
+    end,
+}
+
+local posts_projectsysgetdrive = {
+    pattern = "/project/sys/get_drive$",
+    func = function(matches, stream, headers, body)
+
+        if(body == nil) then 
+            return route.http_server.html("failed. no post data.")
+        end
+
+        local cdata = json.decode(body)
+        print("Drive selected: ", cdata.drive)
+        if(cdata.drive) then 
+            route.ecs_server.projectmgr.sys.current_folder = cdata.drive
+            route.ecs_server.projectmgr.sys.folders = dirtools.get_folderslist(cdata.drive)
+        end
+        return route.http_server.json("success")
+    end,
+}
+
+
 route.routes = {
     posts_form,
     posts_systems,
 
     posts_cameraenable,
     posts_cameraeffect,
+
+    posts_assetloaddata,
+
+    posts_projectsysgetdrive,
+    posts_projectsysgetfolder,
 }
 
 return route

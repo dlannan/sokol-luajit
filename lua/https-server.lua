@@ -18,7 +18,7 @@ local http_server = {
     ---The parameter backlog specifies the number of client connections
     -- that can be queued waiting for service. If the queue is full and
     -- another client attempts connection, the connection is refused.
-    backlog=5,
+    backlog=10,
     --}}Options
 
     NOT_FOUND = "endpoint not found.",
@@ -29,6 +29,8 @@ local http_server = {
         get_funcs = {},
         post_funcs = {},
     },
+
+    sockets = {},
 }
 
 ------------------------------------------------------------------------------------------------------------
@@ -58,9 +60,10 @@ http_server.create = function(port)
     -- create a TCP socket and bind it to the local host, at any port
     http_server.server = assert(socket.tcp())
     http_server.server:setoption('reuseaddr', true)
+    http_server.server:setoption('keepalive', true)
     assert(http_server.server:bind("*", port))
+    
     http_server.server:listen(http_server.backlog)
-
     copas.addserver(http_server.server, http_server.handler)
     copas.running = true
 
@@ -79,7 +82,7 @@ end
 
 http_server.update = function()
     -- roughly 60Hz update rate (step depends alot on traffic)
-    copas.step(0.01666666)
+    copas.step(0)
 end
 
 ------------------------------------------------------------------------------------------------------------
@@ -88,6 +91,15 @@ http_server.html = function( html )
 
     local resp = "HTTP/1.0 200 OK\nContent-Type: text/html\n\n"
     resp = string.format("%s%s", resp, tostring(html))
+    return resp
+end
+
+------------------------------------------------------------------------------------------------------------
+
+http_server.post = function( url )
+
+    local resp = "HTTP/1.0 302 Found\nLocation: "
+    resp = string.format("%s%s\n\n", resp, tostring(url))
     return resp
 end
 
@@ -173,11 +185,10 @@ local function get_header_body( lines )
                 body = body..tostring(line).."\n"
             end
 
-            if string.match(line, "^\r\n$") and possible_header == true and header_done == false then 
+            if (string.len(line) == 1 and string.match(line, "\r")) and header_done == false then 
                 header_done = true
-            end
-            if string.match(line, ".-\r\n$") and possible_header == false and header_done == false then 
-                possible_header = true
+            elseif (string.len(line) == 0) and header_done == false then 
+                header_done = true
             end
         end
     end
@@ -226,14 +237,14 @@ end
 
 ------------------------------------------------------------------------------------------------------------
 
-local function process_requests( req )
+local function process_requests( lines )
     
     -- Break into lines first
     local header = nil
-    local lines = utils.csplit( req, "\n")
+    -- local lines = utils.csplit( req, "\n")
     if(utils.tcount(lines) == 0) then 
-        lines = req 
-        header = req 
+        lines = {} 
+        header = ""
     else 
         header = lines[1]
     end 
@@ -251,30 +262,44 @@ end
 
 ------------------------------------------------------------------------------------------------------------
 -- loop forever waiting for clients
+
 http_server.handler = function(skt)
 	
     -- Collate recieve if there is data to read
     local finished = false 
     local data = {}
+    local error = nil
+    local has_data = nil
+    local tries = 0
+    local read_complete = false
 
-    while true do 
-        local indata, err  = copas.receive(skt)
-        if(indata == nil or string.len(indata) == 0 or err ~= nil) then 
+    while not read_complete do 
+        local indata, err, partial  = skt:receive()
+        if(indata == nil or err ~= nil) then 
+            error = err
+            read_complete = true
+            if(partial) then tinsert(data, partial) end
             break
-        end   
-        tinsert(data, indata)
+        else
+            has_data = true
+            tinsert(data, indata)
+        end
     end
 
-    if(utils.tcount(data) > 0) then 
-        local reqdata = tconcat(data, "\n")
+    -- if(error) then print("[Error] "..error) end
+
+    if(has_data) then 
+        --local reqdata = tconcat(data, "\n")
         -- print(reqdata)
+        -- print("---------------------------------------------------")
+        
         -- Process request from client
-        local html = process_requests(reqdata)
+        local html = process_requests(data)
         if(html) then 
-            copas.send(skt, html, 1, string.len(html))
+            skt:send(html, 1, string.len(html))
         end
-        -- copas.send(skt, "HTTP/1.0 200 OK\n\n\ncopas are you there?")
     end
+    skt:close()
 end 
 
 ------------------------------------------------------------------------------------------------------------
