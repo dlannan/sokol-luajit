@@ -369,7 +369,7 @@ function template:render_view(view, vars, options)
         out:push_view(view)
     end
     ok, error = pcall(view.body, out, vars)
-    print(ok,error)
+    --print(ok,error)
     if ok then
         return out:finish()
     elseif err.is(error) then

@@ -83,6 +83,7 @@ local posts_assetloaddata = {
     end,
 }
 
+-- Technically this gets files and folders, but we only show folders and slp's
 local posts_projectsysgetfolder = {
     pattern = "/project/sys/get_folder$",
     func = function(matches, stream, headers, body)
@@ -92,14 +93,18 @@ local posts_projectsysgetfolder = {
         end
 
         local cdata = json.decode(body)
-        print("Folder selected: ", cdata.folder)
+
         if(cdata.folder) then 
+
             if(cdata.folder == "..") then 
                 route.ecs_server.projectmgr.sys.current_folder = dirtools.get_parent(route.ecs_server.projectmgr.sys.current_folder)
             else 
-                route.ecs_server.projectmgr.sys.current_folder = dirtools.combine_path(route.ecs_server.projectmgr.sys.current_folder, cdata.folder)
+                local path, name, ext = dirtools.fileparts(cdata.folder)
+                if(ext ~= "slp") then 
+                    route.ecs_server.projectmgr.sys.current_folder = dirtools.combine_path(route.ecs_server.projectmgr.sys.current_folder, cdata.folder)
+                end
             end
-            route.ecs_server.projectmgr.sys.folders = dirtools.get_folderslist(route.ecs_server.projectmgr.sys.current_folder, true)
+            route.ecs_server.projectmgr.sys.folders = dirtools.get_dirlist(route.ecs_server.projectmgr.sys.current_folder, true, "slp")
         end
         return route.http_server.json("success")
     end,
@@ -114,7 +119,6 @@ local posts_projectsysgetdrive = {
         end
 
         local cdata = json.decode(body)
-        print("Drive selected: ", cdata.drive)
         if(cdata.drive) then 
             route.ecs_server.projectmgr.sys.current_folder = cdata.drive
             route.ecs_server.projectmgr.sys.folders = dirtools.get_folderslist(cdata.drive)

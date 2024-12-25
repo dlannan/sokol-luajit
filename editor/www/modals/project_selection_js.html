@@ -2,6 +2,12 @@
 
 <script>
 
+function updateFolders(data) {
+    $("#sys-folders-select").load( "/partials/sys/folders-select.html", null, function() { 
+        checkFolderSelect();
+    });
+}
+
 function postData( url, data, success )
 {
     var jqxhr = $.ajax({
@@ -18,11 +24,7 @@ function checkFolderSelect()
 {
     $(".sys-select-folder").on("click", function(evt){
         var jdata = { folder: $(this).text()};
-        postData("/project/sys/get_folder", jdata, function(data){
-            $("#sys-folders-select").load( "/partials/sys/folders-select.html", null, function() { 
-                checkFolderSelect();
-            })
-        });
+        postData("/project/sys/get_folder", jdata, updateFolders);
     });
 }
 
@@ -31,11 +33,7 @@ $(document).ready(function () {
     $(".drive-select").on("click", function(evt){
             console.log($(this).attr("data"));
             var jdata = { drive: $(this).attr("data")};
-            postData("/project/sys/get_drive", jdata, function(data){
-                $("#sys-folders-select").load( "/partials/sys/folders-select.html", null, function() { 
-                    checkFolderSelect();
-                });
-            });
+            postData("/project/sys/get_drive", jdata, updateFolders);
             evt.preventDefault();
     });
 

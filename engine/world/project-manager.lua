@@ -15,6 +15,7 @@ local projectmanager = {
     sys         = {
         drives  = dirtools.get_drives(),
         folders = dirtools.get_folderslist("."),
+        current_folder = dirtools.get_app_path(),
     },
 }
 

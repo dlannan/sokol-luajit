@@ -8,38 +8,6 @@
                 <h4 class="modal-title" id="myModalLabel">Projects</h4>
             </div>
             <div class="modal-body">
-                <div class="row">
-                    <div class="panel panel-primary">
-                        <div class="panel-heading">
-                            Project Load
-                        </div>
-                        <div class="panel-body">
-                            <p>Creating a New Project will create a folder with the project name in the selected Folder Path.</p>
-                            <p> <i>Note: The project name does not support symbols.</i></p>
-
-                            <form role="form">
-                                <div class="form-group input-group">
-                                    <span class="input-group-addon">Project Name</span>
-                                    <input type="text" class="form-control" placeholder="MegaProject">
-                                </div>
-                            </form>
-
-                            <p>Configuration for the project can be modified after the project has been created.</p>
-
-                            <p>
-                                Drives: 
-                                {% for drive in projectmgr.sys.drives %}
-                                <button type="button" class="btn btn-primary drive-select" data="{{ drive }}">{{ drive }}</button>
-                                {% endfor %}
-                            </p>
-                            <div id="sys-folders-select" class="sys-folders"></div>
-                        </div>
-                        <div class="panel-footer modal-footer">
-                            <button type="button" class="btn btn-primary">New Project</button>
-                        </div>
-                    </div>
-                </div>
-                <!-- /.col-lg-6 -->
 
                 <div class="row">
                     <div class="panel panel-primary">
@@ -76,6 +44,37 @@
                     </div>
                 </div>
                 <!-- /.col-lg-6 -->
+
+                <div class="row">
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">
+                            Create or Open Project
+                        </div>
+                        <div class="panel-body">
+                            <p>Creating a New Project will create a folder with the project name in the selected Folder Path.</p>
+                            <p> <i>Note: The project name does not support symbols.</i></p>
+
+                            <form role="form">
+                                <div class="form-group input-group">
+                                    <span class="input-group-addon">New Project Name</span>
+                                    <input type="text" class="form-control" placeholder="MegaProject">                                    
+                                </div>
+                            </form>
+
+                            <p>Configuration for the project can be modified after the project has been created.</p>
+
+                            <p>
+                                Drives: 
+                                {% for drive in projectmgr.sys.drives %}
+                                <button type="button" class="btn btn-primary drive-select" data="{{ drive }}">{{ drive }}</button>
+                                {% endfor %}
+                            </p>
+                            <div id="sys-folders-select" class="sys-folders"></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.col-lg-6 -->
+
             </div>
         </div>
     </div>

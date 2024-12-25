@@ -33,10 +33,10 @@ local tconcat   = table.concat
 ---------------------------------------------------------------------------------------
 
 
-local allfolders_cmd = "dir /ON /AD /B %s"
-if(ffi.os ~= "Windows") then allfolders_cmd = "ls -p %s | grep /" end
-local allfiles_cmd = "dir /ON /A-D /B %s"
-if(ffi.os ~= "Windows") then allfiles_cmd = "ls -p %s | grep -v /" end
+local allfolders_cmd = [[dir /ON /AD /B "%s"]]
+if(ffi.os ~= "Windows") then allfolders_cmd = [[ls -p "%s" | grep /]] end
+local allfiles_cmd = [[dir /ON /A-D /B "%s"]]
+if(ffi.os ~= "Windows") then allfiles_cmd = [[ls -p "%s" | grep -v /]] end
 
 -- --------------------------------------------------------------------------------------
 
@@ -169,7 +169,7 @@ end
 if(ffi.os == "Windows") then 
     dirtools.is_folder = function(path)
 
-        local fh = io.popen("attrib "..path, "r")
+        local fh = io.popen([[attrib "]]..path..[["]], "r")
         if(fh) then 
             local res = fh:read("*a")
             local fileattr = string.sub(res, 1, 20)
@@ -198,8 +198,8 @@ end
 dirtools.make_folder = function(folderpath)
 
     if(dirtools.is_folder(folderpath) == false) then 
-        local cmd = "mkdir -f "..folderpath
-        if(ffi.os == "Windows") then cmd = "mkdir "..folderpath end
+        local cmd = [[mkdir -f "]]..folderpath..[["]]
+        if(ffi.os == "Windows") then cmd = [[mkdir "]]..folderpath..[["]] end
         local fh = io.popen(cmd, "r")
         if(fh) then 
             local data = fh:read("*a")
@@ -249,7 +249,7 @@ dirtools.get_app_path = function( expected_root_folder )
             base_dir = "" 
         end
     end
-    -- print("Base Directory: "..base_dir)
+    -- log_info("Base Directory: "..base_dir)
     return base_dir
 end
 
@@ -294,7 +294,7 @@ end
 
 ---------------------------------------------------------------------------------------
 
-dirtools.get_dirlist = function(path, cache_update)
+dirtools.get_dirlist = function(path, cache_update, extfilter)
 
     -- Check path first. If its a drive on windows then no caching
     if(ffi.os == "Windows") then 
@@ -307,7 +307,7 @@ dirtools.get_dirlist = function(path, cache_update)
     end
 
     -- Get all the folders first
-    local files = dirtools.get_folderslist(path)
+    local files = dirtools.get_folderslist(path, cache_update)
 
     -- Add the files to the list.
     local res = ""
@@ -326,10 +326,17 @@ dirtools.get_dirlist = function(path, cache_update)
     end
 
     for f in string.gmatch(res, "(.-)\n") do 
-        local newfile = { name = ffi.string(f), folder = nil }
-        newfile.select = ffi.new("int[1]")
-        newfile.select[0] = 0
-        table.insert(files, newfile) 
+        -- Only match with filter on end of filename
+        local add_file = true
+        if(extfilter) then 
+            add_file = string.match(f, extfilter.."$")
+        end
+        if(add_file) then 
+            local newfile = { name = ffi.string(f), folder = nil }
+            newfile.select = ffi.new("int[1]")
+            newfile.select[0] = 0
+            table.insert(files, newfile) 
+        end
     end    
 
     list_cache[path] = files
@@ -362,7 +369,7 @@ local function windows_dir( folder )
 	if f then
 		result = f:read("*a")
 	else
-		print("[Error] failed to read - "..tostring(folder))
+		log_error("failed to read - "..tostring(folder))
 	end
 	return result
 end
@@ -375,7 +382,7 @@ local function unix_dir( folder )
 	if f then
 		result = f:read("*a")
 	else
-		print("[Error] failed to read - "..tostring(folder))
+		log_error("failed to read - "..tostring(folder))
 	end
 	return result
 end

@@ -703,9 +703,23 @@ table.dataTable thead .sorting:after {
     display: block; 
 }
 
+.sys-folders-list th {
+    padding: 0!important;
+    border-bottom: 0!important;
+}
+
+.sys-folders-list th > form > div {
+    margin-bottom: 2px!important;
+}
+
 .sys-folders-list tbody { 
     overflow-y: scroll;
     height: 28vh;
 }
 
+.sys-folders-list-project button {
+    padding-top: 0;
+    padding-bottom: 0;
+    float: right;
+}
 
