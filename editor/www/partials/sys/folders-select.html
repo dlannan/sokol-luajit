@@ -22,7 +22,7 @@
                 {% if folder.folder or folder.name == ".." %}
                 <td class="sys-select-folder">{{ folder.name }}</td>
                 {% else %}
-                <td class="sys-folders-list-project">{{ folder.name }} <button type="button" class="btn btn-primary"><i class="fa  fa-arrow-right fa-fw"></i></button></td>
+                <td class="sys-folders-list-project">{{ folder.name }} <button type="button" class="btn btn-primary" data-toggle="tooltip" data-placement="bottom" title="Open the project"><i class="fa  fa-arrow-right fa-fw"></i></button></td>
                 {% endif %}
             </tr>
             {% endfor %}

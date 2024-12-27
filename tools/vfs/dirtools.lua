@@ -202,7 +202,8 @@ end
 
 dirtools.make_folder = function(folderpath)
 
-    if(dirtools.is_folder(folderpath) == false) then 
+    local found = dirtools.is_folder(folderpath)
+    if(found == nil) then 
         local cmd = [[mkdir -f "]]..folderpath..[["]]
         if(ffi.os == "Windows") then cmd = [[mkdir "]]..folderpath..[["]] end
         local fh = io.popen(cmd, "r")
@@ -210,9 +211,13 @@ dirtools.make_folder = function(folderpath)
             local data = fh:read("*a")
             fh:close() 
             log_info(data)
+            return true
         else 
             log_error("Cannot make folder: "..folderpath)
+            return nil
         end
+    else
+        log_info("Folder already exists: "..folderpath)
     end
 end
 

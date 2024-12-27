@@ -28,13 +28,6 @@ local websocket     = require("websocket")
 
 base_www_path       = "editor/www/"
 
--- --------------------------------------------------------------------------------------
--- The project manager handles configuration of the project data (build, debug etc)
---   Project manager defines what worlds, assets and folders are accessible for the project
---   Note: the editor should _always_ have an active project. If it doesnt have one, it will 
---         show a load panel to load one. 
-local projectmgr    = require("engine.world.project-manager")
-
 ------------------------------------------------------------------------------------------------------------
 
 local tinsert       = table.insert
@@ -60,8 +53,6 @@ local tinyserver	= {
         current_page    = "index.html",
         sb_menu_select  = "dashboard",
     },
-
-    projectmgr          = projectmgr,
 }
 
 ------------------------------------------------------------------------------------------------------------
@@ -235,8 +226,6 @@ end
 ------------------------------------------------------------------------------------------------------------
 
 tinyserver.init = function()
-
-    projectmgr:init()
 
     local base_path = dirtools.get_app_path()
     local editor_path = dirtools.combine_path(base_path, "editor")

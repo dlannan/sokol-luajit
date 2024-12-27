@@ -242,6 +242,13 @@ end
 
 ------------------------------------------------------------------------------------------------------------
 
+worldmanager.addmanager = function(mgrname, mgrobj)
+	-- This adds the manager to be accessible by twig using the mgrname
+    tinysrv[mgrname] = mgrobj
+end
+
+------------------------------------------------------------------------------------------------------------
+
 worldmanager.processOptions = function(self, options) 
 	if(options) then 
 		if(options.noserver == true) then 

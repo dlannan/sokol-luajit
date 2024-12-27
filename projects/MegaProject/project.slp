@@ -1,0 +1,12 @@
+{
+    "name": "MegaProject",
+    "filename": "F:\\dev\\luajit\\Thunc\\sokol-luajit\\projects\\MegaProject\\project.slp",
+    "paths": {
+        "config": "F:\\dev\\luajit\\Thunc\\sokol-luajit\\projects\\MegaProject\\config",
+        "build": "F:\\dev\\luajit\\Thunc\\sokol-luajit\\projects\\MegaProject\\build",
+        "project": "F:\\dev\\luajit\\Thunc\\sokol-luajit\\projects\\MegaProject",
+        "data": "F:\\dev\\luajit\\Thunc\\sokol-luajit\\projects\\MegaProject\\data",
+        "cache": "F:\\dev\\luajit\\Thunc\\sokol-luajit\\projects\\MegaProject\\cache",
+        "assets": "F:\\dev\\luajit\\Thunc\\sokol-luajit\\projects\\MegaProject\\assets"
+    }
+}

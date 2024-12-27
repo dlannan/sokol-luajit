@@ -5,9 +5,8 @@
 function showConfirm() {
 
     $("#project-select-create").on("click", function(evt) {
-        var projectName = $("#project-create-name").val();
-        console.log(projectName);
-        $("#project_name").text( projectName );
+
+        $("#project_name").text( $("#project-create-name").val() );
         $("#project_path").text( $("#project-select-path").attr("placeholder") );
 
         $("#modalProjectSelectConfirm").modal("show");
@@ -35,7 +34,26 @@ function postData( url, data, success )
 
 function checkFolderSelect()
 {
-    $(".sys-select-folder").on("click", function(evt){
+    $(".sys-folders-list-project").on("click", function(evt) {
+        var project_path = $("#project-select-path").attr("placeholder");
+        var project_name = project_path.replace(/^.*[\\\/]/, '');
+        var jdata = { 
+            project: {
+                projectfile: $(this).text(),
+                name: project_name,
+                path: $("#project-select-path").attr("placeholder")
+            }
+        };
+        postData("/project/load", jdata, function(){
+            $("#modalProjectSelect").modal("hide");
+            // Default start always load the dashbaord 
+            $("#main-module").load( "/partials/dashboard.html", function(){
+                $("#module_js").load( "/partials/dashboard_js.html");
+            });
+        });
+    });
+
+    $(".sys-select-folder").on("click", function(evt) {
         var jdata = { folder: $(this).text()};
         postData("/project/sys/get_folder", jdata, updateFolders);
     });

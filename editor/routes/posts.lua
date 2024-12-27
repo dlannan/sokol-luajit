@@ -127,6 +127,37 @@ local posts_projectsysgetdrive = {
     end,
 }
 
+local posts_projectcreate = {
+    pattern = "/project/create$",
+    func = function(matches, stream, headers, body)
+
+        if(body == nil) then 
+            return route.http_server.html("failed. no post data.")
+        end
+
+        local cdata = json.decode(body)
+        if(cdata.project) then 
+            route.ecs_server.projectmgr:create(cdata.project)
+        end
+        return route.http_server.json("success")
+    end,
+} 
+
+local posts_projectload = {
+    pattern = "/project/load$",
+    func = function(matches, stream, headers, body)
+
+        if(body == nil) then 
+            return route.http_server.html("failed. no post data.")
+        end
+
+        local cdata = json.decode(body)
+        if(cdata.project) then 
+            route.ecs_server.projectmgr:load(cdata.project)
+        end
+        return route.http_server.json("success")
+    end,
+} 
 
 route.routes = {
     posts_form,
@@ -137,6 +168,8 @@ route.routes = {
 
     posts_assetloaddata,
 
+    posts_projectcreate,
+    posts_projectload,
     posts_projectsysgetdrive,
     posts_projectsysgetfolder,
 }

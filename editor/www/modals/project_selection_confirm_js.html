@@ -9,7 +9,15 @@ $(document).ready(function () {
     });
 
     $("#project-select-ok").on("click", function(evt){
-            console.log(evt);
+        var jdata = { 
+            project: {
+                name: $("#project-create-name").val(),
+                path: $("#project-select-path").attr("placeholder")
+            }
+        };
+        postData("/project/create", jdata, function(){ });
+        $("#modalProjectSelectConfirm").modal("hide");
+        $("#modalProjectSelect").modal("toggle");
     });
 });
 

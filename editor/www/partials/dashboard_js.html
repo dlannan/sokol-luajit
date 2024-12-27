@@ -8,16 +8,23 @@
 // If there is no current project set (on the server side) then request a load or selection.
 $(document).ready(function () {
 
-    var current_project = {{ current_project? current_project:0 }};
-    console.log(current_project);
+    console.log("{{projectmgr.current_project}}");
+    var current_project = "{{ projectmgr.current_project? projectmgr.current_project:0 }}";
+    
     // Show project load/selection modal
-    if(current_project === 0) {
-        console.log("Show modal");
+    if(current_project.length === 0) {
         $("#modalProjectSelect").modal({
             backdrop: 'static',
             keyboard: false
         });
     }
+
+    $("#openProject").on("click", function(evt){
+        $("#modalProjectSelect").modal({
+            backdrop: 'static',
+            keyboard: false
+        });
+    });
 });
 
 </script>

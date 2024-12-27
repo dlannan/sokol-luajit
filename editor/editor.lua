@@ -21,6 +21,13 @@ ffi.cdef[[
 ]]
 
 -- --------------------------------------------------------------------------------------
+-- The project manager handles configuration of the project data (build, debug etc)
+--   Project manager defines what worlds, assets and folders are accessible for the project
+--   Note: the editor should _always_ have an active project. If it doesnt have one, it will 
+--         show a load panel to load one. 
+local projectmgr    = require("editor.project-manager")
+
+-- --------------------------------------------------------------------------------------
 -- Tiny ECS will be our core object manager. 
 --    Rendering, physics collision and more will be components to this system
 --    Rendering specifically will be built with a ldb that will run all the culling, sorting
@@ -31,7 +38,9 @@ local tiny          = require('engine.world.world-manager')
 
 local function init()
 
+    projectmgr:init()
     tiny:init({noserver = false})
+    tiny.addmanager("projectmgr", projectmgr)
 
     local desc = ffi.new("sg_desc[1]")
     desc[0].environment = slib.sglue_environment()
