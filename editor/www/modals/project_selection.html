@@ -57,7 +57,7 @@
                             <form role="form">
                                 <div class="form-group input-group">
                                     <span class="input-group-addon">New Project Name</span>
-                                    <input type="text" class="form-control" placeholder="MegaProject">                                    
+                                    <input id="project-create-name" type="text" class="form-control" placeholder="MegaProject">                                    
                                 </div>
                             </form>
 
@@ -74,6 +74,8 @@
                     </div>
                 </div>
                 <!-- /.col-lg-6 -->
+
+                {% include "modals/project_selection_confirm.html" %}
 
             </div>
         </div>

@@ -1,13 +1,8 @@
-compile error: unknown filter len in partials/sys/folders-select.html:21
-Context:  if folder.folder|len >  <-- there
+syntax error: unexpected token '.', expecting end of tag in partials/dashboard_js.html:16
+Context:  set projectmgr. <-- there
 Lua stack traceback:
 	editor\twig/aspect\error.lua:49: in function 'compiler_error'
-	editor\twig/aspect\compiler.lua:656: in function 'parse_filters'
-	editor\twig/aspect\compiler.lua:739: in function 'parse_value'
-	editor\twig/aspect\ast.lua:85: in function 'parse'
-	editor\twig/aspect\compiler.lua:749: in function 'parse_expression'
-	editor\twig/aspect\tags.lua:616: in function <editor\twig/aspect\tags.lua:613>
-	editor\twig/aspect\compiler.lua:259: in function <editor\twig/aspect\compiler.lua:202>
+	editor\twig/aspect\compiler.lua:261: in function <editor\twig/aspect\compiler.lua:202>
 	[C]: in function 'pcall'
 	editor\twig/aspect\compiler.lua:126: in function 'run'
 	editor\twig/aspect\template.lua:232: in function 'compile'

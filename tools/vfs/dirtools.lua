@@ -169,18 +169,23 @@ end
 if(ffi.os == "Windows") then 
     dirtools.is_folder = function(path)
 
+        if(path == nil) then return nil end 
+
         local fh = io.popen([[attrib "]]..path..[["]], "r")
         if(fh) then 
             local res = fh:read("*a")
             local fileattr = string.sub(res, 1, 20)
             fileattr = string.gsub(fileattr, " ", "")
             fh:close()
+            if(string.match(res, "^File not found")) then return nil end
             return (#fileattr == 0)
         end
-        return false
+        return nil
     end
 else
     dirtools.is_folder = function(path)
+
+        if(path == nil) then return nil end 
 
         local fh = io.popen("file "..path, "r")
         if(fh) then 
@@ -189,7 +194,7 @@ else
             fh:close()
             return (folder ~= nil)
         end
-        return false
+        return nil 
     end
 end
 

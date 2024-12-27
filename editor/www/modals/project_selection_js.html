@@ -2,9 +2,22 @@
 
 <script>
 
+function showConfirm() {
+
+    $("#project-select-create").on("click", function(evt) {
+        var projectName = $("#project-create-name").val();
+        console.log(projectName);
+        $("#project_name").text( projectName );
+        $("#project_path").text( $("#project-select-path").attr("placeholder") );
+
+        $("#modalProjectSelectConfirm").modal("show");
+    });     
+}
+
 function updateFolders(data) {
-    $("#sys-folders-select").load( "/partials/sys/folders-select.html", null, function() { 
+    $("#sys-folders-select").load( "/partials/sys/folders-select.html", null, function() {      
         checkFolderSelect();
+        showConfirm();
     });
 }
 
@@ -30,6 +43,10 @@ function checkFolderSelect()
 
 $(document).ready(function () {
 
+    if($("#project-create-name").val().length == 0) {
+        $("#project-create-name").val("MegaProject");
+    }
+
     $(".drive-select").on("click", function(evt){
             console.log($(this).attr("data"));
             var jdata = { drive: $(this).attr("data")};
@@ -39,7 +56,10 @@ $(document).ready(function () {
 
     $("#sys-folders-select").load( "/partials/sys/folders-select.html", null, function() { 
         checkFolderSelect();
+        showConfirm();         
     });            
 });
 
 </script>
+
+{% include("modals/project_selection_confirm_js.html") %}

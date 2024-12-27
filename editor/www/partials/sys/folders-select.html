@@ -1,5 +1,4 @@
 
-
 <div class="table-responsive">
     <table class="table table-striped table-bordered table-hover sys-folders-list">
         <thead>
@@ -8,8 +7,10 @@
                     <form role="form">
                         <div class="form-group btn-group input-group">
                             <span class="input-group-addon">Folder Path</span>
-                            <input type="text" class="form-control" placeholder="{{ projectmgr.sys.current_folder }}">
-                            <div class="input-group-btn"><button type="button" class="btn btn-primary">Create</button></div>
+                            <input id="project-select-path" type="text" class="form-control" placeholder="{{ projectmgr.sys.current_folder }}">
+                            {% if projectmgr.sys.has_create==1 %}
+                            <div id="project-select-create" class="input-group-btn"><button type="button" class="btn btn-primary">Create Project</button></div>
+                            {% endif %}
                         </div>
                     </form>                    
                 </th>
