@@ -23,7 +23,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for group in current_world.groups %}
+                            {% for group in current_world.data.groups %}
                             <tr>
                                 <td>{{ group.id }}</td>
                                 <td>{{ group.name }}</td>
@@ -64,7 +64,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for asset in current_world.assets %}                            
+                            {% for asset in current_world.data.assets %}                            
                             <tr class="odd gradeX">
                                 <td>{{ asset.id }}</td>
                                 <td>{{ asset.name }}</td>

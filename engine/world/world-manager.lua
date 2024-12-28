@@ -190,7 +190,7 @@ worldmanager.addWorld = function(self, worldname)
 	else
 		self.current_world = tiny.world()
 		self.current_world.name = worldname 
-		
+
 		-- Add an updater for entities in the httpserver
 		self:addSystem( worldname.."_Entities", { "name", "etype" }, tinysrv.entitySystemProc )
 
@@ -241,8 +241,10 @@ end
 worldmanager.final = function (self)
 
 	tinysrv.final()
-	tiny.clearEntities(self.current_world)
-	tiny.clearSystems(self.current_world)
+	if(self.current_world) then 
+		tiny.clearEntities(self.current_world)
+		tiny.clearSystems(self.current_world)
+	end
 end
 
 ------------------------------------------------------------------------------------------------------------

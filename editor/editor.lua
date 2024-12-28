@@ -34,7 +34,6 @@ local projectmgr    = require("editor.project-manager")
 --      and binning needed. This will be decoupled from the editor itself. 
 local tiny          = require('engine.world.world-manager')
 
--- --------------------------------------------------------------------------------------
 
 local function init()
 
@@ -51,8 +50,6 @@ local function init()
 
     local hwnd = sapp.sapp_win32_get_hwnd()
 
-    local cmd = [[http://localhost:9190/index.html]]
-    local proc = shell32.ShellExecuteA( hwnd, "open", cmd, nil, nil, 1)
 --    io.popen(cmd, "r")
     ffi.C.Sleep(500)
 end

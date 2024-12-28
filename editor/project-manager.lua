@@ -113,9 +113,9 @@ projectmanager.load = function(self, project)
                 local fh = io.open( world_obj.filename, "r")
                 if(fh) then 
                     local data = fh:read("*a")
-                    local jworld = json.decode(data)
-                    local world = tiny.addWorld(tiny, world_obj.name)
-                    utils.tmerge(world, jworld)
+                    fh:close()
+                    tiny.addWorld(tiny, world_obj.name)
+                    tiny.current_world.data = json.decode(data)
                 end
             end
         end

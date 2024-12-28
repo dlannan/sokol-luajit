@@ -17,7 +17,7 @@
                         <i class="fa fa-list fa-5x"></i>
                     </div>
                     <div class="col-xs-9 text-right">
-                        <div class="huge">{{ current_world.assets|length }}</div>
+                        <div class="huge">{{ current_world.data.assets|length }}</div>
                         <div>Project Assets</div>
                     </div>
                 </div>
@@ -40,7 +40,7 @@
                         <i class="fa fa-photo fa-5x"></i>
                     </div>
                     <div class="col-xs-9 text-right">
-                        <div class="huge">{{ current_world.scenes|length }}</div>
+                        <div class="huge">{{ current_world.data.scenes|length }}</div>
                         <div>Scenes</div>
                     </div>
                 </div>
@@ -63,7 +63,7 @@
                         <i class="fa fa-cube fa-5x"></i>
                     </div>
                     <div class="col-xs-9 text-right">
-                        <div class="huge">{{ current_world.entities|length }}</div>
+                        <div class="huge">{{ current_world.data.entities|length }}</div>
                         <div>Entities</div>
                     </div>
                 </div>
@@ -86,7 +86,7 @@
                         <i class="fa fa-wpforms fa-5x"></i>
                     </div>
                     <div class="col-xs-9 text-right">
-                        <div class="huge">{{ current_world.scripts|length }}</div>
+                        <div class="huge">{{ current_world.data.scripts|length }}</div>
                         <div>Scripts</div>
                     </div>
                 </div>
