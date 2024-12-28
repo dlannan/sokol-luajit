@@ -182,39 +182,6 @@ end
 
 ------------------------------------------------------------------------------------------------------------
 -- Each world thats created we make a default proc to process for http server
-worldmanager.loadDefaultAssets = function(self)
-
-	local thisworld = self.current_world
-	-- Always start with an empty asset pool when creating a new world.
-	local assetpool = {}
-
-	-- Add a default env (simple plane) 
-
-	-- Add the default skydome (so there is a decent bg)
-
-	-- Add some gizmos needed for editing and such (like xyz axis gizmo, bound cube gizmo etc)
-
-end
-
-------------------------------------------------------------------------------------------------------------
--- Each world thats created we make a default proc to process for http server
-worldmanager.loadDefaultScenes = function(self)
-
-	return { { name = "Default", id = 0 } }
-end
-
-------------------------------------------------------------------------------------------------------------
--- Each world thats created we make a default proc to process for http server
-worldmanager.loadDefaultScripts = function(self)
-
-	return { 
-		{ name = "global", id = 0, script = "engine.script.global", ref = "Global" },
-		{ name = "scene", id = 1, script = "engine.script.scene", ref = "Default" } 
-	}
-end
-
-------------------------------------------------------------------------------------------------------------
--- Each world thats created we make a default proc to process for http server
 worldmanager.addWorld = function(self, worldname)
 
 	if(self.worlds_lookup[worldname]) then 
@@ -222,21 +189,14 @@ worldmanager.addWorld = function(self, worldname)
 		return nil
 	else
 		self.current_world = tiny.world()
-		self.current_world.name = worldname
-		-- These are asset groups for the world
-		self.current_world.groups = { { id = 0, name = "default", tags = "default,all" } } 
-		-- World assets. Some default assets are added automatically (mainly for editor)
-		self.current_world.assets = worldmanager.loadDefaultAssets(self)
-		self.current_world.scenes = worldmanager.loadDefaultScenes(self)
-		self.current_world.entities = {}
-		self.current_world.scripts = worldmanager.loadDefaultScripts(self)
-
+		self.current_world.name = worldname 
+		
 		-- Add an updater for entities in the httpserver
 		self:addSystem( worldname.."_Entities", { "name", "etype" }, tinysrv.entitySystemProc )
 
 		tinsert(self.worlds, self.current_world)
 		self.systems_lookup[worldname] = utils.tcount(self.worlds)
-		return utils.tcount(self.worlds)
+		return self.current_world, utils.tcount(self.worlds)
 	end
 end
 
@@ -295,10 +255,6 @@ worldmanager.update = function(self, dt)
 	end
 	tinysrv.update(dt)
 end
-
-------------------------------------------------------------------------------------------------------------
-
-worldmanager.default = worldmanager.default or worldmanager.addWorld(worldmanager, "MasterWorld")
 
 ------------------------------------------------------------------------------------------------------------
 

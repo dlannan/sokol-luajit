@@ -9,6 +9,8 @@ local ffi 		    = require("ffi")
 
 local dirtools      = require("tools.vfs.dirtools")
 local cfgmgr        = require('editor.config-manager')
+local datahlp       = require('editor.config.data-helper')
+local tiny          = require('engine.world.world-manager')
 
 ------------------------------------------------------------------------------------------------------------
 
@@ -28,6 +30,7 @@ local projectmanager = {
 ------------------------------------------------------------------------------------------------------------
 
 projectmanager.init = function(self)
+
     cfgmgr.load()
     self.recents = cfgmgr.recents
 end
@@ -39,6 +42,9 @@ projectmanager.create = function(self, project)
     -- Check the path is valid first 
     if(project) then 
         if(project.path and dirtools.is_folder(project.path)) then 
+
+            tiny.default = tiny.default or tiny.addWorld(tiny, "MasterWorld")
+
             local clean_name = utils.cleanstring(project.name)
             local project_path = dirtools.combine_path(project.path, clean_name)
             if(dirtools.make_folder(project_path)) then 
@@ -54,17 +60,21 @@ projectmanager.create = function(self, project)
                 local data_path = dirtools.combine_path(project_path, "data")
                 dirtools.make_folder(data_path)
 
+                -- Iterate default worlds and create datasets (assets, scripts etc) for them
+                local world_entries = datahlp.make_worlds(data_path, tiny.worlds)
+
                 local project_filename = dirtools.combine_path(project_path, "project.slp")
                 self.current_project = {
                     filename    = project_filename,
                     name        = clean_name,
                     paths       = {
-                    project     = project_path,
+                        project     = project_path,
                         assets      = assets_path,
                         config      = config_path,
                         build       = build_path,
                         cache       = cache_path,
                         data        = data_path,
+                        worlds      = world_entries,
                     },
                 }
 
@@ -91,12 +101,31 @@ projectmanager.load = function(self, project)
             project_filename = dirtools.combine_path(project.path, project.projectfile)
             local fh = io.open(project_filename, "r")
             if(fh) then 
-                local data = fh:read( '*a' )
+                local data = fh:read( "*a" )
                 self.current_project = json.decode(data)
                 fh:close()
             end
+
+            -- Load worlds 
+            -- Clear worlds first!! 
+            tiny.worlds = {}
+            for i,world_obj in ipairs(self.current_project.paths.worlds) do
+                local fh = io.open( world_obj.filename, "r")
+                if(fh) then 
+                    local data = fh:read("*a")
+                    local jworld = json.decode(data)
+                    local world = tiny.addWorld(tiny, world_obj.name)
+                    utils.tmerge(world, jworld)
+                end
+            end
         end
     end
+end
+
+------------------------------------------------------------------------------------------------------------
+-- Consider making this a timed autosaver. Will see.
+projectmanager.save = function(self, project)
+
 end
 
 ------------------------------------------------------------------------------------------------------------

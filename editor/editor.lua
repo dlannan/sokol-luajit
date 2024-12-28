@@ -55,7 +55,6 @@ local function init()
     local proc = shell32.ShellExecuteA( hwnd, "open", cmd, nil, nil, 1)
 --    io.popen(cmd, "r")
     ffi.C.Sleep(500)
-
 end
 
 

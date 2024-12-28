@@ -1,12 +1,1 @@
-{
-    "name": "MegaProject",
-    "filename": "F:\\dev\\luajit\\Thunc\\sokol-luajit\\projects\\MegaProject\\project.slp",
-    "paths": {
-        "config": "F:\\dev\\luajit\\Thunc\\sokol-luajit\\projects\\MegaProject\\config",
-        "build": "F:\\dev\\luajit\\Thunc\\sokol-luajit\\projects\\MegaProject\\build",
-        "project": "F:\\dev\\luajit\\Thunc\\sokol-luajit\\projects\\MegaProject",
-        "data": "F:\\dev\\luajit\\Thunc\\sokol-luajit\\projects\\MegaProject\\data",
-        "cache": "F:\\dev\\luajit\\Thunc\\sokol-luajit\\projects\\MegaProject\\cache",
-        "assets": "F:\\dev\\luajit\\Thunc\\sokol-luajit\\projects\\MegaProject\\assets"
-    }
-}
+{"paths":{"config":"F:\\dev\\luajit\\Thunc\\sokol-luajit\\projects\\MegaProject\\config","worlds":[{"filename":"F:\\dev\\luajit\\Thunc\\sokol-luajit\\projects\\MegaProject\\data\\worlds\\MasterWorld.json","name":"MasterWorld"}],"data":"F:\\dev\\luajit\\Thunc\\sokol-luajit\\projects\\MegaProject\\data","assets":"F:\\dev\\luajit\\Thunc\\sokol-luajit\\projects\\MegaProject\\assets","project":"F:\\dev\\luajit\\Thunc\\sokol-luajit\\projects\\MegaProject","cache":"F:\\dev\\luajit\\Thunc\\sokol-luajit\\projects\\MegaProject\\cache","build":"F:\\dev\\luajit\\Thunc\\sokol-luajit\\projects\\MegaProject\\build"},"filename":"F:\\dev\\luajit\\Thunc\\sokol-luajit\\projects\\MegaProject\\project.slp","name":"MegaProject"}

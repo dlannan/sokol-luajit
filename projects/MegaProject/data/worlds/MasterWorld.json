@@ -1,0 +1,1 @@
+{"groups":[{"tags":"default,all","id":0,"name":"default"}],"scripts":[{"ref":"Global","script":"engine.script.global","id":0,"name":"global"},{"ref":"Default","script":"engine.script.scene","id":1,"name":"scene"}],"entities":[],"scenes":[{"id":0,"name":"Default"}]}
