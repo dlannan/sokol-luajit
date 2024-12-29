@@ -55,7 +55,7 @@ local function frame()
     sgp.sgp_clear()
 
     -- Draw an animated rectangle that rotates and changes its colors.
-    local time = tonumber(sapp.sapp_frame_count() * sapp.sapp_frame_duration())
+    local time = tonumber(sapp.sapp_frame_count()) * sapp.sapp_frame_duration()
     local r = math.sin(time)*0.5+0.5
     local g = math.cos(time)*0.5+0.5
     sgp.sgp_set_color(r, g, 0.3, 1.0)
