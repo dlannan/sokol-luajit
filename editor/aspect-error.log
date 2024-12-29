@@ -1,7 +1,10 @@
-internal error: Template 'partials/config_modules_js.html' not found in runtime:0
+internal error: editor\twig/aspect\utils.lua:132: attempt to call global 'max' (a nil value) in amiga.html:1
 Lua stack traceback:
 	editor\twig/aspect\error.lua:103: in function 'new'
-	editor\twig/aspect\template.lua:395: in function 'render'
+	editor\twig/aspect\compiler.lua:130: in function 'run'
+	editor\twig/aspect\template.lua:232: in function 'compile'
+	editor\twig/aspect\template.lua:311: in function 'get_view'
+	editor\twig/aspect\template.lua:393: in function 'render'
 	.\editor\twig\twig.lua:40: in function 'parse'
 	.\editor\routes\xml.lua:15: in function 'process_requests'
 	.\lua\https-server.lua:297: in function <.\lua\https-server.lua:266>

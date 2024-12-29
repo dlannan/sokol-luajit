@@ -28,7 +28,7 @@ typedef struct state {
 -- --------------------------------------------------------------------------------------
 -- The nice way to take a glsl shader and load, compile and return a shader description
 local shc       = require("tools.shader_compiler.shc_compile").init( "sokol%-luajit", true )
-local shader    = shc.compile("./samples/cube-sapp.glsl")
+local shader    = shc.compile("./projects/examples/samples/cube-sapp.glsl")
 
 -- --------------------------------------------------------------------------------------
 
@@ -160,7 +160,7 @@ local function frame()
     vs_params[0].mvp    = mvp
     sg_range[0].ptr     = vs_params
     sg_range[0].size    = ffi.sizeof(vs_params[0])
-    sg.sg_apply_uniforms(sg.SG_SHADERSTAGE_VS, 0, sg_range)
+    sg.sg_apply_uniforms(0, sg_range)
     
     sg.sg_draw(0, 36, 1)
     sg.sg_end_pass()

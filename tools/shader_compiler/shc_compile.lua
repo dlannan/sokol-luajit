@@ -23,7 +23,11 @@ sh_compiler.init = function(base_path, debug_shader, tools_path)
         tools_dir = base_dir..tools_path..dirtools.sep
     end 
 
-    sh_compiler.target_tmp      = base_dir.."bin/shaderbin/shader_gen.h"
+    if(ffi.os == "Windows") then 
+        sh_compiler.target_tmp      = base_dir.."bin\\shaderbin\\shader_gen.h"
+    else 
+        sh_compiler.target_tmp      = base_dir.."bin/shaderbin/shader_gen.h"
+    end
     sh_compiler.target_lang     = "glsl410"
     sh_compiler.target_output   = "sokol"
     
@@ -107,6 +111,8 @@ sh_compiler.process_shader = function( filename, shader_src, program_name )
     desc_str = string.gsub(desc_str, ";", "")
     desc_str = string.gsub(desc_str, "%(const char%*%)", "")
     desc_str = string.gsub(desc_str, "SG_UNIFORMLAYOUT_STD140", "sg.SG_UNIFORMLAYOUT_STD140")
+    desc_str = string.gsub(desc_str, "SG_SHADERSTAGE_VERTEX", "sg.SG_SHADERSTAGE_VERTEX")
+    desc_str = string.gsub(desc_str, "SG_SHADERSTAGE_FRAGMENT", "sg.SG_SHADERSTAGE_FRAGMENT")
     desc_str = string.gsub(desc_str, "SG_UNIFORMTYPE_FLOAT3", "sg.SG_UNIFORMTYPE_FLOAT3")
     desc_str = string.gsub(desc_str, "SG_UNIFORMTYPE_FLOAT4", "sg.SG_UNIFORMTYPE_FLOAT4")
     desc_str = string.gsub(desc_str, "SG_IMAGESAMPLETYPE_FLOAT", "sg.SG_IMAGESAMPLETYPE_FLOAT")
@@ -132,7 +138,7 @@ sh_compiler.compile = function( glslfile, program_name )
 
     local command = exec..' -i '..glslfile.." -o "..sh_compiler.target_tmp
     command = command.." -l "..sh_compiler.target_lang.." -f "..sh_compiler.target_output
-
+print(command)
     local runner = io.popen(command, "r")
     -- Read in the results, then the files
     if(runner) then 
