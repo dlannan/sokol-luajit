@@ -462,6 +462,7 @@ end
 dirtools.init = function( base_path )
     local path = dirtools.get_app_path(base_path)
     dirtools.add_default_paths(path)
+    return dirtools
 end
 
 ---------------------------------------------------------------------------------------
