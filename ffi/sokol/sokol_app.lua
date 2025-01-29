@@ -1,3 +1,5 @@
+-- load lcpp (ffi.cdef wrapper turned on per default)
+local lcpp = require("tools.lcpp")
 local ffi  = require( "ffi" )
 
 local sokol_filename = _G.SOKOL_DLL or "sokol_dll"
@@ -14,13 +16,11 @@ local lib  = ffi_sokol_app or libs[ ffi.os ][ ffi.arch ]
 print(lib)
 local sokol_app   = ffi.load( lib )
 
--- load lcpp (ffi.cdef wrapper turned on per default)
-local lcpp = require("tools.lcpp")
-
 -- just use LuaJIT ffi and lcpp together
+HEADER_PATH = HEADER_PATH or ""
 ffi.cdef([[
-#include <ffi/sokol-headers/sokol_app.h> 
-#include <ffi/sokol-headers/sokol_log.h>
+#include "]]..HEADER_PATH..[[ffi/sokol-headers/sokol_app.h" 
+#include "]]..HEADER_PATH..[[ffi/sokol-headers/sokol_log.h"
 ]])
 
 return sokol_app

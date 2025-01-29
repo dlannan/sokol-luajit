@@ -17,11 +17,12 @@ local sokol_libs   = ffi.load( lib )
 local lcpp = require("tools.lcpp")
 
 -- just use LuaJIT ffi and lcpp together
+HEADER_PATH = HEADER_PATH or ""
 ffi.cdef([[
-#include <ffi/sokol-headers/sokol_args.h> 
-#include <ffi/sokol-headers/sokol_fetch.h> 
-#include <ffi/sokol-headers/sokol_glue.h>
-#include <ffi/sokol-headers/sokol_time.h>   
+   #include "]]..HEADER_PATH..[[ffi/sokol-headers/sokol_args.h"
+   #include "]]..HEADER_PATH..[[ffi/sokol-headers/sokol_fetch.h"
+   #include "]]..HEADER_PATH..[[ffi/sokol-headers/sokol_glue.h"
+   #include "]]..HEADER_PATH..[[ffi/sokol-headers/sokol_time.h"
 ]])
 
 return sokol_libs

@@ -17,9 +17,10 @@ local sokol_gfx   = ffi.load( lib )
 local lcpp = require("tools.lcpp")
 
 -- just use LuaJIT ffi and lcpp together
+HEADER_PATH = HEADER_PATH or ""
 ffi.cdef([[
-#include <ffi/sokol-headers/sokol_gfx.h> 
-#include <ffi/sokol-headers/sokol_gp.h> 
+   #include "]]..HEADER_PATH..[[ffi/sokol-headers/sokol_gfx.h"
+   #include "]]..HEADER_PATH..[[ffi/sokol-headers/sokol_gp.h"
 ]])
 
 return sokol_gfx
