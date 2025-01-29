@@ -1,5 +1,4 @@
-
-package.path    = package.path..";../?.lua"
+package.path    = package.path..";../../?.lua"
 local dirtools  = require("tools.vfs.dirtools").init("sokol%-luajit")
 
 --_G.SOKOL_DLL    = "sokol_debug_dll"

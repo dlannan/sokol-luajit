@@ -18,6 +18,14 @@ local lcpp = require("tools.lcpp")
 
 -- just use LuaJIT ffi and lcpp together
 HEADER_PATH = HEADER_PATH or ""
-ffi.cdef([[#include "]]..HEADER_PATH..[[ffi/sokol-headers/sokol_gfx.h" ]])
+ffi.cdef([[
+#include "]]..HEADER_PATH..[[ffi/sokol-headers/sokol_gfx.h" 
+
+enum sg_params_extended {
+   SG_SHADERSTAGE_VS,
+   SG_SHADERSTAGE_FS
+} sg_params_extended;
+
+]])
 
 return sokol_gfx
