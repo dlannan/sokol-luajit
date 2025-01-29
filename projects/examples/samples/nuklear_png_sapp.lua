@@ -1,14 +1,9 @@
-package.path    = package.path..";../?.lua"
-local dirtools = require("tools.vfs.dirtools")
-local base_path = dirtools.get_app_path("sokol%-luajit")
-
-package.cpath   = package.cpath..";"..base_path.."bin/win64/?.dll"
-
-package.path    = package.path..";"..base_path.."ffi/sokol/?.lua"
-package.path    = package.path..";"..base_path.."?.lua"
+package.path    = package.path..";../../?.lua"
+local dirtools  = require("tools.vfs.dirtools").init("sokol%-luajit")
 
 --_G.SOKOL_DLL    = "sokol_debug_dll"
 local sapp      = require("sokol_app")
+sg              = require("sokol_gfx")
 sg              = require("sokol_nuklear")
 local nk        = sg
 local slib      = require("sokol_libs") -- Warn - always after gfx!!
@@ -73,7 +68,7 @@ local function init(void)
     snk[0].logger.func = slib.slog_func
     nk.snk_setup(snk)
 
-    local base_path = "samples/"
+    local base_path = "projects/examples/samples/"
     pix["baboon"] = icon_load(base_path.."images/baboon.png")
     pix["copy"] = icon_load(base_path.."icon/copy.png")
     pix["del"] = icon_load(base_path.."icon/delete.png")

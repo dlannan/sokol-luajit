@@ -1,9 +1,8 @@
-package.cpath   = package.cpath..";../bin/win64/?.dll"
-package.path    = package.path..";../ffi/sokol/?.lua"
-package.path    = package.path..";../?.lua"
+package.path    = package.path..";../../?.lua"
+local dirtools  = require("tools.vfs.dirtools").init("sokol%-luajit")
 
 local sapp      = require("sokol_app")
-local sg        = require("sokol_gfx")
+sg              = require("sokol_gfx")
 local slib      = require("sokol_libs") -- Warn - always after gfx!!
 
 local sshape    = require("sokol_shape")
@@ -14,7 +13,7 @@ local ffi       = require("ffi")
 -- --------------------------------------------------------------------------------------
 
 local shc       = require("tools.shader_compiler.shc_compile").init( "sokol%-luajit", false )
-local shader    = shc.compile("./samples/shapes-sapp.glsl")
+local shader    = shc.compile("./projects/examples/samples/shapes-sapp.glsl")
 
 -- --------------------------------------------------------------------------------------
 
@@ -201,7 +200,7 @@ local function frame()
         sg_range[0].ptr = vs_params
         sg_range[0].size = ffi.sizeof(vs_params)
         
-        sg.sg_apply_uniforms(sg.SG_SHADERSTAGE_VS, 0, sg_range)
+        sg.sg_apply_uniforms(sg.SG_SHADERSTAGE_VS, sg_range)
         sg.sg_draw(state[0].shapes[i].draw.base_element, state[0].shapes[i].draw.num_elements, 1)
     end
     sg.sg_end_pass();

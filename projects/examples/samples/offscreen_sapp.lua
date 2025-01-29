@@ -1,10 +1,9 @@
-package.cpath   = package.cpath..";../bin/win64/?.dll"
-package.path    = package.path..";../ffi/sokol/?.lua"
-package.path    = package.path..";../?.lua"
+package.path    = package.path..";../../?.lua"
+local dirtools  = require("tools.vfs.dirtools").init("sokol%-luajit")
 
 --_G.SOKOL_DLL    = "sokol_debug_dll"
 local sapp      = require("sokol_app")
-local sg        = require("sokol_gfx")
+sg              = require("sokol_gfx")
 local slib      = require("sokol_libs") -- Warn - always after gfx!!
 
 local sshape    = require("sokol_shape")
@@ -14,12 +13,12 @@ local hutils    = require("hmm_utils")
 local ffi       = require("ffi")
 
 -- --------------------------------------------------------------------------------------
-
+-- The nice way to take a glsl shader and load, compile and return a shader description
 local shc       = require("tools.shader_compiler.shc_compile").init( "sokol%-luajit", false )
 
 -- Need to use default because this is whats used for first unnamed program
-local default   = shc.compile("./samples/offscreen-sapp.glsl", "default")
-local offscreen = shc.compile("./samples/offscreen-sapp.glsl", "offscreen")
+local default   = shc.compile("./projects/examples/samples/offscreen-sapp.glsl", "default")
+local offscreen = shc.compile("./projects/examples/samples/offscreen-sapp.glsl", "offscreen")
 
 -- --------------------------------------------------------------------------------------
 
@@ -184,8 +183,8 @@ local function init()
     -- // resource bindings to render a textured shape, using the offscreen render target as texture
     display_bind[0].vertex_buffers[0] = vbuf
     display_bind[0].index_buffer = ibuf
-    display_bind[0].fs.images[0] = color_img
-    display_bind[0].fs.samplers[0] = smp
+    display_bind[0].images[0] = color_img
+    display_bind[0].samplers[0] = smp
     state[0].display.bind = display_bind
 end
 
@@ -224,7 +223,7 @@ local function frame()
     sg.sg_begin_pass(state[0].offscreen.pass)
     sg.sg_apply_pipeline(state[0].offscreen.pip)
     sg.sg_apply_bindings(state[0].offscreen.bind)
-    sg.sg_apply_uniforms(sg.SG_SHADERSTAGE_VS, 0, vs_range)
+    sg.sg_apply_uniforms(sg.SG_SHADERSTAGE_VS, vs_range)
     sg.sg_draw(state[0].donut.base_element, state[0].donut.num_elements, 1)
     sg.sg_end_pass()
 
@@ -245,7 +244,7 @@ local function frame()
 
     sg.sg_apply_pipeline(state[0].display.pip)
     sg.sg_apply_bindings(state[0].display.bind)
-    sg.sg_apply_uniforms(sg.SG_SHADERSTAGE_VS, 0, def_vs_range)
+    sg.sg_apply_uniforms(sg.SG_SHADERSTAGE_VS, def_vs_range)
     sg.sg_draw(state[0].sphere.base_element, state[0].sphere.num_elements, 1)
     sg.sg_end_pass()
 

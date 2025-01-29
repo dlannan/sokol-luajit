@@ -1,10 +1,9 @@
-package.cpath   = package.cpath..";../bin/win64/?.dll"
-package.path    = package.path..";../ffi/sokol/?.lua"
-package.path    = package.path..";../?.lua"
+package.path    = package.path..";../../?.lua"
+local dirtools  = require("tools.vfs.dirtools").init("sokol%-luajit")
 
 --_G.SOKOL_DLL    = "sokol_debug_dll"
 local sapp      = require("sokol_app")
-local sg        = require("sokol_gfx")
+sg              = require("sokol_gfx")
 local slib      = require("sokol_libs") -- Warn - always after gfx!!
 local hmm       = require("hmm")
 local hutils    = require("hmm_utils")
@@ -28,7 +27,7 @@ local rmt_ctx   = nil
 -- --------------------------------------------------------------------------------------
 -- The nice way to take a glsl shader and load, compile and return a shader description
 local shc       = require("tools.shader_compiler.shc_compile").init( "sokol%-luajit", false )
-local shader    = shc.compile("./samples/cube-sapp.glsl")
+local shader    = shc.compile("./projects/examples/samples/cube-sapp.glsl")
 
 -- --------------------------------------------------------------------------------------
 
@@ -172,7 +171,7 @@ local function frame()
     vs_params[0].mvp    = mvp
     sg_range[0].ptr     = vs_params
     sg_range[0].size    = ffi.sizeof(vs_params[0])
-    sg.sg_apply_uniforms(sg.SG_SHADERSTAGE_VS, 0, sg_range)
+    sg.sg_apply_uniforms(sg.SG_SHADERSTAGE_VS, sg_range)
     
     sg.sg_draw(0, 36, 1)
     sg.sg_end_pass()

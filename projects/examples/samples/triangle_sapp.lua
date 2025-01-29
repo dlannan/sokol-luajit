@@ -1,10 +1,9 @@
-package.cpath   = package.cpath..";../bin/win64/?.dll"
-package.path    = package.path..";../ffi/sokol/?.lua"
-package.path    = package.path..";../?.lua"
+package.path    = package.path..";../../?.lua"
+local dirtools  = require("tools.vfs.dirtools").init("sokol%-luajit")
 
-local sapp = require("sokol_app")
-local sg = require("sokol_gfx")
-local slib = require("sokol_libs") -- Warn - always after gfx!!
+local sapp  = require("sokol_app")
+sg          = require("sokol_gfx")
+local slib  = require("sokol_libs") -- Warn - always after gfx!!
 
 local ffi = require("ffi")
 
@@ -62,7 +61,7 @@ typedef struct state {
 -- --------------------------------------------------------------------------------------
 -- The nice way to take a glsl shader and load, compile and return a shader description
 local shc       = require("tools.shader_compiler.shc_compile").init( "sokol%-luajit", false )
-local shader    = shc.compile("./samples/triangle-sapp.glsl")
+local shader    = shc.compile("./projects/examples/samples/triangle-sapp.glsl")
 
 -- --------------------------------------------------------------------------------------
 

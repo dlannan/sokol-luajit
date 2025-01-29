@@ -3,7 +3,7 @@ local dirtools  = require("tools.vfs.dirtools").init("sokol%-luajit")
 
 --_G.SOKOL_DLL    = "sokol_debug_dll"
 local sapp      = require("ffi.sokol.sokol_app")
-local sg        = require("ffi.sokol.sokol_gfx")
+sg              = require("ffi.sokol.sokol_gfx")
 local slib      = require("ffi.sokol.sokol_libs") -- Warn - always after gfx!!
 
 local hmm       = require("ffi.sokol.hmm")
@@ -18,9 +18,9 @@ local ffi       = require("ffi")
 local shc       = require("tools.shader_compiler.shc_compile").init( "sokol%-luajit", false )
 
 -- Need to use default because this is whats used for first unnamed program
-local shadow_shader   = shc.compile("./samples/shadows-sapp.glsl", "shadow")
-local display_shader  = shc.compile("./samples/shadows-sapp.glsl", "display")
-local dbg_shader      = shc.compile("./samples/shadows-sapp.glsl", "dbg")
+local shadow_shader   = shc.compile("./projects/examples/samples/shadows-sapp.glsl", "shadow")
+local display_shader  = shc.compile("./projects/examples/samples/shadows-sapp.glsl", "display")
+local dbg_shader      = shc.compile("./projects/examples/samples/shadows-sapp.glsl", "dbg")
 
 -- --------------------------------------------------------------------------------------
 
@@ -200,8 +200,8 @@ local function init()
     display_bind = ffi.new("sg_bindings[1]")
     display_bind[0].vertex_buffers[0] = vbuf
     display_bind[0].index_buffer = ibuf
-    display_bind[0].fs.images[0] = state[0].shadow_map
-    display_bind[0].fs.samplers[0] = state[0].shadow_sampler
+    display_bind[0].images[0] = state[0].shadow_map
+    display_bind[0].samplers[0] = state[0].shadow_sampler
     state[0].display.bind = display_bind
 
     local dbg_vertices = ffi.new("float[8]", { 0.0, 0.0,  1.0, 0.0,  0.0, 1.0,  1.0, 1.0 })
@@ -228,8 +228,8 @@ local function init()
 
     dbg_bind = ffi.new("sg_bindings[1]")
     dbg_bind[0].vertex_buffers[0] = dbg_vbuf
-    dbg_bind[0].fs.images[0] = state[0].shadow_map
-    dbg_bind[0].fs.samplers[0] = dbg_sampler
+    dbg_bind[0].images[0] = state[0].shadow_map
+    dbg_bind[0].samplers[0] = dbg_sampler
     state[0].dbg.bind = dbg_bind
 end
 
@@ -307,7 +307,7 @@ local function frame()
 
     sg.sg_apply_pipeline(state[0].shadow.pip)
     sg.sg_apply_bindings(state[0].shadow.bind)
-    sg.sg_apply_uniforms(sg.SG_SHADERSTAGE_VS, 0, def_vs_range)
+    sg.sg_apply_uniforms(sg.SG_SHADERSTAGE_VS, def_vs_range)
     sg.sg_draw(0, 36, 1)
     sg.sg_end_pass()
 
@@ -327,11 +327,11 @@ local function frame()
 
     sg.sg_apply_pipeline(state[0].display.pip)
     sg.sg_apply_bindings(state[0].display.bind)
-    sg.sg_apply_uniforms(sg.SG_SHADERSTAGE_FS, 0, disp_fs_range)
-    sg.sg_apply_uniforms(sg.SG_SHADERSTAGE_VS, 0, plane_vs_range)
+    sg.sg_apply_uniforms(sg.SG_SHADERSTAGE_FS, disp_fs_range)
+    sg.sg_apply_uniforms(sg.SG_SHADERSTAGE_VS, plane_vs_range)
     sg.sg_draw(36, 6, 1)
 
-    sg.sg_apply_uniforms(sg.SG_SHADERSTAGE_VS, 0, cube_vs_range)
+    sg.sg_apply_uniforms(sg.SG_SHADERSTAGE_VS, cube_vs_range)
     sg.sg_draw(0, 36, 1)
 
     sg.sg_apply_pipeline(state[0].dbg.pip)

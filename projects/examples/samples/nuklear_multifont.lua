@@ -1,15 +1,9 @@
-package.path    = package.path..";../?.lua"
-local dirtools  = require("tools.vfs.dirtools")
-local base_path = dirtools.get_app_path("sokol%-luajit")
-
-package.cpath   = package.cpath..";"..base_path.."bin/win64/?.dll"
-
-package.path    = package.path..";"..base_path.."ffi/sokol/?.lua"
-package.path    = package.path..";"..base_path.."?.lua"
-package.path    = package.path..";"..base_path.."lua/?.lua"
+package.path    = package.path..";../../?.lua"
+local dirtools  = require("tools.vfs.dirtools").init("sokol%-luajit")
 
 --_G.SOKOL_DLL    = "sokol_debug_dll"
 local sapp      = require("sokol_app")
+sg              = require("sokol_gfx")
 sg              = require("sokol_nuklear")
 local nk        = sg
 local slib      = require("sokol_libs") -- Warn - always after gfx!!
@@ -88,7 +82,7 @@ end
 local function setup_font(ctx)
 
     fonts = {} 
-    local font_path = "samples/font/"
+    local font_path = "projects/examples/samples/font/"
 
     local image = nil
 
