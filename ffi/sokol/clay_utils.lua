@@ -1,17 +1,26 @@
 
 local clay_utils = {}
 
-local CLAY__INIT = function(ctype, init) return ffi.cdef( ctype, init ) end
+local CLAY__INIT = function(ctype) return ffi.new( ctype ) end
 local CLAY__WRAPPER_TYPE = function(ctype) return "Clay__"..ctype.."Wrapper" end
 local CLAY__WRAPPER_STRUCT = function(ctype) return [[typedef struct { ]]..ctype..[[ wrapped; } ]]..CLAY__WRAPPER_TYPE(ctype)..";" end
 local CLAY__CONFIG_WRAPPER = function(ctype, ...) CLAY__INIT(CLAY__WRAPPER_TYPE(ctype)), { ... }).wrapped end
 
-local CLAY__MAX(x, y) = function return math.max(x, y) end
-local CLAY__MIN(x, y) = function return math.min(x, y) end
+local CLAY__MAX = function return math.max(x, y) end
+local CLAY__MIN = function return math.min(x, y) end
 
-CLAY_LAYOUT(...) Clay__AttachLayoutConfig(Clay__StoreLayoutConfig(CLAY__CONFIG_WRAPPER(Clay_LayoutConfig, __VA_ARGS__)))
+local CLAY_LAYOUT = function(...)
+    local layoutconfig =  ffi.new("Clay_LayoutConfig[1]", {...})
+    local storeconfig = clay.Clay__StoreLayoutConfig(layoutconfig[0]) 
+    clay.Clay__AttachLayoutConfig(storeconfig)
+end
 
-CLAY_RECTANGLE(...) Clay__AttachElementConfig(CLAY__INIT(Clay_ElementConfigUnion) { .rectangleElementConfig = Clay__StoreRectangleElementConfig(CLAY__CONFIG_WRAPPER(Clay_RectangleElementConfig, __VA_ARGS__)) }, CLAY__ELEMENT_CONFIG_TYPE_RECTANGLE)
+local CLAY_RECTANGLE = function (...) 
+    local obj = ffi.new("Clay_ElementConfigUnion[1]", { 
+        rectangleElementConfig = Clay__StoreRectangleElementConfig(CLAY__CONFIG_WRAPPER(Clay_RectangleElementConfig, ...)) 
+    })
+    Clay__AttachElementConfig( obj, clay.CLAY__ELEMENT_CONFIG_TYPE_RECTANGLE )
+end 
 
 CLAY_TEXT_CONFIG(...) Clay__StoreTextElementConfig(CLAY__CONFIG_WRAPPER(Clay_TextElementConfig, __VA_ARGS__))
 
