@@ -1,60 +1,46 @@
+
 package.path    = package.path..";../../?.lua"
 local dirtools  = require("tools.vfs.dirtools").init("sokol%-luajit")
 
 --_G.SOKOL_DLL    = "sokol_debug_dll"
 local sapp      = require("sokol_app")
-sg              = require("sokol_gfx")
+sgp             = require("sokol_gp")
+sg              = sgp
 local slib      = require("sokol_libs") -- Warn - always after gfx!!
-
-local clay      = require("clay")
-local cutils    = require("clay_utils")
 
 local hmm       = require("hmm")
 local hutils    = require("hmm_utils")
 
+local clay      = require("clay")
+local cutils    = require("clay_utils")
+
 local utils     = require("utils")
+
+-- --------------------------------------------------------------------------------------
 
 local ffi       = require("ffi")
 
--- --------------------------------------------------------------------------------------
-
 ffi.cdef[[
-/* application state */
-typedef struct state {
-    float rx, ry;
-    sg_pipeline pip;
-    sg_bindings* bind;
-} state;
+    void Sleep(uint32_t ms);
 ]]
-
-local layoutElement = ffi.new("Clay_LayoutConfig[1]", { padding = 5 })
-
--- --------------------------------------------------------------------------------------
--- The nice way to take a glsl shader and load, compile and return a shader description
-local shc       = require("tools.shader_compiler.shc_compile").init( "sokol%-luajit", true )
-local shader    = shc.compile("./projects/examples/samples/cube-sapp.glsl")
-
-local clay_dim  = ffi.new("Clay_Dimensions[1]", { {1024,768} })
-local clay_errors = ffi.new("Clay_ErrorHandler[1]", { { errorHanderFunction = HandleClayErrors } })
-
--- --------------------------------------------------------------------------------------
-
-local function logout(tag, log_level, log_item, message, line_nr, filename, user_data)
-    print("-------->>> ")
-    print(tag.." "..log_level.." "..log_item.." "..message.." "..line_nr.." "..filename)
-end
 
 -- --------------------------------------------------------------------------------------
 
 local function HandleClayErrors(errorData) 
-    print(string.format("%s", errorData.errorText.chars))
+    print(string.format("[Clay] %s", ffi.string(errorData.errorText.chars)))
 end
 
 -- --------------------------------------------------------------------------------------
+-- Clay setup params
+local clay_dim  = ffi.new("Clay_Dimensions[1]", {{ 1024, 768 }})
+local clay_errors = ffi.new("Clay_ErrorHandler[1]", {{ errorHanderFunction = HandleClayErrors }})
 
-local state = ffi.new("state[1]")
-local sg_range = ffi.new("sg_range[1]")
-local binding = ffi.new("sg_bindings[1]", {})
+-- --------------------------------------------------------------------------------------
+
+local totalMemorySize = clay.Clay_MinMemorySize()
+local clay_mem = ffi.new("char[?]", totalMemorySize)
+
+-- --------------------------------------------------------------------------------------
 
 local function init()
 
@@ -65,139 +51,119 @@ local function init()
     sg.sg_setup( desc )
     print("Sokol Is Valid: "..tostring(sg.sg_isvalid()))
 
-    local vertices = ffi.new("float[168]", {
-        -1.0, -1.0, -1.0,   1.0, 0.0, 0.0, 1.0,
-         1.0, -1.0, -1.0,   1.0, 0.0, 0.0, 1.0,
-         1.0,  1.0, -1.0,   1.0, 0.0, 0.0, 1.0,
-        -1.0,  1.0, -1.0,   1.0, 0.0, 0.0, 1.0,
+    -- Initialize Sokol GP, adjust the size of command buffers for your own use.
+    local sgpdesc = ffi.new("sgp_desc[1]")
+    ffi.fill(sgpdesc, ffi.sizeof("sgp_desc"))
+    sgp.sgp_setup(sgpdesc)
+    print("Sokol GP Is Valid: ".. tostring(sgp.sgp_is_valid()))
 
-        -1.0, -1.0,  1.0,   0.0, 1.0, 0.0, 1.0,
-         1.0, -1.0,  1.0,   0.0, 1.0, 0.0, 1.0,
-         1.0,  1.0,  1.0,   0.0, 1.0, 0.0, 1.0,
-        -1.0,  1.0,  1.0,   0.0, 1.0, 0.0, 1.0,
-
-        -1.0, -1.0, -1.0,   0.0, 0.0, 1.0, 1.0,
-        -1.0,  1.0, -1.0,   0.0, 0.0, 1.0, 1.0,
-        -1.0,  1.0,  1.0,   0.0, 0.0, 1.0, 1.0,
-        -1.0, -1.0,  1.0,   0.0, 0.0, 1.0, 1.0,
-
-        1.0, -1.0, -1.0,    1.0, 0.5, 0.0, 1.0,
-        1.0,  1.0, -1.0,    1.0, 0.5, 0.0, 1.0,
-        1.0,  1.0,  1.0,    1.0, 0.5, 0.0, 1.0,
-        1.0, -1.0,  1.0,    1.0, 0.5, 0.0, 1.0,
-
-        -1.0, -1.0, -1.0,   0.0, 0.5, 1.0, 1.0,
-        -1.0, -1.0,  1.0,   0.0, 0.5, 1.0, 1.0,
-         1.0, -1.0,  1.0,   0.0, 0.5, 1.0, 1.0,
-         1.0, -1.0, -1.0,   0.0, 0.5, 1.0, 1.0,
-
-        -1.0,  1.0, -1.0,   1.0, 0.0, 0.5, 1.0,
-        -1.0,  1.0,  1.0,   1.0, 0.0, 0.5, 1.0,
-         1.0,  1.0,  1.0,   1.0, 0.0, 0.5, 1.0,
-         1.0,  1.0, -1.0,   1.0, 0.0, 0.5, 1.0
-    }) 
-    
-    local buffer_desc           = ffi.new("sg_buffer_desc[1]")
-    buffer_desc[0].data.ptr     = vertices
-    buffer_desc[0].data.size    = ffi.sizeof(vertices)
-    buffer_desc[0].label        = "cube-vertices"
-    local vbuf = sg.sg_make_buffer(buffer_desc)
-
-    local indices = ffi.new("uint16_t[36]", {
-        0, 1, 2,  0, 2, 3,
-        6, 5, 4,  7, 6, 4,
-        8, 9, 10,  8, 10, 11,
-        14, 13, 12,  15, 14, 12,
-        16, 17, 18,  16, 18, 19,
-        22, 21, 20,  23, 22, 20
-    })
-
-    local ibuffer_desc          = ffi.new("sg_buffer_desc[1]", {})
-    ibuffer_desc[0].type        = sg.SG_BUFFERTYPE_INDEXBUFFER
-    ibuffer_desc[0].data.ptr    = indices
-    ibuffer_desc[0].data.size   = ffi.sizeof(indices) 
-    ibuffer_desc[0].label       = "cube-indices"
-    local ibuf = sg.sg_make_buffer(ibuffer_desc)
-
-    local shd = sg.sg_make_shader(shader)
-
-    local pipe_desc = ffi.new("sg_pipeline_desc[1]", {})
-    pipe_desc[0].layout.buffers[0].stride = 28
-    pipe_desc[0].layout.attrs[0].format = sg.SG_VERTEXFORMAT_FLOAT3
-    pipe_desc[0].layout.attrs[1].format = sg.SG_VERTEXFORMAT_FLOAT4
-    pipe_desc[0].shader         = shd    
-    pipe_desc[0].index_type     = sg.SG_INDEXTYPE_UINT16
-    pipe_desc[0].cull_mode      = sg.SG_CULLMODE_BACK
-    pipe_desc[0].depth.write_enabled = true
-    pipe_desc[0].depth.compare  = sg.SG_COMPAREFUNC_LESS_EQUAL
-    pipe_desc[0].label          = "cube-pipeline"
-    state[0].pip = sg.sg_make_pipeline(pipe_desc)
-
-    binding[0].vertex_buffers[0] = vbuf
-    binding[0].index_buffer     = ibuf
-    state[0].bind               = binding
-
-    local totalMemorySize = clay.Clay_MinMemorySize()
-    local clay_mem = ffi.new("char[?]", totalMemorySize)
     clayMemory = clay.Clay_CreateArenaWithCapacityAndMemory(totalMemorySize, clay_mem);    
     clay.Clay_Initialize(clayMemory, clay_dim[0], clay_errors[0]);
 end
 
 -- --------------------------------------------------------------------------------------
-local rect1 = clay.CLAY_RECTANGLE({ color = {255,255,255,0} })
-local layout1 = clay.CLAY_LAYOUT(layoutElement)
 
+local renderCmdMap = {
+    [clay.CLAY_RENDER_COMMAND_TYPE_RECTANGLE] = function(cmd)
+        local color = cmd.config.rectangleElementConfig.color
+        sgp.sgp_set_color(color.r, color.g, color.b, color.a)
+        local bb = cmd.boundingBox
+        sgp.sgp_draw_filled_rect(bb.x, bb.y, bb.width, bb.height)
+    end, 
+    [clay.CLAY_RENDER_COMMAND_TYPE_TEXT] = function(cmd)
+
+    end, 
+}
+
+-- --------------------------------------------------------------------------------------
+
+local function renderClay( renderCommands )
+    -- // More comprehensive rendering examples can be found in the renderers/ directory
+    for i = 0, renderCommands.length do
+        local theCmd = renderCommands.internalArray[i]
+        local cmdType = tonumber(theCmd.commandType)
+        local docommand = renderCmdMap[cmdType]
+        if(docommand) then 
+            docommand(theCmd)
+        end
+    end
+end    
+
+-- --------------------------------------------------------------------------------------
+-- TODO: make these helpers in cutils I think.
+local widthSizing = ffi.new("Clay_SizingAxis", { size = {percent = 100}, type = clay.CLAY__SIZING_TYPE_GROW }) 
+local heightSizing = ffi.new("Clay_SizingAxis", { size = {percent = 100}, type = clay.CLAY__SIZING_TYPE_GROW }) 
+
+local sizingGrow = ffi.new("Clay_Sizing", { width = widthSizing, height = heightSizing })
+local layoutElement = ffi.new("Clay_LayoutConfig", { padding = { top = 25 }, sizing = sizingGrow })
+local rectconfig = ffi.new("Clay_RectangleElementConfig", { color = {255,255,0,255} })
+
+-- --------------------------------------------------------------------------------------
+local rotator = 0.0
 local function frame()
 
-    -- /* NOTE: the vs_params_t struct has been code-generated by the shader-code-gen */
-    local w         = sapp.sapp_widthf()
-    local h         = sapp.sapp_heightf()
-    local t         = (sapp.sapp_frame_duration() * 60.0)
+    -- Get current window size.
+    local width         = sapp.sapp_widthf()
+    local height        = sapp.sapp_heightf()
+    local t             = (sapp.sapp_frame_duration() * 60.0)
+    rotator = math.fmod(rotator + sapp.sapp_frame_duration(), math.pi * 2.0)
+    local ratio = width/height
 
+    -- Clay commands to make ui - this is a little messy because Clay uses a mess of macros (very 90s)
     clay.Clay_BeginLayout()
-    -- clay.CLAY(rect1, layout1) {
-    --     clay.CLAY_TEXT(CLAY_STRING(""), clay.CLAY_TEXT_CONFIG({ .fontId = 0 }))
-    -- }
-    clay.Clay_EndLayout()
+    cutils.CLAY_START()
+        cutils.CLAY_RECTANGLE(rectconfig)
+        cutils.CLAY_LAYOUT(layoutElement)
+        cutils.CLAY_TEXT(cutils.CLAY_STRING(""), cutils.CLAY_TEXT_CONFIG({ fontId = 0 }))
+    cutils.CLAY_END()
+    -- This builds a list of render commands we can process below
+    local renderCommands = clay.Clay_EndLayout()
 
-    local proj      = hmm.HMM_Perspective(60.0, w/h, 0.01, 10.0)
-    local view      = hmm.HMM_LookAt(hmm.HMM_Vec3(0.0, 1.5, 6.0), hmm.HMM_Vec3(0.0, 0.0, 0.0), hmm.HMM_Vec3(0.0, 1.0, 0.0))
-    local view_proj = hmm.HMM_MultiplyMat4(proj, view)
-    state[0].rx     = state[0].rx + 1.0 * t
-    state[0].ry     = state[0].ry + 2.0 * t
+    -- Begin recording draw commands for a frame buffer of size (width, height).
+    sgp.sgp_begin(width, height)
+    -- Set frame buffer drawing region to (0,0,width,height).
+    sgp.sgp_viewport(0, 0, width, height)
+    -- Set drawing coordinate space to (left=-ratio, right=ratio, top=1, bottom=-1).
+    sgp.sgp_project(-ratio, ratio, 1.0, -1.0)
 
-    local rxm       = hmm.HMM_Rotate(state[0].rx, hmm.HMM_Vec3(1.0, 0.0, 0.0))
-    local rym       = hmm.HMM_Rotate(state[0].ry, hmm.HMM_Vec3(0.0, 1.0, 0.0))
-    local model     = hmm.HMM_MultiplyMat4(rxm, rym)
+    -- Clear the frame buffer.
+    sgp.sgp_set_color(0.1, 0.1, 0.1, 1.0)
+    sgp.sgp_clear()
 
-    local mvp       = hmm.HMM_MultiplyMat4(view_proj, model)
+    -- Draw an animated rectangle that rotates and changes its colors.
+    local r = math.sin(rotator)*0.5+0.5
+    local g = math.cos(rotator)*0.5+0.5
+    sgp.sgp_push_transform()
+    sgp.sgp_set_color(r, g, 0.3, 1.0)
+    sgp.sgp_rotate_at(rotator, 0.0, 0.0)
+    sgp.sgp_draw_filled_rect(-0.5, -0.5, 1.0, 1.0)
+    sgp.sgp_pop_transform()
 
+    -- Render clay last (over the top)
+    sgp.sgp_reset_project()
+    renderClay(renderCommands)
+
+    -- Begin a render pass.
     local pass      = ffi.new("sg_pass[1]")
-    pass[0].action.colors[0].load_action = sg.SG_LOADACTION_CLEAR
-    pass[0].action.colors[0].clear_value = { 0.25, 0.5, 0.75, 1.0 }
     pass[0].swapchain = slib.sglue_swapchain()
     sg.sg_begin_pass(pass)
 
-    sg.sg_apply_pipeline(state[0].pip)
-    sg.sg_apply_bindings(state[0].bind)
-
-    local vs_params = ffi.new("vs_params_t[1]")
-    vs_params[0].mvp    = mvp
-    sg_range[0].ptr     = vs_params
-    sg_range[0].size    = ffi.sizeof(vs_params[0])
-    sg.sg_apply_uniforms(0, sg_range)
-    
-    sg.sg_draw(0, 36, 1)
-    sg.sg_end_pass()
+    -- Dispatch all draw commands to Sokol GFX.
+    sgp.sgp_flush()
+    -- Finish a draw command queue, clearing it.
+    sgp.sgp_end()
+    -- End render pass.
+    sgp.sg_end_pass()
+    -- Commit Sokol render.
     sg.sg_commit()
 
-    -- Display frame stats in console.
-    -- hutils.show_stats()
+    ffi.C.Sleep(1)
 end
 
 -- --------------------------------------------------------------------------------------
 
 local function cleanup()
+    sgp.sgp_shutdown()
     sg.sg_shutdown()
 end
 
@@ -209,8 +175,8 @@ app_desc[0].frame_cb    = frame
 app_desc[0].cleanup_cb  = cleanup
 app_desc[0].width       = 1920
 app_desc[0].height      = 1080
-app_desc[0].window_title = "Cube (sokol-app)"
-app_desc[0].fullscreen  = true
+app_desc[0].window_title = "Rectangle (Sokol GP)"
+app_desc[0].fullscreen  = false
 app_desc[0].icon.sokol_default = true 
 app_desc[0].logger.func = slib.slog_func 
 

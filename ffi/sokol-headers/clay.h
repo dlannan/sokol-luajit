@@ -97,7 +97,7 @@
 
 #define CLAY_STRING_CONST(string) { .length = CLAY__STRING_LENGTH(CLAY__ENSURE_STRING_LITERAL(string)), .chars = (string) }
 
-uint8_t CLAY__ELEMENT_DEFINITION_LATCH;
+extern uint8_t CLAY__ELEMENT_DEFINITION_LATCH;
 
 // Publicly visible layout element macros -----------------------------------------------------
 
