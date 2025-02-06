@@ -27,13 +27,14 @@ ffi.cdef[[
 -- --------------------------------------------------------------------------------------
 
 local function HandleClayErrors(errorData) 
+    print(errorData)
     print(string.format("[Clay] %s", ffi.string(errorData.errorText.chars)))
 end
 
 -- --------------------------------------------------------------------------------------
 -- Clay setup params
-local clay_dim  = ffi.new("Clay_Dimensions[1]", {{ 1024, 768 }})
-local clay_errors = ffi.new("Clay_ErrorHandler[1]", {{ errorHanderFunction = HandleClayErrors }})
+local clay_dim  = ffi.new("Clay_Dimensions", { 1024, 768 })
+local clay_errors = ffi.new("Clay_ErrorHandler", { errorHanderFunction = HandleClayErrors })
 
 -- --------------------------------------------------------------------------------------
 
@@ -57,8 +58,8 @@ local function init()
     sgp.sgp_setup(sgpdesc)
     print("Sokol GP Is Valid: ".. tostring(sgp.sgp_is_valid()))
 
-    clayMemory = clay.Clay_CreateArenaWithCapacityAndMemory(totalMemorySize, clay_mem);    
-    clay.Clay_Initialize(clayMemory, clay_dim[0], clay_errors[0]);
+    clayMemory = clay.Clay_CreateArenaWithCapacityAndMemory(totalMemorySize, clay_mem)
+    clay.Clay_Initialize(clayMemory, clay_dim, clay_errors)
 end
 
 -- --------------------------------------------------------------------------------------
@@ -91,12 +92,16 @@ end
 
 -- --------------------------------------------------------------------------------------
 -- TODO: make these helpers in cutils I think.
-local widthSizing = ffi.new("Clay_SizingAxis", { size = {percent = 100}, type = clay.CLAY__SIZING_TYPE_GROW }) 
-local heightSizing = ffi.new("Clay_SizingAxis", { size = {percent = 100}, type = clay.CLAY__SIZING_TYPE_GROW }) 
+local ctype_sizingaxis = ffi.typeof("Clay_SizingAxis")
+local ctype_sizing = ffi.typeof("Clay_Sizing")
 
-local sizingGrow = ffi.new("Clay_Sizing", { width = widthSizing, height = heightSizing })
-local layoutElement = ffi.new("Clay_LayoutConfig", { padding = { top = 25 }, sizing = sizingGrow })
-local rectconfig = ffi.new("Clay_RectangleElementConfig", { color = {255,255,0,255} })
+local sizingGrow = ctype_sizing( { 
+    width = ctype_sizingaxis( { size = {percent = 100}, type = clay.CLAY__SIZING_TYPE_GROW } ), 
+    height = ctype_sizingaxis( { size = {percent = 100}, type = clay.CLAY__SIZING_TYPE_GROW } )
+} )
+
+local ctype_layoutconfig = ffi.typeof("Clay_LayoutConfig")
+local ctype_rectangleelementconfig = ffi.typeof("Clay_RectangleElementConfig")
 
 -- --------------------------------------------------------------------------------------
 local rotator = 0.0
@@ -111,11 +116,19 @@ local function frame()
 
     -- Clay commands to make ui - this is a little messy because Clay uses a mess of macros (very 90s)
     clay.Clay_BeginLayout()
+
+    -- The cascading child declaration methodology is messy. I think I might make it stack based, 
+    --    much cleaner and certainly better to dev with. 
     cutils.CLAY_START()
-        cutils.CLAY_RECTANGLE(rectconfig)
-        cutils.CLAY_LAYOUT(layoutElement)
-        cutils.CLAY_TEXT(cutils.CLAY_STRING(""), cutils.CLAY_TEXT_CONFIG({ fontId = 0 }))
+        -- elements config
+        cutils.CLAY_LAYOUT( ctype_layoutconfig({ padding = { top = 25 }, sizing = sizingGrow }) )
+        cutils.CLAY_RECTANGLE( ctype_rectangleelementconfig( { color = {255,255,0,255} }) )
+    cutils.CLAY_POSTCONFIG()
+
+        -- Children here
+        cutils.CLAY_TEXT( cutils.CLAY_STRING(""), cutils.CLAY_TEXT_CONFIG({ fontId = 0 }) )
     cutils.CLAY_END()
+
     -- This builds a list of render commands we can process below
     local renderCommands = clay.Clay_EndLayout()
 

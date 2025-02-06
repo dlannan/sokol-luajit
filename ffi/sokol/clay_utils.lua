@@ -112,20 +112,23 @@ local CLAY__ELEMENT_DEFINITION_LATCH = 0
 clay_utils.CLAY = function(...)
 	do
         clay.Clay__OpenElement()
-        for i,v in pairs({...}) do v() end
+
         clay.Clay__ElementPostConfiguration()
         clay.CLAY__ELEMENT_DEFINITION_LATCH =  clay.CLAY__ELEMENT_DEFINITION_LATCH + 1
         clay.Clay__CloseElement()
-        end
+    end
 end
 
 clay_utils.CLAY_START = function()
-    --clay.CLAY__ELEMENT_DEFINITION_LATCH = 0
+    clay.CLAY__ELEMENT_DEFINITION_LATCH = 0
     clay.Clay__OpenElement()
 end
 
-clay_utils.CLAY_END = function()
+clay_utils.CLAY_POSTCONFIG = function()
     clay.Clay__ElementPostConfiguration()
+end
+
+clay_utils.CLAY_END = function()
     clay.CLAY__ELEMENT_DEFINITION_LATCH =  clay.CLAY__ELEMENT_DEFINITION_LATCH + 1
     clay.Clay__CloseElement()
 end
