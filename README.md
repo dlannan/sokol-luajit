@@ -1,5 +1,17 @@
 # sokol-luajit
 
+Update 06/05/2024
+- Updated Discord link (Thanks DarkSeasonsStudios)
+- PR added for MacOS fixes. (Thanks funatsufumiya)
+
+TODO: Some testing on MacOS.
+
+NOTES: Im currently very busy finishing off another project here: 
+
+https://forum.defold.com/t/f18-interceptor-building-my-favorite-old-amiga-game/69851
+
+Once this is complete, I will put most of my time into this project. 
+
 Update 11/12/2024 
 - Breaking changes happening. The build system works but Ive decided to change to use an FBP styled system (see FBP readme).
 - I hope to have a 'usable' new system in the next couple of weeeks. 
@@ -13,7 +25,7 @@ A luajit set of ffi wrappers for the excellent sokol framework,
 
 For all things, Sokol, luajit and sokol-luajit feel free to drop in the Discord
 
-Discord - https://discord.gg/KMDeFebk
+Discord - [https://discord.gg/KMDeFebk](https://discord.gg/Knzpav9nfD)
 
 
 ## Sokol
