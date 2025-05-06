@@ -54,11 +54,13 @@ dirtools.add_default_paths = function(path)
         ["Linux"]       = "linux",
         ["Windows"]     = "win64",
         ["MacOSX"]      = "macos",
+        ["OSX"]         = "macos",
     }
     local extensions = {
         ["Linux"]       = "so",
         ["Windows"]     = "dll",
         ["MacOSX"]      = "so",
+        ["OSX"]         = "so",
     }
 
     package.cpath   = package.cpath..";"..path.."bin/"..folders[ffi.os].."/?."..extensions[ffi.os]

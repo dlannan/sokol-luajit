@@ -4,7 +4,7 @@ local ffi  = require( "ffi" )
 
 local sokol_filename = _G.SOKOL_DLL or "sokol_dll"
 local libs = ffi_sokol_app or {
-   OSX     = { x64 = sokol_filename..".so" },
+   OSX     = { x64 = sokol_filename.."_macos.so", arm64  = sokol_filename.."_macos_arm64.so" },
    Windows = { x64 = sokol_filename..".dll" },
    Linux   = { x64 = "lib"..sokol_filename..".so", arm = "lib"..sokol_filename..".so" },
    BSD     = { x64 = sokol_filename..".so" },
@@ -13,7 +13,6 @@ local libs = ffi_sokol_app or {
 }
 
 local lib  = ffi_sokol_app or libs[ ffi.os ][ ffi.arch ]
-print(lib)
 local sokol_app   = ffi.load( lib )
 
 -- just use LuaJIT ffi and lcpp together
