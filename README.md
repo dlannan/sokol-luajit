@@ -1,6 +1,6 @@
 # sokol-luajit
 
-Update 06/05/2024
+Update 06/05/2025
 - Updated Discord link (Thanks DarkSeasonsStudios)
 - PR added for MacOS fixes. (Thanks funatsufumiya)
 
