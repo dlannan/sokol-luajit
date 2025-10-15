@@ -25,6 +25,15 @@ ffi.cdef[[
         uint64_t        lparam[1];
         const char *    title;
     } enumData;
+
+    typedef struct { long left; long top; long right; long bottom; } RECT;
+
+    int GetSystemMetrics(int nIndex);
+    int AdjustWindowRect(RECT* lpRect, unsigned long dwStyle, int bMenu);
+    long GetWindowLongA(unsigned int hWnd, int nIndex);
+    int SystemParametersInfoW(unsigned int uiAction, unsigned int uiParam, RECT* pvParam, unsigned int fWinIni);
+
+    int SetWindowPos(unsigned int hWnd, void* hWndInsertAfter, int X, int Y, int cx, int cy, unsigned int uFlags);    
 ]]
 
 require("ffi.windows")
@@ -262,10 +271,22 @@ end
 local pid = user32.GetWindowThreadProcessId( wvhwnd or 0, nil )
 local hhookSysMsg = user32.SetWindowsHookExA( user32.WH_CALLWNDPROC, MsgFilter, 0, pid)
 
+
+local SWP_NOZORDER = 0x0004
+local SWP_NOACTIVATE = 0x0010
+local SWP_ASYNCWINDOWPOS = 0x4000
+local SWP_SHOWWINDOW = 0x0040
+
+local function SetWindowPos( hwnd, x, y, width, height )
+
+    user32.SetWindowPos(hwnd, nil, x, y, width, height, bit.bor(SWP_NOZORDER, SWP_ASYNCWINDOWPOS, SWP_NOACTIVATE))
+end
+
 ------------------------------------------------------------------------------------------------------------
 
 return {
     CreateWindow = CreateWindow,
+    SetWindowPos = SetWindowPos,
     SetTransparentBlend = SetTransparentBlend,
     GetHwndFromProcess = GetHwndFromProcess,
     RemoveWindowBorders = RemoveWindowBorders,

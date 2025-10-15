@@ -21,6 +21,16 @@ ffi.cdef[[
 ]]
 
 -- --------------------------------------------------------------------------------------
+
+local width = 1920 
+local height = 1080
+if(arg[1] and arg[2]) then 
+    width = tonumber(arg[1])
+    height = tonumber(arg[2])
+end
+print(width, height)
+
+-- --------------------------------------------------------------------------------------
 -- The project manager handles configuration of the project data (build, debug etc)
 --   Project manager defines what worlds, assets and folders are accessible for the project
 --   Note: the editor should _always_ have an active project. If it doesnt have one, it will 
@@ -91,8 +101,8 @@ app_desc[0].init_cb     = init
 app_desc[0].frame_cb    = frame
 app_desc[0].cleanup_cb  = cleanup
 app_desc[0].event_cb    = input
-app_desc[0].width       = 1920
-app_desc[0].height      = 1080
+app_desc[0].width       = width
+app_desc[0].height      = height
 app_desc[0].window_title = "editor - sokol"
 app_desc[0].fullscreen  = false
 app_desc[0].icon.sokol_default = true 
