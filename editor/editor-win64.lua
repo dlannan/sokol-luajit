@@ -84,15 +84,17 @@ local function setupWindows()
     desktop[0].left = 0
     desktop[0].right = (r-l)/2
     browserhwnd = SetupBrowser(desktop)
+    sleep(100) -- Let things setup (window pos etc)
+
     desktop[0].left = (r-l)/2
     desktop[0].right = r
     sokolhwnd = SetupSokolLuajit(desktop)
+    sleep(100) -- Let things setup (window pos etc)
 end 
 
 ------------------------------------------------------------------------------------------------------------
 
 setupWindows()
-sleep(100) -- Let things setup (window pos etc)
 while true do 
     if(user32.IsWindow(browserhwnd) == 0) then break end 
     if(user32.IsWindow(sokolhwnd) == 0) then break end
@@ -105,5 +107,5 @@ end
 if(sokolhwnd) then 
     user32.SendMessageA(sokolhwnd, ffi.C.WM_CLOSE, 0, 0)
 end
-print("Exited")
+print("Editor Exited.")
 ------------------------------------------------------------------------------------------------------------
