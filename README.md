@@ -4,6 +4,14 @@ Update 15/10/2025
 
 Its been a long time. Life gets in the way as usual. I have been using this toolkit for a number of projects so I wanted to update it. I have built a complete fbp system using it (to be shared later) and I have made a luajit based html rendering engine that is coming along nicely (with the same toolkit). 
 
+https://github.com/dlannan/luajit-html-engine/
+
+If you want kind of a preview of what is happening you can see some of the work by running:
+
+```.\bin\win64\luajit.exe .\editor\editor-win64.lua```
+
+Obviously this is for win64 atm. And there might be browser compatibility issuse too. If you use Firefox or similar it should work fine, but dont expect miracles :)
+
 What the next few weeks (I hope) will look like:
 - Improvements for nuklear widgets and state management
 - Probably remove fbp from here - I think it should be optional (its a dev mindset that can be hindering to some).
