@@ -38,12 +38,12 @@ print("BROWSER SETUP")
 
     local browser, bsize = winu.getDefaultBrowser()
     local browser_path    = ffi.string(browser)..[[ -new-window "http://localhost:9190/index.html"]]
-    hproc_browser, hthread_browser, si_browser = execute(browser_path)
-    sleep(200)
+    hproc_browser, hthread_browser, pi_browser = execute(browser_path)
     -- Need to make this more generic (ie browser agnostic)
-    local browserhwnd = GetHwndFromProcess( hthread_browser, "Mozilla Firefox" )
+    -- local browserhwnd = winu.GetHwndFromProcess( hthread_browser, "Mozilla Firefox" )
+    local browserhwnd = winu.FindWindowByProcId(pi_browser[0].hProcess, hproc_browser, 400)
     -- local browserhwnd = user32.FindWindowA( nil, "http://localhost:9190/index.html")
-    print(hproc_browser, hthread_browser, si_browser)
+    -- print(hproc_browser, hthread_browser, si_browser)
     if(browserhwnd) then 
         sleep(100) -- Let things setup (window pos etc)
         local style = user32.GetWindowLongA(browserhwnd, -16)
@@ -63,10 +63,10 @@ print("SOKOL-LUAJIT SETUP")
     local width = rect[0].right - rect[0].left 
     local height = rect[0].bottom - rect[0].top
     local sokolluajit_path    = [["bin/win64/luajit.exe" "editor/editor.lua" ]]..string.format(" %d  %d", width, height)
-    hproc_sokol, hthread_sokol, si_sokol = execute(sokolluajit_path)
-    sleep(200)
+    hproc_sokol, hthread_sokol, pi_sokol = execute(sokolluajit_path)
     print(hproc_sokol, hthread_sokol, si_sokol)
-    local sokolhwnd = GetHwndFromProcess( hthread_sokol, "editor - sokol" )
+    -- local sokolhwnd = GetHwndFromProcess( hthread_sokol, "editor - sokol" )
+    local sokolhwnd = winu.FindWindowByProcId(pi_sokol[0].hProcess, hproc_sokol, 200)
     -- local sokolhwnd = user32.FindWindowA( nil, "editor - sokol")
     if(sokolhwnd) then 
         sleep(100) -- Let things setup (window pos etc)
@@ -89,7 +89,7 @@ local function setupWindows()
     desktop_width = workArea.right - workArea.left
     desktop_height = workArea.bottom - workArea.top
     print("Screen size:", desktop_width, "x", desktop_height)
-
+    
     local desktop = ffi.new("RECT[1]")
     -- Get a handle to the desktop window
     hDesktop = user32.GetDesktopWindow()

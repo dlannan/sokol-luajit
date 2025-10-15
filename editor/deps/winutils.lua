@@ -1,6 +1,8 @@
 ------------------------------------------------------------------------------------------------------------
 local ffi = require( "ffi" )
 
+local tinsert       = table.insert
+
 local kernel32 	    = ffi.load( "kernel32.dll" )
 local user32 	    = ffi.load( "user32.dll" )
 local comdlg32      = ffi.load( "Comdlg32.dll" )
@@ -19,24 +21,123 @@ local Colors = {
 }
 
 ffi.cdef[[
-    void Sleep(uint32_t ms);
+
+    typedef unsigned long DWORD;
+    typedef int BOOL;
+    typedef const char* LPCSTR;
+    typedef unsigned int HANDLE;
+    typedef unsigned int HWND;
+    typedef unsigned long *ULONG_PTR;
+    typedef long LPARAM;
+    typedef int (*WNDENUMPROC)(HWND hwnd, LPARAM lParam);
 
     typedef struct enumData {
         uint64_t        lparam[1];
         const char *    title;
-    } enumData;
+   } enumData;
+
+   typedef struct tagPROCESSENTRY32 {
+        DWORD dwSize;
+        DWORD cntUsage;
+        DWORD th32ProcessID;
+        ULONG_PTR  th32DefaultHeapID;
+        DWORD th32ModuleID;
+        DWORD cntThreads;
+        DWORD th32ParentProcessID;
+        long pcPriClassBase;
+        DWORD dwFlags;
+        char szExeFile[260];
+    } PROCESSENTRY32;   
 
     typedef struct { long left; long top; long right; long bottom; } RECT;
+
+    HANDLE CreateToolhelp32Snapshot(DWORD dwFlags, DWORD th32ProcessID);
+    BOOL Process32First(HANDLE hSnapshot, PROCESSENTRY32 *lppe);
+    BOOL Process32Next(HANDLE hSnapshot, PROCESSENTRY32 *lppe);
+    BOOL CloseHandle(HANDLE hObject);
+
+    BOOL EnumWindows(WNDENUMPROC lpEnumFunc, LPARAM lParam);
+    DWORD GetWindowThreadProcessId(HWND hWnd, DWORD *lpdwProcessId);
+    BOOL IsWindowVisible(HWND hWnd);
+
+    DWORD WaitForInputIdle(HANDLE hProcess, DWORD dwMilliseconds);
+    HWND GetForegroundWindow(void);
 
     int GetSystemMetrics(int nIndex);
     int AdjustWindowRect(RECT* lpRect, unsigned long dwStyle, int bMenu);
     long GetWindowLongA(unsigned int hWnd, int nIndex);
-    int SystemParametersInfoW(unsigned int uiAction, unsigned int uiParam, RECT* pvParam, unsigned int fWinIni);
+    BOOL SystemParametersInfoW(unsigned int uiAction, unsigned int uiParam, RECT* pvParam, unsigned int fWinIni);
 
-    int SetWindowPos(unsigned int hWnd, void* hWndInsertAfter, int X, int Y, int cx, int cy, unsigned int uFlags);    
+    BOOL SetWindowPos(unsigned int hWnd, void* hWndInsertAfter, int X, int Y, int cx, int cy, unsigned int uFlags);    
+
+    void Sleep(uint32_t ms);
 ]]
 
 require("ffi.windows")
+
+-- -----------------------------------------------------------------------------------
+local TH32CS_SNAPPROCESS = 0x00000002
+local process_parents = {}
+local process_childs = {}
+
+local function GetAllProcesses( )
+    -- Setup Toolhelp snapshot
+    local snapshot = kernel32.CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0)
+    if snapshot == -1 then return end
+
+    local entry = ffi.new("PROCESSENTRY32[1]")
+    entry[0].dwSize = ffi.sizeof("PROCESSENTRY32")
+
+    local found = false
+    local first_entry = kernel32.Process32First(snapshot, entry)
+    if first_entry ~= 0 then
+        repeat
+            process_parents[entry[0].th32ParentProcessID] = process_parents[entry[0].th32ParentProcessID] or {}
+            tinsert(process_parents[entry[0].th32ParentProcessID], entry[0].th32ProcessID)
+            process_childs[entry[0].th32ProcessID] = entry[0].th32ParentProcessID
+            print(entry[0].th32ProcessID, entry[0].th32ParentProcessID)
+        until kernel32.Process32Next(snapshot, entry) == 0
+    end
+
+    kernel32.CloseHandle(snapshot)
+end
+
+-- -----------------------------------------------------------------------------------
+
+function CheckChildren( win_pid, target_pid )
+
+    if( process_parents[target_pid] ) then 
+        for i, v in ipairs(process_parents[target_pid]) do 
+            print(v, win_pid, target_pid)
+            if v == win_pid then return true end 
+        end 
+    end 
+    return false
+end
+
+-- -----------------------------------------------------------------------------------
+
+local function FindWindowByProcId( proc_handle, proc_id, timeout_ms )
+
+    timeout_ms = timeout_ms or 5000
+
+    -- Wait until process is idle (i.e., its message queue is waiting)
+    local wait_result = ffi.C.Sleep(timeout_ms)
+
+    -- Get the currently active (foreground) window
+    local hwnd = user32.GetForegroundWindow()
+    if hwnd == nil then
+        print("No foreground window found.")
+        return nil
+    end
+
+    -- Check if it belongs to our target process
+    local pid_ptr = ffi.new("DWORD[1]")
+    user32.GetWindowThreadProcessId(hwnd, pid_ptr)
+    return hwnd
+end    
+
+-- -----------------------------------------------------------------------------------
 
 local function AssocQ( outstr, bsize )
     local ftype = ffi.cast("char *", ffi.string("http"))
@@ -285,18 +386,23 @@ end
 ------------------------------------------------------------------------------------------------------------
 
 return {
-    CreateWindow = CreateWindow,
-    SetWindowPos = SetWindowPos,
-    SetTransparentBlend = SetTransparentBlend,
-    GetHwndFromProcess = GetHwndFromProcess,
-    RemoveWindowBorders = RemoveWindowBorders,
-    WindowsFileSelect = WindowsFileSelect,
-    WindowsFolderSelect = WindowsFolderSelect,
-    execute     = execute,
-    shellexecute = shellexecute,
-    Sleep       = ffi.C.Sleep,
-    GetFile     = GetFile,
-    getDefaultBrowser   = getDefaultBrowser,
+    CreateWindow            = CreateWindow,
+    SetWindowPos            = SetWindowPos,
+
+    SetTransparentBlend     = SetTransparentBlend,
+    GetHwndFromProcess      = GetHwndFromProcess,
+    RemoveWindowBorders     = RemoveWindowBorders,
+    WindowsFileSelect       = WindowsFileSelect,
+    WindowsFolderSelect     = WindowsFolderSelect,
+
+    execute                 = execute,
+    shellexecute =           shellexecute,
+    Sleep                   = ffi.C.Sleep,
+    GetFile                 = GetFile,
+
+    FindWindowByProcId      = FindWindowByProcId,
+    GetAllProcesses         = GetAllProcesses,
+    getDefaultBrowser       = getDefaultBrowser,
 
     kernel  = kernel32,
     user    = user32,

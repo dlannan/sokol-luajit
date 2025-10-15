@@ -1,4 +1,4 @@
-internal error: Template 'partials/statistics_js.html' not found in runtime:0
+internal error: Template 'partials/config_modules_js.html' not found in runtime:0
 Lua stack traceback:
 	editor\twig/aspect\error.lua:103: in function 'new'
 	editor\twig/aspect\template.lua:395: in function 'render'
