@@ -1,5 +1,92 @@
 # sokol-luajit
 
+Update 15/10/2025
+
+Its been a long time. Life gets in the way as usual. I have been using this toolkit for a number of projects so I wanted to update it. I have built a complete fbp system using it (to be shared later) and I have made a luajit based html rendering engine that is coming along nicely (with the same toolkit). 
+
+What the next few weeks (I hope) will look like:
+- Improvements for nuklear widgets and state management
+- Probably remove fbp from here - I think it should be optional (its a dev mindset that can be hindering to some).
+- Add in some more backend development interfaces - The editor will be heavily based on a html/js editor suite.
+- Provide some small completed applications for reference (will be in examples).
+- Provide a single complete larger application (like a small game).
+
+The goal here is to make building, running and developing more streamlined and simple. 
+
+What the whole system should look like:
+```
++-----------------------------------------------------------+
+|                  Developer Workstation                    |
+|                                                           |
+|  +---------------------+    +-------------------------+   |
+|  |  Remote Web UI      |<-->|     Local Dev Server    |<--+
+|  |  (Browser - HTTPS)  |    |  (luajit + sokol main)  |   |
+|  +---------------------+    +-------------------------+   |
+|     |       |       |                 |                   |
+|     |       |       |                 |                   |
+|     V       V       V                 V                   |
+|  +--------+ +-----+ +----------+   +-----------+          |
+|  | Scene  | |Data | | Scripting|   | Asset Mgmt|          |
+|  | Graph  | |Mgmt | | (LuaJIT) |   | (STB, etc)|          |
+|  +--------+ +-----+ +----------+   +-----------+          |
+|      |         |         |              |                 |
+|      +---------+---------+--------------+                 |
+|                           |                               |
+|                           V                               |
+|                   +---------------+                       |
+|                   | Project Build |                       |
+|                   | Config/Flow   |                       |
+|                   +-------+-------+                       |
+|                           |                               |
+|             +-------------+--------------+                |
+|             |      App State Engine      |                |
+|             | (Start/Pause/Restart etc.) |                |
+|             +------+------+--------------+                |
+|                    |      |                               |
+|      +-------------+      +------------+                  |
+|      |                                 |                  |
+|      V                                 V                  |
+| +------------+             +--------------------------+   |
+| |  Rendering |<------------|       Input System       |   |
+| | (Sokol GFX)|             |    (Sokol, Nuklear UI)   |   |
+| +------------+             +--------------------------+   |
+|      |                                |                   |
+|      |                                V                   |
+|      |                         +-------------+            |
+|      |                         | Debug Tools |            |
+|      |                         | (Remotery)  |            |
+|      |                         +-------------+            |
+|      V                                                    |
+| +-------------------------+                               | 
+| |  Live Application View  |                               | 
+| | (App/Window(s) Display) |                               | 
+| +-------------------------+                               | 
+|                                                           |
++-----------------------------------------------------------+
+
+```
+
+| Component                          | Description                                                               |
+| ---------------------------------- | ------------------------------------------------------------------------- |
+| **LuaJIT**                         | Scripting runtime, manages dynamic scripts in real-time.                  |
+| **Sokol (GFX, APP, TIME, AUDIO)**  | Low-level platform abstraction (window, rendering, input, timing).        |
+| **Nuklear**                        | Lightweight immediate-mode UI, used in debug overlays or in-app GUI.      |
+| **STB (image, vorbis, etc)**       | Asset loading (images, audio, fonts).                                     |
+| **Remotery**                       | Remote profiling and performance metrics via web browser.                 |
+| **Remote Web UI**                  | Interface to manage all aspects of the game/app project.                  |
+| **Scenegraph/Data/Asset Managers** | Internal modules in Lua/C interfacing with LuaJIT + the live app.         |
+| **App State Engine**               | Controls app runtime (play/pause/reset), possibly as a Lua state machine. |
+
+
+Realtime Flow Summary:
+- You write/edit scripts/assets remotely.
+- Backend compiles/builds/configures project state using LuaJIT + native libs.
+- Changes are pushed to the live application window, which uses Sokol for rendering and input.
+- Remotery allows you to monitor runtime performance.
+- The UI system (could be in Nuklear or remote browser) allows you to control the app's lifecycle.
+
+The above was generated by ChatGPT with my input. This is mostly correct. And I hope to have large portions of this operational by early 2026.
+
 Update 06/05/2025
 - Updated Discord link (Thanks DarkSeasonsStudios)
 - PR added for MacOS fixes. (Thanks funatsufumiya)
