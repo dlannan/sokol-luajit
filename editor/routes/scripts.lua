@@ -1,14 +1,30 @@
 local utils 		    = require("utils")
+local json 		        = require("json")
+
+-- TODO: This needs to go to config or similar
+local scripts_lua       = "data/lua/"
+
 local route = {
     http_server = nil,
     ecs_server = nil,
 }
 
+local scripts_lua_load_json = {
+    pattern = "/(.*%.lua)%??.*$", 
+    func = function(matches, stream, headers, body)
+        local lua_data = utils.loaddata(base_www_path..scripts_lua..matches[1])	
+        -- Convert to json
+        local out_tbl = { content = tostring(lua_data) }
+        local json_data = json.encode(out_tbl)
+        return route.http_server.json(json_data)
+    end,
+}
+
 local scripts_json = {
     pattern = "/(.*%.json)%??.*$", 
     func = function(matches, stream, headers, body)
-        local json = utils.loaddata(base_www_path..matches[1])		
-        return route.http_server.json(json)
+        local json_data = utils.loaddata(base_www_path..matches[1])	
+        return route.http_server.json(json_data)
     end,
 }
 
@@ -54,6 +70,7 @@ local scripts_css_map = {
 
 -- Order is important!!
 route.routes = {
+    scripts_lua_load_json,
     scripts_json,
     scripts_js,
     scripts_ts,

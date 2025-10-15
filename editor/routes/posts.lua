@@ -2,6 +2,9 @@ local utils 		    = require("utils")
 local json              = require("json")
 local dirtools          = require("tools.vfs.dirtools")
 
+-- TODO: This needs to go to config or similar
+local scripts_lua       = "data/lua/"
+
 local route = {
     http_server = nil,
     ecs_server = nil,
@@ -159,6 +162,27 @@ local posts_projectload = {
     end,
 } 
 
+local posts_scriptlua_save = {
+    pattern = "/scripts/lua/save$", 
+    func = function(matches, stream, headers, body)
+
+        if(body == nil) then 
+            return route.http_server.html("failed. no post data.")
+        end
+
+        local cdata = json.decode(body)
+        if(cdata.filename) then 
+            local ofile = utils.loaddata(base_www_path..scripts_lua..cdata.filename)
+            -- Only allow writing of current data files!!
+            if(ofile and cdata.content) then 
+                utils.savedata(base_www_path..scripts_lua..cdata.filename, cdata.content)
+            end
+        end
+        return route.http_server.json("success")
+    end,
+} 
+
+
 route.routes = {
     posts_form,
     posts_systems,
@@ -172,6 +196,8 @@ route.routes = {
     posts_projectload,
     posts_projectsysgetdrive,
     posts_projectsysgetfolder,
+
+    posts_scriptlua_save,
 }
 
 return route

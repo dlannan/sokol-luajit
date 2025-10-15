@@ -189,7 +189,6 @@ end
 local function loaddata(filepath)
 	local data = nil
 	local fh = io.open(filepath, "rb")
-	print(filepath)
 	if(fh) then 
 		data = fh:read("*a")
 		fh:close()
@@ -197,6 +196,19 @@ local function loaddata(filepath)
 		print("[Error] utils.loaddata: Unable to load - "..filepath)
 	end
 	return data 
+end
+
+-- ---------------------------------------------------------------------------
+
+local function savedata(filepath, content)
+	local data = nil
+	local fh = io.open(filepath, "wb")
+	if(fh) then 
+		data = fh:write(content)
+		fh:close()
+	else 
+		print("[Error] utils.savedata: Unable to save - "..filepath)
+	end
 end
 
 ------------------------------------------------------------------------------------------------------------
@@ -322,6 +334,7 @@ return {
 	tickround		= tickround,
 
 	loaddata		= loaddata,
+	savedata		= savedata,
 
 	urldecode		= urldecode,
 	parseurl 		= parseurl,

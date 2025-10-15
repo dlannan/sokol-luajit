@@ -1,5 +1,11 @@
 -- --------------------------------------------------------------------------------------
 -- This is crazy windows stuff. Will attempt with OSX and Linux later)
+
+-- TODO - I think I need to make this a core main app, and the other processes are forked
+--        from this app. That way it can get process handles and manage them closing properly.
+--        Other benefits might be the ability to put their hwnd into a "master window" and thus
+--        drive it all much more cleanly (this will suit linux and osx more too)
+
 local ffi       = require("ffi")
 local winu      = require("editor.deps.winutils")
 
@@ -86,13 +92,18 @@ end
 ------------------------------------------------------------------------------------------------------------
 
 setupWindows()
+sleep(100) -- Let things setup (window pos etc)
 while true do 
     if(user32.IsWindow(browserhwnd) == 0) then break end 
     if(user32.IsWindow(sokolhwnd) == 0) then break end
     sleep(1)
 end
 
-user32.CloseWindow(browserhwnd)
-user32.CloseWindow(sokolhwnd)
+if(browserhwnd) then
+    user32.SendMessageA(browserhwnd, ffi.C.WM_CLOSE, 0, 0)
+end
+if(sokolhwnd) then 
+    user32.SendMessageA(sokolhwnd, ffi.C.WM_CLOSE, 0, 0)
+end
 print("Exited")
 ------------------------------------------------------------------------------------------------------------
