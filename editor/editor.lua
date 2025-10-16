@@ -6,8 +6,14 @@ dirtools.add_package_path("editor"..dirtools.sep.."twig")
 --_G.SOKOL_DLL    = "sokol_debug_dll"
 local sapp      = require("sokol_app")
 sg              = require("sokol_gfx")
+sg              = require("sokol_nuklear")
+local nk        = sg
 local slib      = require("sokol_libs") -- Warn - always after gfx!!
 
+local hmm       = require("hmm")
+local hutils    = require("hmm_utils")
+
+local stb       = require("stb")
 local utils     = require("utils")
 
 local ffi       = require("ffi")
@@ -18,7 +24,30 @@ local shell32   = ffi.load("shell32")
 ffi.cdef[[
     void Sleep(uint32_t ms);
     void *  ShellExecuteA(const void * hwnd, const char * lpOperation, const char * lpFile, const char * lpParameters, char* lpDirectory, int nShowCmd);
+    int ShowWindow(const void * hWnd, int nCmdShow);
 ]]
+
+local SW_MAXIMIZE = 3
+-- --------------------------------------------------------------------------------------
+
+local engineState   = require("engine.state_engine")
+
+-- --------------------------------------------------------------------------------------
+local enabled_profile   = arg[1] == "-profile"
+local profile           = nil
+if(enabled_profile) then 
+    profile = require("jit.profile")
+    function cb(thread, samples, vmstate)
+        print(profile.dumpstack(thread, "l\n", 1))
+    end
+    profile.start("fi4", cb)
+end
+
+-- --------------------------------------------------------------------------------------
+-- Grab some gui elements for testing
+
+local panels = require("data.gui.widgets.panels")
+
 
 -- --------------------------------------------------------------------------------------
 
@@ -28,7 +57,18 @@ if(arg[1] and arg[2]) then
     width = tonumber(arg[1])
     height = tonumber(arg[2])
 end
-print(width, height)
+print("Display: "..width .. " x ".. height)
+
+-- --------------------------------------------------------------------------------------
+
+local function ErrorCheck(status, err)
+    if(status == false) then 
+        print(status)
+        print(err)
+        print(debug.traceback())
+        os.exit()
+    end
+end
 
 -- --------------------------------------------------------------------------------------
 -- The project manager handles configuration of the project data (build, debug etc)
@@ -37,28 +77,28 @@ print(width, height)
 --         show a load panel to load one. 
 local projectmgr    = require("editor.project-manager")
 
--- --------------------------------------------------------------------------------------
--- Tiny ECS will be our core object manager. 
---    Rendering, physics collision and more will be components to this system
---    Rendering specifically will be built with a ldb that will run all the culling, sorting
---      and binning needed. This will be decoupled from the editor itself. 
-local tiny          = require('engine.world.world-manager')
-
-
 local function init()
 
     projectmgr:init()
-    tiny:init({noserver = false})
-    tiny.addmanager("projectmgr", projectmgr)
 
     local desc = ffi.new("sg_desc[1]")
     desc[0].environment = slib.sglue_environment()
     desc[0].logger.func = slib.slog_func
     desc[0].disable_validation = false
     sg.sg_setup( desc )
+
+    local snk = ffi.new("snk_desc_t[1]")
+    snk[0].dpi_scale = sapp.sapp_dpi_scale()
+    snk[0].logger.func = slib.slog_func
+    nk.snk_setup(snk)
+
     print("Sokol Is Valid: "..tostring(sg.sg_isvalid()))
 
     local hwnd = sapp.sapp_win32_get_hwnd()
+    ffi.C.ShowWindow(hwnd, SW_MAXIMIZE)
+
+    sapp.sapp_show_mouse(true)
+    sapp.sapp_set_window_title("Thunc Editor v")
 
 --    io.popen(cmd, "r")
     ffi.C.Sleep(500)
@@ -68,7 +108,10 @@ end
 -- --------------------------------------------------------------------------------------
 
 local function input(event) 
+
+    engineState.input(event, {})
 end
+
 
 
 -- --------------------------------------------------------------------------------------
@@ -80,7 +123,19 @@ local function frame()
     local h         = sapp.sapp_heightf()
     local t         = (sapp.sapp_frame_duration() * 60.0)
 
-    tiny:update(sapp.sapp_frame_duration())
+    local dt = sapp.sapp_frame_duration()
+    local ctx = nk.snk_new_frame()
+
+    if(mainState.ctx == nil) then     
+        mainState.ctx = ctx
+        ErrorCheck( pcall( engineState.init ) )
+        print("----------->>> Init")
+        nk.nk_style_show_cursor(ctx)
+    else
+        mainState.ctx = ctx
+    end
+
+    ErrorCheck( pcall( engineState.update, dt ) )
 
     -- Display frame stats in console.
     -- hutils.show_stats()
@@ -90,8 +145,7 @@ end
 
 local function cleanup()
     sg.sg_shutdown()
-
-    tiny:final() 
+    nk.snk_shutdown()
 end
 
 -- --------------------------------------------------------------------------------------
@@ -105,10 +159,15 @@ app_desc[0].width       = width
 app_desc[0].height      = height
 app_desc[0].window_title = "editor - sokol"
 app_desc[0].fullscreen  = false
-app_desc[0].icon.sokol_default = true 
+-- app_desc[0].icon.sokol_default = true 
 app_desc[0].enable_clipboard = true
+app_desc[0].ios_keyboard_resizes_canvas = false
 app_desc[0].logger.func = slib.slog_func 
 
 sapp.sapp_run( app_desc )
+
+-- --------------------------------------------------------------------------------------
+
+if(profile) then profile.stop() end
 
 -- --------------------------------------------------------------------------------------

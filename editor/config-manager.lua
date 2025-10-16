@@ -8,7 +8,7 @@ local dirtools          = require("tools.vfs.dirtools")
 ---------------------------------------------------------------------------------------    
 
 configmanager   = {
-    recents_path    = "editor/config/recents.json",
+    recents_path    = "data/config/recents.json",
     recents         = {},
 }
 
