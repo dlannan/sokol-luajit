@@ -18,6 +18,9 @@ local utils     = require("utils")
 
 local ffi       = require("ffi")
 
+gSmgr 		    = require("engine.utils.statemanager")
+
+
 -- --------------------------------------------------------------------------------------
 local shell32   = ffi.load("shell32")
 
@@ -45,9 +48,7 @@ end
 
 -- --------------------------------------------------------------------------------------
 -- Grab some gui elements for testing
-
-local panels = require("data.gui.widgets.panels")
-
+local SmainGui      = require("editor.states.mainGui")
 
 -- --------------------------------------------------------------------------------------
 
@@ -102,6 +103,10 @@ local function init()
 
 --    io.popen(cmd, "r")
     ffi.C.Sleep(500)
+    -- Add the state to the statemanager and jump to it
+    gSmgr:Init()
+    gSmgr:CreateState("MainGui",		SmainGui)
+    gSmgr:ChangeState("MainGui")
 end
 
 
@@ -111,8 +116,6 @@ local function input(event)
 
     engineState.input(event, {})
 end
-
-
 
 -- --------------------------------------------------------------------------------------
 
