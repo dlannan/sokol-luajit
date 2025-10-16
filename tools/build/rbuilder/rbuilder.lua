@@ -8,6 +8,7 @@ package.path    = package.path..";"..base_path.."?.lua"
 
 --_G.SOKOL_DLL    = "sokol_debug_dll"
 local sapp      = require("sokol_app")
+sg              = require("sokol_gfx")
 sg              = require("sokol_nuklear")
 local nk        = sg
 local slib      = require("sokol_libs") -- Warn - always after gfx!!
@@ -19,8 +20,8 @@ local stb       = require("stb")
 
 local ffi       = require("ffi")
 
-local panel     = require("ui.panels")
-local builder   = require("utils.build")
+local panel     = require("engine.gui.ui.panels")
+local builder   = require("engine.utils.build")
 
 -- --------------------------------------------------------------------------------------
 -- For win - sleep so as to not consume all proc cycles for ui
