@@ -18,8 +18,9 @@ local utils     = require("utils")
 
 local ffi       = require("ffi")
 
-gSmgr 		    = require("engine.utils.statemanager")
+-- --------------------------------------------------------------------------------------
 
+local engineState   = require("engine.state_engine")
 
 -- --------------------------------------------------------------------------------------
 local shell32   = ffi.load("shell32")
@@ -31,9 +32,6 @@ ffi.cdef[[
 ]]
 
 local SW_MAXIMIZE = 3
--- --------------------------------------------------------------------------------------
-
-local engineState   = require("engine.state_engine")
 
 -- --------------------------------------------------------------------------------------
 local enabled_profile   = arg[1] == "-profile"
@@ -49,6 +47,7 @@ end
 -- --------------------------------------------------------------------------------------
 -- Grab some gui elements for testing
 local SmainGui      = require("editor.states.mainGui")
+engineState.queue( "mainGui", SmainGui, true )
 
 -- --------------------------------------------------------------------------------------
 
@@ -95,24 +94,24 @@ local function init()
 
     print("Sokol Is Valid: "..tostring(sg.sg_isvalid()))
 
-    local hwnd = sapp.sapp_win32_get_hwnd()
-    ffi.C.ShowWindow(hwnd, SW_MAXIMIZE)
+    engineState.ready = nil
+    mainState.ctx = nil
 
     sapp.sapp_show_mouse(true)
-    sapp.sapp_set_window_title("Thunc Editor v")
+    sapp.sapp_set_window_title("Thunc Editor v"..PROJECT_VERSION)
 
---    io.popen(cmd, "r")
-    ffi.C.Sleep(500)
-    -- Add the state to the statemanager and jump to it
-    gSmgr:Init()
-    gSmgr:CreateState("MainGui",		SmainGui)
-    gSmgr:ChangeState("MainGui")
+    local hwnd = sapp.sapp_win32_get_hwnd()
+    ffi.C.ShowWindow(hwnd, SW_MAXIMIZE)
 end
-
 
 -- --------------------------------------------------------------------------------------
 
 local function input(event) 
+
+    -- Only kick things off once the window is ready.
+    if(event.type == sapp.SAPP_EVENTTYPE_RESIZED) then 
+        engineState.ready = true
+    end
 
     engineState.input(event, {})
 end
@@ -128,17 +127,26 @@ local function frame()
 
     local dt = sapp.sapp_frame_duration()
     local ctx = nk.snk_new_frame()
-
-    if(mainState.ctx == nil) then     
+    if(engineState.ready == true and mainState.ctx == nil) then     
         mainState.ctx = ctx
-        ErrorCheck( pcall( engineState.init ) )
-        print("----------->>> Init")
-        nk.nk_style_show_cursor(ctx)
-    else
+        ErrorCheck( pcall( engineState.init, w, h ) )
+        nk.nk_style_show_cursor(ctx)   
+    elseif(mainState.ctx) then
         mainState.ctx = ctx
     end
 
     ErrorCheck( pcall( engineState.update, dt ) )
+
+    -- // the sokol_gfx draw pass
+    local pass = ffi.new("sg_pass[1]")
+    pass[0].action.colors[0].load_action = sg.SG_LOADACTION_CLEAR
+    pass[0].action.colors[0].clear_value = { 0.25, 0.5, 0.7, 1.0 }
+    pass[0].swapchain = slib.sglue_swapchain()
+    sg.sg_begin_pass(pass)
+
+    nk.snk_render(sapp.sapp_width(), sapp.sapp_height())
+    sg.sg_end_pass()
+    sg.sg_commit()
 
     -- Display frame stats in console.
     -- hutils.show_stats()
@@ -160,6 +168,7 @@ app_desc[0].cleanup_cb  = cleanup
 app_desc[0].event_cb    = input
 app_desc[0].width       = width
 app_desc[0].height      = height
+app_desc[0].high_dpi    = true
 app_desc[0].window_title = "editor - sokol"
 app_desc[0].fullscreen  = false
 -- app_desc[0].icon.sokol_default = true 

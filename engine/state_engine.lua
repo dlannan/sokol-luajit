@@ -12,6 +12,7 @@ print("PROJECT_VERSION: "..PROJECT_VERSION)
 ------------------------------------------------------------------------------------------------------------
 
 local sapp      	= require("sokol_app")
+local tinsert       = table.insert
 
 ------------------------------------------------------------------------------------------------------------
 -- Global because states need to use it themselves
@@ -26,6 +27,7 @@ local defaults = {
 }
 
 engineState               = {}
+engineState.queued        = {}
 engineState.events        = defaults
 engineState.sm            = require("engine.utils.statemanager")
 
@@ -35,31 +37,45 @@ engineState.sm            = require("engine.utils.statemanager")
 local mainState           = require("engine.app.state_main")
 local SengineRunner       = require("engine.app.states.engineRunner")
 
--- local SgeomModels         = require("engine.app.states.geometry.models")
+------------------------------------------------------------------------------------------------------------
+-- Queue a state for execution from beginning
 
----- States
--- local SmainBG	          = require("engine.app.states.mainBG")
+engineState.queue = function( name, state, startup )
+
+    if(name == nil or state == nil) then return end 
+    tinsert(engineState.queued, { name = name, state = state, startup = startup } )
+end
 
 ------------------------------------------------------------------------------------------------------------
 -- Register every state with the statemanager.
 
-engineState.init = function( )
+engineState.init = function( w, h )
 
     engineState.sm:Init()
-    -- engineState.sm:CreateState("MainBG", 	        SmainBG)
     engineState.sm:CreateState("EngineRunner", 	    SengineRunner)
-    -- engineState.sm:CreateState("MainState", 	    mainState)
+    engineState.sm:CreateState("MainState", 	    mainState)
 
-    -- engineState.sm:CreateState("GeomModels", 	    SgeomModels)
+    engineState.sm:AddSibling("MainState", "EngineRunner")
 
-    -- engineState.sm:AddSibling("MainState", "EngineRunner")
+    -- Add any queued states
+    local startup = nil 
+    for i, v in ipairs(engineState.queued) do 
+        engineState.sm:CreateState(v.name, v.state)
+        if(v.startup) then startup = v.name end 
+
+        v.state:Init(w, h)
+    end 
 
     -- Init some modules ready for kick off.
-    mainState:Init(sapp.sapp_widthf(), sapp.sapp_heightf())
-    SengineRunner:Init(sapp.sapp_widthf(), sapp.sapp_heightf())
+    mainState:Init(w, h)
+    SengineRunner:Init(w, h)
 
     -- This kicks things off!
     engineState.sm:ChangeState("EngineRunner")
+
+    if(startup) then
+        engineState.sm:AddSibling(startup, "EngineRunner")
+    end
 end 
 
 ------------------------------------------------------------------------------------------------------------

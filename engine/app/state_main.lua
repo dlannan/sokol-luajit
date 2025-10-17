@@ -45,7 +45,7 @@ end
 ------------------------------------------------------------------------------------------------------------
 
 function mainState:Begin()
-    Sassets:Begin()
+    -- Sassets:Begin()
     -- bins.bin_add_func(bins.BTYPE_OPAQUE, RenderNuklear)
 end
 

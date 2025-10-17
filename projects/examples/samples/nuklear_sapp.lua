@@ -1448,8 +1448,8 @@ local function draw_demo_ui(ctx)
             end
             nk.nk_tree_pop(ctx)
         end
+        nk.nk_end(ctx)
     end
-    nk.nk_end(ctx)
     return not nk.nk_window_is_closed(ctx, "Overview")
 end
 

@@ -4,6 +4,7 @@
 -- Decription: 
 --    Runs most of the scene.
 
+local sapp      	= require("sokol_app")
 local smgr 			= require("engine.utils.statemanager")
 local nk        	= sg
 local hmm      		= require("hmm")
@@ -32,7 +33,8 @@ local follow 		= require("engine.libs.camera.follow")
 local socket    	= require("socket.core")
 local copas 		= require("copas")
 
-local panels        = require("data.gui.widgets.panels")
+local panels        = require("data.gui.panels.panels")
+local panelactions  = require("data.gui.actions.panels")
 
 ------------------------------------------------------------------------------------------------------------
 
@@ -49,6 +51,8 @@ function SmainGui:Init(wwidth, wheight)
 
 	-- SmenuMain:Init(wwidth, wheight)
 	-- SenvHandler:Init(wwidth, wheight)
+	print("Display: "..wwidth.." x "..wheight)
+	panels.windows.popup.parent = { size = { wwidth, wheight } }
 end
 
 ------------------------------------------------------------------------------------------------------------
@@ -93,6 +97,156 @@ end
 
 ------------------------------------------------------------------------------------------------------------
 
+local function get_parent_size( ele )
+
+	local size = { 1920, 1440 }
+	-- Calc size first since this may be used in positioning (like center etc)
+	if(ele.size) then 
+		if(ele.size[1]) then 
+			if(type(ele.size[1]) == "string") then 
+				if(ele.size[1] == "auto") then 
+					size[1] = ele.parent.size[1] or 1920
+				end
+			else 
+				size[1] = tonumber(ele.size[1]) or 100
+			end
+		end
+		if(ele.size[2]) then 
+			if(type(ele.size[2]) == "string") then 
+				if(ele.size[2] == "auto") then 
+					size[2] = ele.parent.size[2] or 1440
+				end
+			else 
+				size[2] = tonumber(ele.size[2]) or 100
+			end
+		end
+	end
+	return size
+end
+------------------------------------------------------------------------------------------------------------
+
+local function calc_row_geometry( ele )
+	local esizes = {}
+	local autosize = 0
+	local pwidth = get_parent_size(ele)[1]
+	local remainwidth = pwidth
+	for i,v in ipairs(ele.layout) do
+		if(v.width and type(v.width) == "number") then 
+			if(v.width > 0.99) then 
+				esizes[i] = v.width / pwidth
+				remainwidth = remainwidth - v.width
+			else 
+				esizes[i] = v.width
+				remainwidth = remainwidth - v.width * pwidth
+			end
+		else 
+			esizes[i] = 0
+			autosize = autosize + 1
+		end
+	end			
+	local autosize = (remainwidth / pwidth) / autosize
+	for i,v in ipairs(ele.layout) do
+		if(esizes[i] == 0) then esizes[i] = autosize end
+	end
+	return esizes
+end
+
+------------------------------------------------------------------------------------------------------------
+
+local function get_geometry( ele, winrect )
+
+	local size = get_parent_size( ele )
+	winrect[0].w, winrect[0].h = size[1], size[2]
+	if(ele.pos) then 
+		if(ele.pos[1]) then
+			if(type(ele.pos[1]) == "string") then 
+				if(ele.pos[1] == "center") then 
+					local pwidth = ele.parent.size[1] or 1920
+					winrect[0].x = pwidth * 0.5 - winrect[0].w * 0.5
+				elseif(ele.pos[1] == "left") then 
+					winrect[0].x = 0.0
+				elseif(ele.pos[1] == "right") then 
+					local pwidth = ele.parent.size[1] or 1920
+					winrect[0].x = pwidth - winrect[0].w
+				end
+
+			else 
+				winrect[0].x = tonumber(ele.pos[1]) or 0
+			end 
+		end
+		if(ele.pos[2]) then
+			if(type(ele.pos[2]) == "string") then 
+				if(ele.pos[2] == "center") then 
+					local pheight = ele.parent.size[2] or 1440
+					winrect[0].y = pheight * 0.5 - winrect[0].h * 0.5
+				elseif(ele.pos[2] == "top") then 
+					winrect[0].y = 0.0
+				elseif(ele.pos[2] == "bottom") then 
+					local pheight = ele.parent.size[2] or 1440
+					winrect[0].y = pheight - winrect[0].h
+				end
+			else 
+				winrect[0].y = tonumber(ele.pos[2]) or 0
+			end 
+		end
+	end 
+end
+
+------------------------------------------------------------------------------------------------------------
+
+local function render_element( ctx, element )
+
+	if(element.type == "panel") then  
+		element.winrect = element.winrect or ffi.new("struct nk_rect[1]", {{0, 0, 400, 600}})
+		get_geometry(element, element.winrect)
+		if (nk.nk_begin(ctx, element.title or "", element.winrect[0], element.window_flags or 0) == true) then
+			if(element.layout) then 
+				for i,v in ipairs(element.layout) do
+					v.parent = element
+					render_element(ctx, v)
+				end
+			end 
+		end
+		nk.nk_end(ctx)
+
+	elseif(element.type == "row") then 
+		local row_height = 30
+		local children = 1
+		if(element.height) then row_height = tonumber(element.height) end  
+		if(element.layout) then children = #element.layout end
+		nk.nk_layout_row_begin(ctx, nk.NK_DYNAMIC, row_height, children)
+		if(element.layout) then 
+			local esizes = calc_row_geometry(element)
+			for i,v in ipairs(element.layout) do 
+				v.parent = element
+				v.row_height = row_height
+				nk.nk_layout_row_push(ctx, esizes[i])
+				render_element(ctx, v)
+			end
+		end
+		nk.nk_layout_row_end(ctx)
+
+	elseif(element.type == "label") then 
+		local alignment = nk.NK_TEXT_LEFT 
+		if(element.align) then alignment = ALIGNMENT[element.align] or alignment end
+		nk.nk_label(ctx, element.text or "", alignment)
+
+	elseif(element.type == "button") then  
+		local styled_button = ffi.new("struct nk_style_button[1]", { ctx[0].style.button})
+		-- Override rounded corners (can do other things here too - can also make your own button style)
+		styled_button[0].rounding = 0.0
+		if( nk.nk_button_label_styled(ctx, styled_button, element.text or "Missing Text")) then
+		-- if (nk.nk_button_label(ctx, element.text or "Missing Text")) then
+			if(element.action) then 
+				local action = panelactions[element.action]
+				if(action) then action("button", element) end
+			end
+		end
+	end
+end
+
+------------------------------------------------------------------------------------------------------------
+
 function SmainGui:Update(mxi, myi, buttons)
 
 	--nkgui:update()
@@ -100,10 +254,10 @@ function SmainGui:Update(mxi, myi, buttons)
 	if(self.do_screenshot) then 
 		self:TakeScreenshot()
 	end
-	
+
 	-- SmenuMain:Update(mxi, myi, buttons)
 	-- SenvHandler:Update(mxi, myi, buttons)
-
+	render_element(mainState.ctx, panels.windows.popup)
 	--nkgui:render()
 	
 	self.prevmxi = mxi
