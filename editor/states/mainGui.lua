@@ -52,7 +52,7 @@ function SmainGui:Init(wwidth, wheight)
 	-- SmenuMain:Init(wwidth, wheight)
 	-- SenvHandler:Init(wwidth, wheight)
 	print("Display: "..wwidth.." x "..wheight)
-	panels.windows.popup.parent = { size = { wwidth, wheight } }
+	panels.windows.panel_master.parent = { size = { wwidth, wheight } }
 end
 
 ------------------------------------------------------------------------------------------------------------
@@ -102,19 +102,21 @@ local function get_parent_size( ele )
 	local size = { 1920, 1440 }
 	-- Calc size first since this may be used in positioning (like center etc)
 	if(ele.size) then 
+		local pwidth = ele.parent.size[1] or 1920
 		if(ele.size[1]) then 
 			if(type(ele.size[1]) == "string") then 
 				if(ele.size[1] == "auto") then 
-					size[1] = ele.parent.size[1] or 1920
+					size[1] = pwidth
 				end
 			else 
 				size[1] = tonumber(ele.size[1]) or 100
 			end
 		end
+		local pheight = ele.parent.size[2] or 1440
 		if(ele.size[2]) then 
 			if(type(ele.size[2]) == "string") then 
 				if(ele.size[2] == "auto") then 
-					size[2] = ele.parent.size[2] or 1440
+					size[2] = pheight
 				end
 			else 
 				size[2] = tonumber(ele.size[2]) or 100
@@ -156,6 +158,7 @@ end
 local function get_geometry( ele, winrect )
 
 	local size = get_parent_size( ele )
+	ele.size = size
 	winrect[0].w, winrect[0].h = size[1], size[2]
 	if(ele.pos) then 
 		if(ele.pos[1]) then
@@ -196,7 +199,19 @@ end
 
 local function render_element( ctx, element )
 
-	if(element.type == "panel") then  
+	if(element.type == "group") then  
+
+		element.winrect = element.winrect or ffi.new("struct nk_rect[1]", {{0, 0, 400, 600}})
+		get_geometry(element, element.winrect)
+		if(element.layout) then 
+			for i,v in ipairs(element.layout) do
+				v.parent = element
+				render_element(ctx, v)
+			end
+		end 
+
+	elseif(element.type == "panel") then  
+
 		element.winrect = element.winrect or ffi.new("struct nk_rect[1]", {{0, 0, 400, 600}})
 		get_geometry(element, element.winrect)
 		if (nk.nk_begin(ctx, element.title or "", element.winrect[0], element.window_flags or 0) == true) then
@@ -257,7 +272,7 @@ function SmainGui:Update(mxi, myi, buttons)
 
 	-- SmenuMain:Update(mxi, myi, buttons)
 	-- SenvHandler:Update(mxi, myi, buttons)
-	render_element(mainState.ctx, panels.windows.popup)
+	render_element(mainState.ctx, panels.windows.panel_master)
 	--nkgui:render()
 	
 	self.prevmxi = mxi

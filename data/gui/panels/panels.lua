@@ -5,23 +5,55 @@ local panels    = {}
 
 panels.windows  = {}
 
-panels.windows.popup = {
+-- Note: In Niklear panels/windows are top level and cannot be nested. 
+
+panels.windows.panel_simple = {
     type    = "panel",
-    title   = "Main",
+    title   = "simple",
     size    = {600, "auto"},
-    pos     = {"left", "top"},    -- Can be pixels or strings
+    pos     = {0, 0},    -- Can be pixels or strings
     color   = { background = 0x000000ff, text = 0xffffffff, border = 0x888888ff },
-    window_flags =  bit.bor(nk.NK_WINDOW_TITLE, nk.NK_WINDOW_MOVABLE),
+    window_flags =  bit.bor(0, nk.NK_WINDOW_NO_SCROLLBAR),
 
     layout = {
         { 
             type = "row", height = 24, layout = {
-                { type = "label", text = "Some text", width = 0.1 },
-                { type = "button", text = "Build Project", action = "build_project", width = "auto" },
-                { type = "button", text = "Export", action = "export_assets", width = 200 },
-                { type = "button", text = "Quit", action = "quit_app", width = "auto" },
+                { type = "button", text = "Project", action = "project_config", width = "auto" },
+                { type = "button", text = "Paths", action = "paths_config", width = "auto" },
+                { type = "button", text = "World", action = "world_view", width = "auto" },
+                { type = "button", text = "Assets", action = "assets_view", width = "auto" },
             }
         },
+    }
+}
+
+panels.windows.panel_icon_bar = {
+    type    = "panel",
+    title   = "icon_bar",
+    size    = {"auto", 30},
+    pos     = {600, "top"},    -- Can be pixels or strings
+    color   = { background = 0x000000ff, text = 0xffffffff, border = 0x888888ff },
+    window_flags =  bit.bor(0, nk.NK_WINDOW_NO_SCROLLBAR),
+
+    layout = {
+        { 
+            type = "row", height = 24, layout = {
+                { type = "button", text = "Scene", action = "scene_view", width = 80 },
+                { type = "button", text = "Models", action = "model_view", width = 80 },
+                { type = "button", text = "Scripts", action = "scripts_view",width = 80 },
+            }
+        },
+    }
+}
+
+panels.windows.panel_master = {
+    type    = "group",
+    size    = {"auto", "auto"},
+    pos     = {"left", "top"},    -- Can be pixels or strings
+
+    layout = {
+        panels.windows.panel_simple,
+        panels.windows.panel_icon_bar,
     }
 }
 
