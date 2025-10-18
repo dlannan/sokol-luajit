@@ -185,6 +185,10 @@ end
 
 panel.main_ui = function(ctx)
 
+    if(myfonts == nil) then 
+        panel.setup_fonts(ctx)
+    end
+
     wdgts.widget_panel_fixed(ctx, "WinMain", 0, 0, sapp.sapp_width(), sapp.sapp_height(), 0, function(data)
 
         panel.build.active = wdgts.widget_popup_panel(ctx, "popup_build", folder_select.popup_dim, panel.build.ui_func, panel.build, panel.build.active)
