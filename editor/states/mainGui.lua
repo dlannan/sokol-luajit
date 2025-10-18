@@ -9,6 +9,8 @@ local smgr 			= require("engine.utils.statemanager")
 local nk        	= sg
 local hmm      		= require("hmm")
 
+local ffi 			= require("ffi")
+
 ------------------------------------------------------------------------------------------------------------
 
 -- These are child states that allow easier management of a simple controller
@@ -36,6 +38,16 @@ local copas 		= require("copas")
 local panels        = require("data.gui.panels.panels")
 local panelactions  = require("data.gui.actions.panels")
 
+-- This needs to be a database of loaded element templates
+local elements_lookup 	= {
+
+	project_config 		= require("data.gui.elements.project_config"),
+	assets_config 		= require("data.gui.elements.assets_config"),
+
+}
+
+local button_colors 	= nil 
+
 ------------------------------------------------------------------------------------------------------------
 
 local SmainGui	= smgr:NewState()
@@ -53,6 +65,13 @@ function SmainGui:Init(wwidth, wheight)
 	-- SenvHandler:Init(wwidth, wheight)
 	print("Display: "..wwidth.." x "..wheight)
 	panels.windows.panel_master.parent = { size = { wwidth, wheight } }
+
+	button_colors = {
+		normal = nk.nk_style_item_color(mainState.ctx[0].style.button.normal.data.color),
+		hover = nk.nk_style_item_color(mainState.ctx[0].style.button.hover.data.color),
+		active = nk.nk_style_item_color(mainState.ctx[0].style.button.active.data.color),
+	}
+
 end
 
 ------------------------------------------------------------------------------------------------------------
@@ -199,7 +218,15 @@ end
 
 local function render_element( ctx, element )
 
-	if(element.type == "group") then  
+	-- Custom is for custom provided gui rendering (ie doesnt work well with provided templates)
+	if(element.type == "custom") then  
+
+		if(element.init) then element.init(ctx, element) end
+		if(element.update) then element.update(ctx, element) end
+		-- if(element.finish) then element.finish(ctx, element) end
+
+		
+	elseif(element.type == "group") then  
 
 		element.winrect = element.winrect or ffi.new("struct nk_rect[1]", {{0, 0, 400, 600}})
 		get_geometry(element, element.winrect)
@@ -224,6 +251,50 @@ local function render_element( ctx, element )
 		end
 		nk.nk_end(ctx)
 
+	elseif(element.type == "notebook") then  
+
+		element.winrect = element.winrect or ffi.new("struct nk_rect[1]", {{0, 0, 400, 600}})
+		element.current_tab = element.current_tab or 1
+		
+		local tabs = #element.tab_titles or 0
+		local row_height = element.height or 30
+		local widget_width = (element.parent.size[1] / tabs) / element.parent.size[1]
+
+		-- Remove button rounding
+		local rounding_ptr = utils.get_field_ptr( ctx[0].style.button, "struct nk_style_button", "rounding", "float *")
+		nk.nk_style_push_float(ctx, rounding_ptr, 0)
+		nk.nk_layout_row_begin(ctx, nk.NK_DYNAMIC, row_height, tabs)
+
+		for i = 1, tabs do
+			-- /* make sure button perfectly fits text */
+			nk.nk_layout_row_push(ctx, widget_width)
+			if (element.current_tab == i) then
+				-- /* active tab gets highlighted */
+				ctx[0].style.button.normal = button_colors.active
+				ctx[0].style.button.hover = button_colors.active
+				if (nk.nk_button_label(ctx, element.tab_titles[i]) ) then element.current_tab = i end
+			else 
+				if(nk.nk_button_label(ctx, element.tab_titles[i])) then element.current_tab = i end
+			end
+			ctx[0].style.button.normal = button_colors.normal
+			ctx[0].style.button.hover = button_colors.hover
+		end
+		nk.nk_layout_row_end(ctx)
+		nk.nk_style_pop_float(ctx)		
+
+		get_geometry(element, element.winrect)
+		if(element.tab_panels) then 
+			for i,v in ipairs(element.tab_panels) do
+				if(i == element.current_tab) then  
+					child_element = elements_lookup[v]
+					if(child_element) then 
+						child_element.parent = element
+						render_element(ctx, child_element) 
+					end
+				end
+			end
+		end 
+
 	elseif(element.type == "row") then 
 		local row_height = 30
 		local children = 1
@@ -247,7 +318,7 @@ local function render_element( ctx, element )
 		nk.nk_label(ctx, element.text or "", alignment)
 
 	elseif(element.type == "button") then  
-		local styled_button = ffi.new("struct nk_style_button[1]", { ctx[0].style.button})
+		local styled_button = ffi.new("struct nk_style_button[1]", { ctx[0].style.button })
 		-- Override rounded corners (can do other things here too - can also make your own button style)
 		styled_button[0].rounding = 0.0
 		if( nk.nk_button_label_styled(ctx, styled_button, element.text or "Missing Text")) then
@@ -273,6 +344,7 @@ function SmainGui:Update(mxi, myi, buttons)
 	-- SmenuMain:Update(mxi, myi, buttons)
 	-- SenvHandler:Update(mxi, myi, buttons)
 	render_element(mainState.ctx, panels.windows.panel_master)
+
 	--nkgui:render()
 	
 	self.prevmxi = mxi

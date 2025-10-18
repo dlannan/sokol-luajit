@@ -311,6 +311,16 @@ function parseurl(s)
 end
 
 -- ---------------------------------------------------------------------------
+
+local function get_field_ptr( object, structname, field, ptrtype)
+
+	local base_ptr = ffi.cast("uint8_t *", object)
+	local off = ffi.offsetof(structname, field)
+	return ffi.cast(ptrtype, base_ptr + off)
+end
+
+
+-- ---------------------------------------------------------------------------
 return {
 
 	getdirs 		= getdirs,
@@ -338,5 +348,7 @@ return {
 
 	urldecode		= urldecode,
 	parseurl 		= parseurl,
+
+	get_field_ptr	= get_field_ptr,
 }
 -- ---------------------------------------------------------------------------

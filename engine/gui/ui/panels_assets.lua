@@ -82,7 +82,7 @@ local tabs = {
 
 assets.panel = function(ctx)
 
-    nk.nk_style_set_font(ctx, assets.font[3].handle)
+    -- nk.nk_style_set_font(ctx, assets.font[3].handle)
 
     local r = nk.nk_window_get_content_region(ctx)
     local flags = nk.NK_WINDOW_BORDER

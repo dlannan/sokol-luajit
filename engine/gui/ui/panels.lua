@@ -169,7 +169,7 @@ end
 
 -- --------------------------------------------------------------------------------------
 
-panel.main_ui = function(ctx)
+panel.setup_fonts = function(ctx)
 
     if(myfonts == nil) then 
         myfonts = fonts.setup_font(ctx, font_list)
@@ -179,6 +179,11 @@ panel.main_ui = function(ctx)
         assets.font = myfonts 
         build.font = myfonts
     end
+end
+
+-- --------------------------------------------------------------------------------------
+
+panel.main_ui = function(ctx)
 
     wdgts.widget_panel_fixed(ctx, "WinMain", 0, 0, sapp.sapp_width(), sapp.sapp_height(), 0, function(data)
 

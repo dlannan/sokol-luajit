@@ -1,6 +1,8 @@
 -- All gui ui elements will follow a std format (under development)
 ---    Primary goal: A formal gui protocol like svg or html that allows for clear gui creation and control.
 local nk        = sg 
+
+local notes     = require("data.gui.widgets.notebook")
 local panels    = {}
 
 panels.windows  = {}
@@ -16,14 +18,7 @@ panels.windows.panel_simple = {
     window_flags =  bit.bor(0, nk.NK_WINDOW_NO_SCROLLBAR),
 
     layout = {
-        { 
-            type = "row", height = 24, layout = {
-                { type = "button", text = "Project", action = "project_config", width = "auto" },
-                { type = "button", text = "Paths", action = "paths_config", width = "auto" },
-                { type = "button", text = "World", action = "world_view", width = "auto" },
-                { type = "button", text = "Assets", action = "assets_view", width = "auto" },
-            }
-        },
+        notes.side_panel,
     }
 }
 
