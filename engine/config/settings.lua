@@ -3,6 +3,7 @@
 local ffi       = require("ffi")
 local json      = require("lua.json")
 local logging   = require("engine.utils.logging")
+local utils     = require("engine.utils.general")
 
 -- ------------------------------------------------------------------------------------------------------
 
@@ -17,7 +18,7 @@ local settings = {
 -- Default settings if none are loaded or found
 local platforms = { "Win64", "MacOS", "Linux", "IOS64" }
 local buildtypes = { "Release", "Debug", "Release Remotery", "Debug Remotery" }
-local resolutions = { "1920x1080", "1680x1050", "1600x900", "1440x900", "1376x768", "Custom" }
+local resolutions = { "Auto-detect", "4096×2160", "3840×2160","3440×1440", "2560×1600", "2560x1440", "1920x1080", "1680x1050", "1600x900", "1440x900", "1376x768", "Custom" }
 local arch = { "x86", "x64", "arm", "arm64", "arm64be", "ppc", "mips", "mipsel", "mips64", "mips64el", "mips64r6", "mips64r6el" }
 local oss = { "Windows", "Linux", "OSX", "BSD", "POSIX", "Other" }
 local optimisations = { "None", "Level 1", "Level 2", "Level 3" }
@@ -179,8 +180,8 @@ settings.load = function( projectpath )
         end 
     end
 
-    local title = settings.config.rbuilder.appname.value.." ("..settings.config.rbuilder.version.value..")"
-    settings.config.rbuilder.title = { value = title, slen = 32 }
+    -- local title = settings.config.rbuilder.appname.value.." ("..settings.config.rbuilder.version.value..")"
+    -- settings.config.rbuilder.title = { value = title, slen = 32 }
 
     return settings.config
 end

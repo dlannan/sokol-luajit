@@ -10,6 +10,8 @@ local slib      = require("sokol_libs") -- Warn - always after gfx!!
 
 -- --------------------------------------------------------------------------------------
 
+local gen       = require("engine.utils.general")
+
 local settings  = require("engine.config.settings")
 local wdgts     = require("engine.utils.widgets")
 local fonts     = require("engine.utils.fonts")
@@ -57,15 +59,82 @@ local build           = {
 }
 
 -- --------------------------------------------------------------------------------------
+local function new_project(ctx)
+
+    local inp = ctx[0].input
+    local r = nk.nk_window_get_content_region(ctx)
+
+    nk.nk_layout_space_begin(ctx, nk.NK_STATIC, 27, 1)
+    nk.nk_layout_space_push(ctx, nk.nk_rect(r.w-100, -139, 27, 27))
+    local bounds = nk.nk_widget_bounds(ctx)
+
+    nk.nk_style_set_font(ctx, build.font[1].handle)
+    if(nk.nk_button_label(ctx, "") == true) then
+        build.panels.newconfig()
+    end
+    nk.nk_style_set_font(ctx, build.font[3].handle)    
+    nk.nk_layout_space_end(ctx)
+
+    if (nk.nk_input_is_mouse_hovering_rect(inp, bounds) == true) then
+        nk.nk_tooltip(ctx, "    Create Project...")
+    end
+
+end
+
+-- --------------------------------------------------------------------------------------
+local function load_project(ctx)
+
+    local inp = ctx[0].input
+    local r = nk.nk_window_get_content_region(ctx)
+
+    nk.nk_layout_space_begin(ctx, nk.NK_STATIC, 27, 1)
+    nk.nk_layout_space_push(ctx, nk.nk_rect(r.w-70, -166, 27, 27))
+    local bounds = nk.nk_widget_bounds(ctx)
+
+    nk.nk_style_set_font(ctx, build.font[1].handle)
+    if(nk.nk_button_label(ctx, "") == true) then
+        build.panels.loadconfig()
+    end
+    nk.nk_style_set_font(ctx, build.font[3].handle)
+    nk.nk_layout_space_end(ctx)
+    if (nk.nk_input_is_mouse_hovering_rect(inp, bounds) == true) then
+        nk.nk_tooltip(ctx, "    Load Project...")
+    end
+end
+
+-- --------------------------------------------------------------------------------------
+local function save_project(ctx)
+
+    local inp = ctx[0].input
+    local r = nk.nk_window_get_content_region(ctx)
+
+    nk.nk_layout_space_begin(ctx, nk.NK_STATIC, 27, 1)
+    nk.nk_layout_space_push(ctx, nk.nk_rect(r.w-40, -193, 27, 27))
+    local bounds = nk.nk_widget_bounds(ctx)
+
+    nk.nk_style_set_font(ctx, build.font[1].handle)
+    if(nk.nk_button_label(ctx, "") == true) then
+        build.panels.saveconfig()
+    end
+    nk.nk_style_set_font(ctx, build.font[3].handle)
+    nk.nk_layout_space_end(ctx)
+    if (nk.nk_input_is_mouse_hovering_rect(inp, bounds) == true) then
+        nk.nk_tooltip(ctx, "    Save Project...")
+    end
+end
+
+-- --------------------------------------------------------------------------------------
 -- Attempts to find sokol in nearby folders (up max 4 directories from builder)
 --    Sets all the sokol properties if it does find it
 local function search_sokol(ctx)
 
+    local inp = ctx[0].input
     local r = nk.nk_window_get_content_region(ctx)
     build.run_config = nil
 
     nk.nk_layout_space_begin(ctx, nk.NK_STATIC, 27, 1)
     nk.nk_layout_space_push(ctx, nk.nk_rect(r.w-40, -195, 27, 27))
+    local bounds = nk.nk_widget_bounds(ctx)
 
     nk.nk_style_set_font(ctx, build.font[1].handle)
     if(nk.nk_button_label(ctx, "") == true) then
@@ -73,18 +142,21 @@ local function search_sokol(ctx)
         local found = dirtools.find_folder(".", 5, "sokol-luajit")
         if(found) then 
             found = dirtools.combine_path(found, "sokol-luajit")
-            logging.info(string.format("Found Sokol-luajit: %s",found))
+            logging.info(string.format("Found Sokol-luajit: %s", found))
             logging.info("Auto filling sokol paths...")
-            build.config["sokol"].sokol_path.value = found 
-            build.config["sokol"].sokol_bin.value = dirtools.combine_path(found, "bin")
-            build.config["sokol"].sokol_ffi.value = dirtools.combine_path(found, "ffi")
-            build.config["sokol"].sokol_lua.value = dirtools.combine_path(found, "lua")
-            build.config["sokol"].sokol_examples.value = dirtools.combine_path(found, "examples")
+            gen.ffi_string(build.config["sokol"].sokol_path, found)
+            gen.ffi_string(build.config["sokol"].sokol_bin, dirtools.combine_path(found, "bin"))
+            gen.ffi_string(build.config["sokol"].sokol_ffi, dirtools.combine_path(found, "ffi"))
+            gen.ffi_string(build.config["sokol"].sokol_lua, dirtools.combine_path(found, "lua"))
+            gen.ffi_string(build.config["sokol"].sokol_examples, dirtools.combine_path(found, "examples"))
             build.run_config = true
         end
     end
     nk.nk_style_set_font(ctx, build.font[3].handle)
     nk.nk_layout_space_end(ctx)
+    if (nk.nk_input_is_mouse_hovering_rect(inp, bounds) == true) then
+        nk.nk_tooltip(ctx, "    Search For Sokol")
+    end    
 end
 
 -- --------------------------------------------------------------------------------------
@@ -178,6 +250,9 @@ local project_tabs = {
         name = "Settings",
         func = function(ctx) 
             display_section(ctx, "project") 
+            new_project(ctx)
+            load_project(ctx)
+            save_project(ctx)
             display_section(ctx, "sokol")
             search_sokol(ctx)
             display_section(ctx, "graphics")
@@ -205,6 +280,8 @@ local project_tabs = {
 build.panel = function(ctx)
 
     nk.nk_style_set_font(ctx, build.font[3].handle)
+
+    if(build.panels) then build.panels.do_popups(ctx) end
 
     local r = nk.nk_window_get_content_region(ctx)
     local flags = nk.NK_WINDOW_BORDER

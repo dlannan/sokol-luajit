@@ -1,5 +1,5 @@
 [Info] settings.load projectpath nil, using default settings.
 [Info] Found Sokol-luajit: F:\dev\luajit\repos\sokol-luajit
 [Info] Auto filling sokol paths...
-[Info] Found Sokol-luajit: F:\dev\luajit\repos\sokol-luajit
-[Info] Auto filling sokol paths...
+[Error] settings.save - Failed to save config: .
+[Info]  panel.saveconfig: Saved path - .

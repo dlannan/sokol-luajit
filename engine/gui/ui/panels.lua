@@ -62,8 +62,9 @@ local recent_files = nil
 local function setup_config()
     
     for sectionname, section in pairs(panel.config) do
-
+        -- print(sectionname, section)
         for key, prop in pairs(section) do
+            -- print(key, prop)
             -- If ptype is nill or string its a string
             if(prop.ptype == "string") then
                 prop.ffi = ffi.new("char[?]", prop.slen )
@@ -183,6 +184,17 @@ end
 
 -- --------------------------------------------------------------------------------------
 
+panel.do_popups = function(ctx)
+
+    panel.build.active = wdgts.widget_popup_panel(ctx, "popup_build", folder_select.popup_dim, panel.build.ui_func, panel.build, panel.build.active)
+    folder_select.popup_active = wdgts.widget_popup_panel(ctx, "popup_folder", folder_select.popup_dim, folder_select.ui_func, folder_select, folder_select.popup_active)
+    file_select.popup_active = wdgts.widget_popup_panel(ctx, "popup_fileselect", file_select.popup_dim, file_select.ui_func, file_select, file_select.popup_active)
+    recent_files.popup_active = wdgts.widget_popup_panel(ctx, "popup_recentfiles", recent_files.popup_dim, recent_files.ui_func, recent_files, recent_files.popup_active)
+
+end
+
+-- --------------------------------------------------------------------------------------
+
 panel.main_ui = function(ctx)
 
     if(myfonts == nil) then 
@@ -191,10 +203,7 @@ panel.main_ui = function(ctx)
 
     wdgts.widget_panel_fixed(ctx, "WinMain", 0, 0, sapp.sapp_width(), sapp.sapp_height(), 0, function(data)
 
-        panel.build.active = wdgts.widget_popup_panel(ctx, "popup_build", folder_select.popup_dim, panel.build.ui_func, panel.build, panel.build.active)
-        folder_select.popup_active = wdgts.widget_popup_panel(ctx, "popup_folder", folder_select.popup_dim, folder_select.ui_func, folder_select, folder_select.popup_active)
-        file_select.popup_active = wdgts.widget_popup_panel(ctx, "popup_fileselect", file_select.popup_dim, file_select.ui_func, file_select, file_select.popup_active)
-        recent_files.popup_active = wdgts.widget_popup_panel(ctx, "popup_recentfiles", recent_files.popup_dim, recent_files.ui_func, recent_files, recent_files.popup_active)
+        panel.do_popups(ctx)
 
         -- /* menubar */
         local menu_states = { MENU_DEFAULT = 0, MENU_WINDOWS = 1}
@@ -380,6 +389,8 @@ panel.cleanup = function()
 end
 
 -- --------------------------------------------------------------------------------------
+
+build.panels    = panel 
 
 return panel
 

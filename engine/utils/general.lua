@@ -19,10 +19,22 @@ local function tdump(o, level)
 	end
  end
 
+ 
+ -- --------------------------------------------------------------------------------------
+
+ local function ffi_string( data, str )
+
+	data.ffi = ffi.new("char[?]", #str, str)
+	data.len_ffi = ffi.new("int[1]", { #str} )
+	return data
+ end
+
  -- --------------------------------------------------------------------------------------
 
  return {
     tdump       = tdump,
+
+	ffi_string	= ffi_string,
  }
 
  -- --------------------------------------------------------------------------------------

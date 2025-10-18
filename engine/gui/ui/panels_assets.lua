@@ -85,8 +85,9 @@ assets.panel = function(ctx)
     -- nk.nk_style_set_font(ctx, assets.font[3].handle)
 
     local r = nk.nk_window_get_content_region(ctx)
+    print(r.w, r.h)
     local flags = nk.NK_WINDOW_BORDER
-    assets.curr_tab, named_tab = wdgts.widget_notebook(ctx, "assets", flags, tabs, assets.curr_tab, r.h-60, 120)
+    assets.curr_tab, named_tab = wdgts.widget_notebook(ctx, "assets", flags, tabs, assets.curr_tab, r.h-80, 120)
 
     nk.nk_layout_row_dynamic(ctx, 25, 2)
     if (nk.nk_button_label(ctx, "Add Folder") == true) then
