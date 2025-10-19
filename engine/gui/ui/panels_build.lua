@@ -114,7 +114,7 @@ local function save_project(ctx)
 
     nk.nk_style_set_font(ctx, build.font[1].handle)
     if(nk.nk_button_label(ctx, "") == true) then
-        build.panels.saveconfig()
+        build.panels.saveconfig(true)
     end
     nk.nk_style_set_font(ctx, build.font[3].handle)
     nk.nk_layout_space_end(ctx)
