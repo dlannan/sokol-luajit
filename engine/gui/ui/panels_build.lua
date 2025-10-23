@@ -285,7 +285,7 @@ build.panel = function(ctx)
 
     local r = nk.nk_window_get_content_region(ctx)
     local flags = nk.NK_WINDOW_BORDER
-    build.curr_tab = wdgts.widget_notebook(ctx, "assets", flags, project_tabs, build.curr_tab, r.h-60, 120)
+    build.curr_tab = wdgts.widget_notebook(ctx, "assets", flags, project_tabs, build.curr_tab, r.h-80, 120)
     -- display_section(ctx, "graphics")
     -- display_section(ctx, "audio")
 

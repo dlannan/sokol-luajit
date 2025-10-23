@@ -91,6 +91,14 @@ end
 
 ------------------------------------------------------------------------------------------------------------
 
+function SmainGui:ReSize( w, h )
+	package.loaded["data.gui.panels.panels"] = nil
+	panels        = require("data.gui.panels.panels")
+	panels.windows.panel_master.parent = { size = { w, h } }
+end
+
+------------------------------------------------------------------------------------------------------------
+
 function SmainGui:Screenshot()
 	self.do_screenshot = true
 end 

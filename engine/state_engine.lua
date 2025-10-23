@@ -26,6 +26,7 @@ local defaults = {
     } 
 }
 
+-- This is global - dont freak out. All variables are technically global :) (Live under _G)
 engineState               = {}
 engineState.queued        = {}
 engineState.events        = defaults

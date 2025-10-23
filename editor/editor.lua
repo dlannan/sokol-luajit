@@ -20,6 +20,7 @@ local ffi       = require("ffi")
 
 -- --------------------------------------------------------------------------------------
 
+local smgr          = require("engine.utils.statemanager")
 local engineState   = require("engine.state_engine")
 
 -- --------------------------------------------------------------------------------------
@@ -111,6 +112,12 @@ local function input(event)
     -- Only kick things off once the window is ready.
     if(event.type == sapp.SAPP_EVENTTYPE_RESIZED) then 
         engineState.ready = true
+        if(mainState.ctx) then 
+            local w         = sapp.sapp_widthf()
+            local h         = sapp.sapp_heightf()   
+            local mainGui = smgr:GetState("mainGui")
+            mainGui:ReSize(w, h)
+        end
     end
 
     engineState.input(event, {})
