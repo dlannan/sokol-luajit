@@ -4,7 +4,7 @@ local sokol_filename = _G.SOKOL_DLL or "clay_dll"
 local libs = ffi_clay or {
    OSX     = { x64 = sokol_filename..".so" },
    Windows = { x64 = sokol_filename..".dll" },
-   Linux   = { x64 = sokol_filename..".so", arm = sokol_filename..".so" },
+   Linux   = { x64 = "./bin/linux/lib"..sokol_filename..".so", arm = "./bin/linux/lib"..sokol_filename..".so" },
    BSD     = { x64 = sokol_filename..".so" },
    POSIX   = { x64 = sokol_filename..".so" },
    Other   = { x64 = sokol_filename..".so" },

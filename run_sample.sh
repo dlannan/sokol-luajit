@@ -2,6 +2,7 @@
 
 SCRIPT_PATH="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 PROJECT_PATH="$(dirname $(dirname "$SCRIPT_PATH"))"
+OS=$(uname -s)
 
 if [[ "$OS" == "Linux"* ]]; then
 echo "Running Linux..."

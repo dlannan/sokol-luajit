@@ -3,7 +3,7 @@ local ffi  = require( "ffi" )
 local libs = ffi_sokol_shape or {
    OSX     = { x64 = "sokol_shape_dll.so" },
    Windows = { x64 = "sokol_shape_dll.dll" },
-   Linux   = { x64 = "sokol_shape_dll.so", arm = "sokol_shape_dll.so" },
+   Linux   = { x64 = "./bin/linux/lib".."sokol_shape_dll.so", arm = "./bin/linux/lib".."sokol_shape_dll.so" },
    BSD     = { x64 = "sokol_shape_dll.so" },
    POSIX   = { x64 = "sokol_shape_dll.so" },
    Other   = { x64 = "sokol_shape_dll.so" },

@@ -3,7 +3,7 @@ local ffi  = require( "ffi" )
 local libs = ffi_hmm_dll or {
    OSX     = { x64 = "hmm_dll_macos.so", arm64 = "hmm_dll_macos_arm64.so" },
    Windows = { x64 = "hmm_dll.dll" },
-   Linux   = { x64 = "hmm_dll.so", arm = "hmm_dll.so" },
+   Linux   = { x64 = "./bin/linux/lib".."hmm_dll.so", arm = "./bin/linux/lib".."hmm_dll.so" },
    BSD     = { x64 = "hmm_dll.so" },
    POSIX   = { x64 = "hmm_dll.so" },
    Other   = { x64 = "hmm_dll.so" },
