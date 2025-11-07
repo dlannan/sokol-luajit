@@ -51,8 +51,7 @@ local master_img_height = ffi.new("int[1]", 0)
 local function font_loader( atlas, font_file, font_size, cfg)
 
     local newfont = nk.nk_font_atlas_add_from_file(atlas, font_file, font_size, cfg)
-    local image = nk.nk_font_atlas_bake(atlas, master_img_width, master_img_height, nk.NK_FONT_ATLAS_RGBA32)
-    return image, newfont
+    return nil, newfont
 end
 
 -- --------------------------------------------------------------------------------------
@@ -77,6 +76,11 @@ local function font_atlas_img( image )
     return nk_hnd
 end
 
+local rune_ranges = ffi.new("nk_rune[9]", {
+    0xE000, 0xF8FF, -- private use / Nerd Font symbols
+    0
+})
+
 -- --------------------------------------------------------------------------------------
 -- Setup fonts
 local function setup_font(ctx)
@@ -89,14 +93,15 @@ local function setup_font(ctx)
     nk.nk_font_atlas_init_default(atlas)
     nk.nk_font_atlas_begin(atlas)
     
-    image = nk.nk_font_atlas_bake(atlas, master_img_width, master_img_height, nk.NK_FONT_ATLAS_RGBA32)
-
     image, fonts[1] = font_loader(atlas, font_path.."acknowtt.ttf", 16.0, nil)
 
-    atlas[0].config.range = nk.nk_font_awesome_glyph_ranges()
-    image, fonts[2] = font_loader(atlas, font_path.."fontawesome-webfont.ttf", 40.0, atlas[0].config)
+    local config = nk.nk_font_config(40.0)
+    config.range = rune_ranges
+    image, fonts[2] = font_loader(atlas, font_path.."fontawesome-webfont.ttf", 40.0, config)
 
     image, fonts[3] = font_loader(atlas, font_path.."ProggyClean.ttf", 18.0, nil)
+
+    local image = nk.nk_font_atlas_bake(atlas, master_img_width, master_img_height, nk.NK_FONT_ATLAS_RGBA32)
 
     -- Dump the atlas to check it.
     stb.stbi_write_png( "data/temp/atlas_font.png", master_img_width[0], master_img_height[0], 4, image, master_img_width[0] * 4)
@@ -184,6 +189,13 @@ local function draw_demo_ui(ctx)
 
             nk.nk_style_set_font(ctx, fonts[3].handle)
             nk.nk_button_label(ctx, "Hello in ProggyClean")
+
+            local text = ""
+            local w = fonts[2].handle.width(fonts[2].handle.userdata, fonts[2].handle.height, text, #text)            
+            local h = fonts[2].handle.height
+            local rect = nk.nk_rect(100, 100, w, h)
+            local hcolor = nk.nk_rgba(0xff, 0xff, 0xff, 0xff)
+            nk.nk_draw_text(nk.nk_window_get_canvas(ctx), rect, text, #text, fonts[2].handle, hcolor, hcolor)
 
             nk.nk_layout_row_end(ctx)
         end 
