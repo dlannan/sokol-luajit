@@ -126,7 +126,7 @@ local function frame()
     cutils.CLAY_POSTCONFIG()
 
         -- Children here
-        cutils.CLAY_TEXT( cutils.CLAY_STRING(""), cutils.CLAY_TEXT_CONFIG({ fontId = 0 }) )
+        cutils.CLAY_TEXT( cutils.CLAY_STRING("STRING"), cutils.CLAY_TEXT_CONFIG({ fontId = 0 }) )
     cutils.CLAY_END()
 
     -- This builds a list of render commands we can process below

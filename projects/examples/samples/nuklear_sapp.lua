@@ -1457,7 +1457,7 @@ end
 
 local function frame(void) 
 
-    local ctx = nk.snk_new_frame()
+    local ctx = nk.snk_new_frame(false)
 
     -- // see big function at end of file
     draw_demo_ui(ctx)

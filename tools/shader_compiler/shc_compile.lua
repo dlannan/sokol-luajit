@@ -110,14 +110,17 @@ sh_compiler.process_shader = function( filename, shader_src, program_name )
     desc_str = string.gsub(desc_str, "            ", "")
     desc_str = string.gsub(desc_str, ";", "")
     desc_str = string.gsub(desc_str, "%(const char%*%)", "")
-    desc_str = string.gsub(desc_str, "SG_UNIFORMLAYOUT_STD140", "sg.SG_UNIFORMLAYOUT_STD140")
-    desc_str = string.gsub(desc_str, "SG_SHADERSTAGE_VERTEX", "sg.SG_SHADERSTAGE_VERTEX")
-    desc_str = string.gsub(desc_str, "SG_SHADERSTAGE_FRAGMENT", "sg.SG_SHADERSTAGE_FRAGMENT")
-    desc_str = string.gsub(desc_str, "SG_UNIFORMTYPE_FLOAT3", "sg.SG_UNIFORMTYPE_FLOAT3")
-    desc_str = string.gsub(desc_str, "SG_UNIFORMTYPE_FLOAT4", "sg.SG_UNIFORMTYPE_FLOAT4")
-    desc_str = string.gsub(desc_str, "SG_IMAGESAMPLETYPE_FLOAT", "sg.SG_IMAGESAMPLETYPE_FLOAT")
-    desc_str = string.gsub(desc_str, "SG_SAMPLERTYPE_FILTERING", "sg.SG_SAMPLERTYPE_FILTERING")
-    desc_str = string.gsub(desc_str, "SG_IMAGETYPE_2D", "sg.SG_IMAGETYPE_2D")
+    desc_str = string.gsub(desc_str, " SG_UNIFORMLAYOUT_STD140", " sg.SG_UNIFORMLAYOUT_STD140")
+    desc_str = string.gsub(desc_str, " SG_SHADERSTAGE_VERTEX", " sg.SG_SHADERSTAGE_VERTEX")
+    desc_str = string.gsub(desc_str, " SG_SHADERSTAGE_FRAGMENT", " sg.SG_SHADERSTAGE_FRAGMENT")
+    desc_str = string.gsub(desc_str, " SG_UNIFORMTYPE_INT", " sg.SG_UNIFORMTYPE_INT")
+    desc_str = string.gsub(desc_str, " SG_UNIFORMTYPE_FLOAT", " sg.SG_UNIFORMTYPE_FLOAT")
+    desc_str = string.gsub(desc_str, " SG_UNIFORMTYPE_FLOAT2", " sg.SG_UNIFORMTYPE_FLOAT2")
+    desc_str = string.gsub(desc_str, " SG_UNIFORMTYPE_FLOAT3", " sg.SG_UNIFORMTYPE_FLOAT3")
+    desc_str = string.gsub(desc_str, " SG_UNIFORMTYPE_FLOAT4", " sg.SG_UNIFORMTYPE_FLOAT4")
+    desc_str = string.gsub(desc_str, " SG_IMAGESAMPLETYPE_FLOAT", " sg.SG_IMAGESAMPLETYPE_FLOAT")
+    desc_str = string.gsub(desc_str, " SG_SAMPLERTYPE_FILTERING", " sg.SG_SAMPLERTYPE_FILTERING")
+    desc_str = string.gsub(desc_str, " SG_IMAGETYPE_2D", " sg.SG_IMAGETYPE_2D")
 
     ffi_str = ffi_str..desc_str.."\n"
     ffi_str = ffi_str..[[return ]]..program_name..[[shader]]
@@ -138,7 +141,7 @@ sh_compiler.compile = function( glslfile, program_name )
 
     local command = exec..' -i '..glslfile.." -o "..sh_compiler.target_tmp
     command = command.." -l "..sh_compiler.target_lang.." -f "..sh_compiler.target_output
-print(command)
+-- print(command)
     local runner = io.popen(command, "r")
     -- Read in the results, then the files
     if(runner) then 

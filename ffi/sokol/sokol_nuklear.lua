@@ -5457,7 +5457,7 @@ typedef struct snk_desc_t {
 } snk_desc_t;
 
 void snk_setup(const snk_desc_t* desc);
-struct nk_context* snk_new_frame(void);
+struct nk_context* snk_new_frame(int);
 void snk_render(int width, int height);
 snk_image_t snk_make_image(const snk_image_desc_t* desc);
 void snk_destroy_image(snk_image_t img);

@@ -119,7 +119,6 @@ local function frame(void)
     sg.sg_end_pass()
     sg.sg_commit()
 
-    ffi.C.Sleep(3)
 end
 
 -- --------------------------------------------------------------------------------------
