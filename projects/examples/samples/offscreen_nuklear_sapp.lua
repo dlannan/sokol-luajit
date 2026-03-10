@@ -341,20 +341,20 @@ local function frame()
     local h = sapp.sapp_height()
     def_vs_params[0].mvp = compute_mvp(-state[0].rx * 0.25, state[0].ry * 0.25, w/h, 3.0)
     
-    local pass = ffi.new("sg_pass[1]")
-    pass[0].action = state[0].display.pass_action
-    pass[0].swapchain = slib.sglue_swapchain()
-    pass[0].label = "swapchain-pass"
-    sg.sg_begin_pass(pass)
+    -- local pass = ffi.new("sg_pass[1]")
+    -- pass[0].action = state[0].display.pass_action
+    -- pass[0].swapchain = slib.sglue_swapchain()
+    -- pass[0].label = "swapchain-pass"
+    -- sg.sg_begin_pass(pass)
 
-    def_vs_range[0].ptr = def_vs_params
-    def_vs_range[0].size = ffi.sizeof(def_vs_params)
+    -- def_vs_range[0].ptr = def_vs_params
+    -- def_vs_range[0].size = ffi.sizeof(def_vs_params)
 
-    sg.sg_apply_pipeline(state[0].display.pip)
-    sg.sg_apply_bindings(state[0].display.bind)
-    sg.sg_apply_uniforms(sg.SG_SHADERSTAGE_VS, def_vs_range)
-    sg.sg_draw(state[0].sphere.base_element, state[0].sphere.num_elements, 1)
-    sg.sg_end_pass()
+    -- sg.sg_apply_pipeline(state[0].display.pip)
+    -- sg.sg_apply_bindings(state[0].display.bind)
+    -- sg.sg_apply_uniforms(sg.SG_SHADERSTAGE_VS, def_vs_range)
+    -- sg.sg_draw(state[0].sphere.base_element, state[0].sphere.num_elements, 1)
+    -- sg.sg_end_pass()
 
     draw_demo_ui(ctx)
 
