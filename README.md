@@ -6,7 +6,7 @@ I am still working on this, but many things are changing fast. I have built an a
 
 https://github.com/dlannan/dim 
 
-[https://github.com/dlannan/sokol-luajit/media/2026-04-15 15-45-22(1).mp4](https://github.com/dlannan/sokol-luajit/blob/main/media/2026-04-15%2015-45-22(1).mp4)
+[https://github.com/dlannan/sokol-luajit/media/dim-example.gif](https://github.com/dlannan/sokol-luajit/blob/main/media/dim-example.gif)
 
 This is an editor based on the excellent lite project. However dim also has a 3d engine being built in it and a number of other features that make it quite different to lite - even tho themes and plugins should mostly work.
 
