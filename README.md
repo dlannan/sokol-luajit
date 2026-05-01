@@ -1,5 +1,23 @@
 # sokol-luajit
 
+Update 01/05/2026
+
+I am still working on this, but many things are changing fast. I have built an application using this framework here:
+
+https://github.com/dlannan/dim 
+
+This is an editor based on the excellent lite project. However dim also has a 3d engine being built in it and a number of other features that make it quite different to lite - even tho themes and plugins should mostly work.
+
+This application provides a way to stress test and fix many of the sokol-luajit plugins and interfaces as well as extend the nuklear gui that is now available. 
+
+The web ui system has stalled (it can render basic html and run js but there is much to do, that for me, isnt needed right now). I hope to return to it at a later date.
+
+Im also using dim as my base framework for a game I have been building for the last few years. Dim is being used to make a world editor which is reasonably detailed in this dev blog:
+
+https://forum.defold.com/t/f18-interceptor-building-my-favorite-old-amiga-game/69851
+
+This is hopefully nearing completion and will then allow me to focus all my efforts here, and on my ljos project. 
+
 Update 16/10/2025
 
 After some trials and tests. The below arch is not going to be very usable. Going to put this into a branch in case I want to redevelop this idea, but there were some major problems:
