@@ -337,9 +337,9 @@ local function frame()
 
     -- // and the display-pass, rendering a rotating textured sphere which uses the
     -- // previously rendered offscreen render-target as texture
-    local w = sapp.sapp_width()
-    local h = sapp.sapp_height()
-    def_vs_params[0].mvp = compute_mvp(-state[0].rx * 0.25, state[0].ry * 0.25, w/h, 3.0)
+    -- local w = sapp.sapp_width()
+    -- local h = sapp.sapp_height()
+    def_vs_params[0].mvp = compute_mvp(0.0, 0.0, 1.0, 3.0)
     
     -- local pass = ffi.new("sg_pass[1]")
     -- pass[0].action = state[0].display.pass_action

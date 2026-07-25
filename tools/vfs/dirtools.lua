@@ -206,11 +206,11 @@ else
 
         if(path == nil) then return nil end 
 
-        run_popen("file "..path, "r", function(fh)
+        run_popen("file "..path, function(fh)
             local res = fh:read("*a")
             local folder = string.match(res, ".-: directory$")
             return (folder ~= nil)
-        end)
+        end, "r")
         return nil 
     end
 end
@@ -363,9 +363,9 @@ dirtools.get_folderslist = function(path, cache_update)
     table.insert(files, 1, { name = ".." })
     
     -- Fill with temp file list of dir /b 
-    local res = run_popen(string.format(allfolders_cmd, path), "r", function(fh)
+    local res = run_popen(string.format(allfolders_cmd, path), function(fh)
         return fh:read("*a")
-    end)
+    end, "r")
     if(res == nil) then return files end
 
     for f in string.gmatch(res, "(.-)\n") do 

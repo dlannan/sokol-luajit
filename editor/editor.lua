@@ -133,7 +133,7 @@ local function frame()
     local t         = (sapp.sapp_frame_duration() * 60.0)
 
     local dt = sapp.sapp_frame_duration()
-    local ctx = nk.snk_new_frame()
+    local ctx = nk.snk_new_frame(false)
     if(engineState.ready == true and mainState.ctx == nil) then     
         mainState.ctx = ctx
         ErrorCheck( pcall( engineState.init, w, h ) )
