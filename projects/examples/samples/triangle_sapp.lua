@@ -5,6 +5,8 @@ local sapp  = require("sokol_app")
 sg          = require("sokol_gfx")
 local slib  = require("sokol_libs") -- Warn - always after gfx!!
 
+require("engine.platform")
+
 local ffi = require("ffi")
 
 ffi.cdef[[
@@ -61,7 +63,7 @@ typedef struct state {
 -- --------------------------------------------------------------------------------------
 -- The nice way to take a glsl shader and load, compile and return a shader description
 local shc       = require("tools.shader_compiler.shc_compile").init( "sokol%-luajit", false )
-local shader    = shc.compile("./projects/examples/samples/triangle-sapp.glsl")
+local shader    = shc.compile("./projects/examples/samples/triangle-sapp.glsl", "triangle")
 
 -- --------------------------------------------------------------------------------------
 
@@ -78,6 +80,7 @@ local function init()
     desc[0].logger.func = slib.slog_func
 
     sg.sg_setup( desc )
+    win.Sleep(10)
 
     local vertices = ffi.new("float[21]") 
     vertices[0] = 0.0; vertices[1] = 0.5; vertices[2] = 0.5; 

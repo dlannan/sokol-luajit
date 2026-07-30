@@ -1,6 +1,6 @@
 @ctype mat4 hmm_mat4
 
-@vs vs
+@vs vs_cube
 layout(binding = 0, std140) uniform vs_params {
     mat4 mvp;
 };
@@ -16,7 +16,7 @@ void main() {
 }
 @end
 
-@fs fs
+@fs fs_cube
 in vec4 color;
 out vec4 frag_color;
 
@@ -25,4 +25,4 @@ void main() {
 }
 @end
 
-@program cube vs fs
+@program cube vs_cube fs_cube

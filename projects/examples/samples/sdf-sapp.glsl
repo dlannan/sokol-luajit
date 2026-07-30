@@ -5,7 +5,7 @@
 //------------------------------------------------------------------------------
 
 //--- vertex shader
-@vs vs
+@vs vs_sdf
 layout(binding=0) uniform vs_params {
     float aspect;
     float time;
@@ -42,7 +42,7 @@ void main() {
 @end
 
 //--- fragment shader
-@fs fs
+@fs fs_sdf
 in vec2 pos;
 in vec3 eye;
 in vec3 up;
@@ -181,4 +181,4 @@ void main() {
 }
 @end
 
-@program sdf vs fs
+@program sdf vs_sdf fs_sdf

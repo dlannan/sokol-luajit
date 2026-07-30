@@ -24,9 +24,9 @@ sh_compiler.init = function(base_path, debug_shader, tools_path)
     end 
 
     if(ffi.os == "Windows") then 
-        sh_compiler.target_tmp      = base_dir.."bin\\shaderbin\\shader_gen.h"
+        sh_compiler.target_tmp      = base_dir.."bin\\shaderbin\\shader_gen_"
     else 
-        sh_compiler.target_tmp      = base_dir.."bin/shaderbin/shader_gen.h"
+        sh_compiler.target_tmp      = base_dir.."bin/shaderbin/shader_gen_"
     end
     sh_compiler.target_lang     = "glsl410"
     sh_compiler.target_output   = "sokol"
@@ -139,7 +139,9 @@ end
 
 sh_compiler.compile = function( glslfile, program_name )
 
-    local command = exec..' -i '..glslfile.." -o "..sh_compiler.target_tmp
+    local target_tmp = sh_compiler.target_tmp..program_name..".h"
+    
+    local command = exec..' -i '..glslfile.." -o "..target_tmp
     command = command.." -l "..sh_compiler.target_lang.." -f "..sh_compiler.target_output
 -- print(command)
     local runner = io.popen(command, "r")
@@ -149,20 +151,28 @@ sh_compiler.compile = function( glslfile, program_name )
         runner:close()
         print("[sh_compiler.lua] Shader: "..glslfile.." compiled correctly.")
     else 
-        print("Invalid command: "..command)
+        print("[sh_compiler.lua] Invalid command: "..command)
         return nil
     end
 
     -- Load in the generated file
     local lua_shader = ""
-    local tmpfile = io.open(sh_compiler.target_tmp, "r")
+    local tmpfile = io.open(target_tmp, "r")
     if(tmpfile) then 
         local shader_src = tmpfile:read("*a")
         tmpfile:close()
-        lua_shader = sh_compiler.process_shader(glslfile, shader_src, program_name)
-        return lua_shader
+        if(shader_src) then 
+            local res, err = sh_compiler.process_shader(glslfile, shader_src, program_name)
+            if(err) then 
+                print("[sh_compiler.lua] Shader Compiler error: ", err)
+                return nil 
+            end 
+            return res
+        end
+        print("[sh_compiler.lua] Cannot process: "..target_tmp)
+        return nil
     else
-        print("Cannot load tmpfile: "..sh_compiler.target_tmp)
+        print("[sh_compiler.lua] Cannot load tmpfile: "..target_tmp)
         return nil
     end
 end

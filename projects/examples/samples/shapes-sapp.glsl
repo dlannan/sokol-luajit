@@ -1,6 +1,6 @@
 @ctype mat4 hmm_mat4
 
-@vs vs
+@vs vs_shapes
 layout(binding=0) uniform vs_params {
     mat4 mvp;
     float draw_mode;
@@ -27,7 +27,7 @@ void main() {
 }
 @end
 
-@fs fs
+@fs fs_shapes
 in vec4 color;
 out vec4 frag_color;
 
@@ -36,4 +36,4 @@ void main() {
 }
 @end
 
-@program shapes vs fs
+@program shapes vs_shapes fs_shapes

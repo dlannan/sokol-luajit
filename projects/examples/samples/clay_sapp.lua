@@ -15,6 +15,7 @@ local clay      = require("clay")
 local cutils    = require("clay_utils")
 
 local utils     = require("utils")
+require("engine.platform")
 
 -- --------------------------------------------------------------------------------------
 
@@ -50,6 +51,7 @@ local function init()
     desc[0].logger.func = slib.slog_func
     desc[0].disable_validation = false
     sg.sg_setup( desc )
+    win.Sleep(10)
     print("Sokol Is Valid: "..tostring(sg.sg_isvalid()))
 
     -- Initialize Sokol GP, adjust the size of command buffers for your own use.

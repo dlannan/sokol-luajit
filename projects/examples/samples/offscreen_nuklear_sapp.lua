@@ -13,6 +13,7 @@ local hmm       = require("hmm")
 local hutils    = require("hmm_utils")
 
 local stb       = require("stb")
+require("engine.platform")
 
 local ffi       = require("ffi")
 
@@ -103,6 +104,7 @@ local function init()
     sg_desc[0].environment = slib.sglue_environment()
     sg_desc[0].logger.func = slib.slog_func
     sg.sg_setup( sg_desc )
+    win.Sleep(10)
 
     -- // use sokol-nuklear with all default-options (we're not doing
     -- // multi-sampled rendering or using non-default pixel formats)

@@ -16,6 +16,7 @@ local stb       = require("stb")
 local ffi       = require("ffi")
 
 local utils     = require("utils")
+require("engine.platform")
 
 -- --------------------------------------------------------------------------------------
 
@@ -30,6 +31,7 @@ local function init(void)
     sg_desc[0].environment = slib.sglue_environment()
     sg_desc[0].logger.func = slib.slog_func
     sg.sg_setup( sg_desc )
+    win.Sleep(10)
 
     -- // use sokol-nuklear with all default-options (we're not doing
     -- // multi-sampled rendering or using non-default pixel formats)

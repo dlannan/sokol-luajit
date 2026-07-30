@@ -8,12 +8,14 @@ local slib      = require("sokol_libs") -- Warn - always after gfx!!
 local sshape    = require("sokol_shape")
 local hmm       = require("hmm")
 
+require("engine.platform")
+
 local ffi       = require("ffi")
 
 -- --------------------------------------------------------------------------------------
 
 local shc       = require("tools.shader_compiler.shc_compile").init( "sokol%-luajit", false )
-local shader    = shc.compile("./projects/examples/samples/shapes-sapp.glsl")
+local shader    = shc.compile("./projects/examples/samples/shapes-sapp.glsl", "shapes")
 
 -- --------------------------------------------------------------------------------------
 
@@ -61,6 +63,7 @@ local function init()
     sg_desc[0].logger.func = slib.slog_func
     sg_desc[0].disable_validation = false
     sg.sg_setup( sg_desc )
+    win.Sleep(10)
 
     local pass_action = ffi.new("sg_pass_action[1]", {})
     pass_action[0].colors[0].load_action = sg.SG_LOADACTION_CLEAR

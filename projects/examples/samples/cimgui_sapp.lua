@@ -13,6 +13,8 @@ local hutils    = require("hmm_utils")
 
 local ffi       = require("ffi")
 
+require("engine.platform")
+
 -- --------------------------------------------------------------------------------------
 
 ffi.cdef[[
@@ -34,6 +36,7 @@ local function init(void)
     sg_desc[0].environment = slib.sglue_environment()
     sg_desc[0].logger.func = slib.slog_func
     sg.sg_setup( sg_desc )
+    win.Sleep(10)
 
     -- // use sokol-imgui with all default-options (we're not doing
     -- // multi-sampled rendering or using non-default pixel formats)

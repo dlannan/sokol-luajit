@@ -12,6 +12,8 @@ local hutils    = require("hmm_utils")
 
 local ffi       = require("ffi")
 
+require("engine.platform")
+
 -- --------------------------------------------------------------------------------------
 -- The nice way to take a glsl shader and load, compile and return a shader description
 local shc       = require("tools.shader_compiler.shc_compile").init( "sokol%-luajit", false )
@@ -61,6 +63,7 @@ local function init()
     sg_desc[0].logger.func = slib.slog_func
     sg.sg_setup( sg_desc )
 
+    win.Sleep(10)
     local offscreen_shader = sg.sg_make_shader(offscreen)
     local default_shader = sg.sg_make_shader(default)  
 

@@ -10,6 +10,7 @@ local hmm       = require("hmm")
 local hutils    = require("hmm_utils")
 
 local utils     = require("utils")
+require("engine.platform")
 
 local ffi       = require("ffi")
 
@@ -27,7 +28,7 @@ typedef struct state {
 -- --------------------------------------------------------------------------------------
 -- The nice way to take a glsl shader and load, compile and return a shader description
 local shc       = require("tools.shader_compiler.shc_compile").init( "sokol%-luajit", true )
-local shader    = shc.compile("./projects/examples/samples/cube-sapp.glsl")
+local shader    = shc.compile("./projects/examples/samples/cube-sapp.glsl", "cube")
 
 -- --------------------------------------------------------------------------------------
 
@@ -49,6 +50,7 @@ local function init()
     desc[0].logger.func = slib.slog_func
     desc[0].disable_validation = false
     sg.sg_setup( desc )
+    win.Sleep(10)
     print("Sokol Is Valid: "..tostring(sg.sg_isvalid()))
 
     local vertices = ffi.new("float[168]", {

@@ -8,12 +8,14 @@ local slib      = require("sokol_libs") -- Warn - always after gfx!!
 local hmm       = require("hmm")
 local hutils    = require("hmm_utils")
 
+require("engine.platform")
+
 local ffi = require("ffi")
 
 -- --------------------------------------------------------------------------------------
 -- The nice way to take a glsl shader and load, compile and return a shader description
-local shc       = require("tools.shader_compiler.shc_compile").init( "sokol%-luajit", true )
-local shader    = shc.compile("./projects/examples/samples/sdf-sapp.glsl")
+local shc       = require("tools.shader_compiler.shc_compile").init( "sokol%-luajit", false )
+local shader    = shc.compile("./projects/examples/samples/sdf-sapp.glsl", "sdf")
 
 -- --------------------------------------------------------------------------------------
 
@@ -43,6 +45,7 @@ local function init()
     desc[0].environment = slib.sglue_environment()
     desc[0].logger.func = slib.slog_func
     sg.sg_setup( desc )
+    win.Sleep(10)
     print("Sokol Is Valid: "..tostring(sg.sg_isvalid()))
 
     local fsq_verts = ffi.new("float[6]", { -1.0, -3.0, 3.0, 1.0, -1.0, 1.0 })

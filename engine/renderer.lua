@@ -3,7 +3,7 @@ local stb           = require("stb")
 local nk            = sg
 
 local utils         = require("lua.utils")
--- require("engine.nuklear")
+require("src.nuklear")
 
 local ffi           = require("ffi")
 
@@ -34,6 +34,7 @@ renderer = {
     ctx             = nil,
     all_fonts       = {},
     cursor          = { name = "arrow", rect = { position = {x=0,y=0}, size ={x=1,y=1} } },
+    dt              = 1.0 / 60.0,
 }
 
 renderer.font = {
@@ -83,9 +84,9 @@ end
 
 -- --------------------------------------------------------------------------------------
 
-local function fix_tab_glyph(glyph, space)
+local function fix_tab_glyph(glyph, space_size)
 
-    glyph[0].xadvance = space * 4
+    glyph[0].xadvance = space_size
     glyph[0].w, glyph[0].h = 0, 0
     glyph[0].x0, glyph[0].y0, glyph[0].x1, glyph[0].y1 = 0, 0, 0, 0
     glyph[0].u0, glyph[0].v0, glyph[0].u1, glyph[0].v1 = 0, 0, 0, 0
@@ -96,13 +97,12 @@ end
 local rune_ranges = ffi.new("nk_rune[9]", {
     0x0009, 0x000A, -- tab
     0x0020, 0x00FF, -- basic Latin + Latin-1
-    0x2500, 0x2BFF, -- box-drawing, arrows
     0xE000, 0xF8FF, -- private use / Nerd Font symbols
     0
 })
 
 local fa_rune_ranges = ffi.new("nk_rune[9]", {
-    0xE000, 0xF8FF, -- private use / Nerd Font symbols
+    0xE000, 0xF8FF, -- only font awesome glyph ranges
     0
 })
 
@@ -176,7 +176,7 @@ local function load_font(font_path, font_size)
         
         local glyph = find_glyph(font.font, 9)
         local space = get_glyph_xadvance(font.font.handle.userdata, 32)    
-        if(glyph) then fix_tab_glyph(glyph, space) end
+        if(glyph) then fix_tab_glyph(glyph, space * 4) end
         
         -- atlas[0].config.range = rune_ranges -- nk.nk_font_default_glyph_ranges()
     end 
@@ -189,7 +189,7 @@ local function load_font(font_path, font_size)
     image = nk.nk_font_atlas_bake(atlas, master_img_width, master_img_height, nk.NK_FONT_ATLAS_RGBA32)
     local glyph = find_glyph(new_font, 9)
     local space = get_glyph_xadvance(new_font.handle.userdata, 32)    
-    if(glyph) then fix_tab_glyph(glyph, space) end
+    if(glyph) then fix_tab_glyph(glyph, space * 4) end
 
 
     local nk_img = font_atlas_img(image, true)
@@ -202,7 +202,14 @@ local function load_font(font_path, font_size)
     local tab_size = get_glyph_xadvance(new_font.handle.userdata, 9)
 
     -- print(master_img_width[0], master_img_height[0], tab_size)
-    local new_font_tbl = { tab_width = tab_size, font = new_font, path = font_path, size = font_size, cfg = nil }
+    local new_font_tbl = { 
+        tab_width = tab_size, 
+        tab_glyph = glyph,
+        font = new_font, 
+        path = font_path, 
+        size = font_size, 
+        cfg = nil 
+    }
     tinsert(fonts, new_font_tbl)
 
     return new_font_tbl
@@ -221,14 +228,14 @@ renderer.font.load = function(path, size)
     if(new_font == nil) then return nil end
     new_font.set_tab_width = function(self, width) 
         if(width == self.tab_width) then return end
-        adjust_glyph( self.font.handle.userdata, 9, width )
+        fix_tab_glyph( self.tab_glyph, width )
         self.tab_width = width
     end
     new_font.get_tab_width = function(self, width)
         return self.tab_width 
     end
     new_font.get_width = function(self, text) 
-        if(text==nil) then print(debug.traceback()) end
+        if(text==nil) then pprint(debug.traceback()) end
         local text = checkstring(text)
         return self.font.handle.width(self.font.handle.userdata, self.font.handle.height, text, #text)
     end
@@ -248,6 +255,7 @@ end
 -- --------------------------------------------------------------------------------------
 
 renderer.show_debug     = function(enable) 
+    -- rencache.rencache_show_debug(enable)
 end
 
 -- --------------------------------------------------------------------------------------
@@ -259,30 +267,44 @@ end
 -- --------------------------------------------------------------------------------------
 -- Not really needed
 renderer.begin_frame    = function()
+    -- rencache.rencache_begin_frame()
 end
 
 -- --------------------------------------------------------------------------------------
 -- Hrm.. needed?
 renderer.end_frame      = function() 
-
+    -- rencache.rencache_end_frame()
 end
 
 -- --------------------------------------------------------------------------------------
 
 renderer.set_clip_rect  = function(x, y, w, h) 
     nuklear_renderer.set_clip_rect(x, y, w, h)
+    -- rencache.rencache_set_clip_rect(x, y, w, h)
 end
 
 -- --------------------------------------------------------------------------------------
 
 renderer.draw_rect      = function(x, y, w, h, color) 
     nuklear_renderer.draw_rect(x, y, w, h, color)
+    -- rencache.rencache_draw_rect(x, y, w, h, color)
 end
 
 -- --------------------------------------------------------------------------------------
 
 renderer.draw_text      = function(font, text, x, y, color) 
     return nuklear_renderer.draw_text(font, text, x, y, color)
+    -- return rencache.rencache_draw_text(font, text, x, y, color)
+end
+
+-- --------------------------------------------------------------------------------------
+
+renderer.enable_cursor   = function(enable)
+    if(enable == true) then 
+        nk.nk_style_show_cursor(renderer.ctx)
+    else 
+        nk.nk_style_hide_cursor(renderer.ctx)
+    end
 end
 
 -- --------------------------------------------------------------------------------------
@@ -298,6 +320,7 @@ end
 renderer.load_image      = function(filename, no_ui) 
     local img, img_info = nuklear_renderer.load_image(filename, no_ui) 
     return img, img_info
+    -- return rencache.rencache_draw_text(font, text, x, y, color)
 end
   
 -- --------------------------------------------------------------------------------------
@@ -305,18 +328,29 @@ end
 renderer.load_image_buffer = function(name, buf, bufsize, no_ui) 
     local img, img_info = nuklear_renderer.load_image_buffer(name, buf, bufsize, no_ui) 
     return img, img_info
+    -- return rencache.rencache_draw_text(font, text, x, y, color)
 end
   
+renderer.make_nk_handle  = function( sg_img_desc )
+    local new_img = sg.sg_make_image(sg_img_desc) 
+    local img_desc = ffi.new("snk_image_desc_t[1]")
+    img_desc[0].image = new_img
+    local snk_img = nk.snk_make_image(img_desc)
+    local nk_hnd = nk.snk_nkhandle(snk_img)
+    return nk.nk_image_handle(nk_hnd)
+end
 -- --------------------------------------------------------------------------------------
 
 renderer.draw_image      = function(image, x, y, w, h) 
     return nuklear_renderer.draw_image(image, x, y, w, h) 
+    -- return rencache.rencache_draw_text(font, text, x, y, color)
 end
   
 -- --------------------------------------------------------------------------------------
 
-renderer.load_model      = function(filename) 
-    return threed_renderer.load_model(filename) 
+renderer.load_model      = function(filename, params) 
+    return threed_renderer.load_model(filename, params) 
+    -- return rencache.rencache_draw_text(font, text, x, y, color)
 end
 
 -- --------------------------------------------------------------------------------------
@@ -324,6 +358,13 @@ end
 renderer.draw_model      = function(model, x, y, w, h) 
 
     return threed_renderer.draw_model(model, x, y, w, h)
+end 
+
+-- --------------------------------------------------------------------------------------
+
+renderer.hide_model      = function(model) 
+
+    return threed_renderer.hide_model(model)
 end 
 
 -- --------------------------------------------------------------------------------------
