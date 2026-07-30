@@ -14,14 +14,14 @@
 local ffi           = require("ffi")
 
 local utils         = require("lua.utils")
-local imageutils 	= require("lua.gltfloader.image-utils")
+local imageutils 	= require("lua.loaders.image-utils")
 local cgltf      	= require("ffi.sokol.cgltf")
 
 local tinsert       = table.insert
 
 -- --------------------------------------------------------------------------------------
 
-local shc           = require("tools.shader_compiler.shc_compile").init( "dim", false )
+local shc           = require("tools.shader_compiler.shc_compile").init( "worldbuilder", false )
 
 -- ----------------------------------------------------------------------------------------
 
@@ -67,12 +67,17 @@ mesh.create_buffer     = function(name, buffers)
     local attribs     = {}
     local float_size  = ffi.sizeof("float")
     local offset      = 0
+    local vsize       = buffers.vsize or 3
 
     if(buffers.vertices) then 
         
-        vertcount = ffi.sizeof(buffers.vertices) / (3 * float_size)
-        stride = 3
-        tinsert(attribs, { offset = offset, format = sg.SG_VERTEXFORMAT_FLOAT3 })
+        vertcount = buffers.vcount or ffi.sizeof(buffers.vertices) / (vsize * float_size)
+        stride = vsize
+        if(vsize == 4) then 
+            tinsert(attribs, { offset = offset, format = sg.SG_VERTEXFORMAT_FLOAT4 })
+        else     
+            tinsert(attribs, { offset = offset, format = sg.SG_VERTEXFORMAT_FLOAT3 })
+        end
 
         if(buffers.uvs) then 
             stride = stride + 2
@@ -95,18 +100,14 @@ mesh.create_buffer     = function(name, buffers)
         vbuf   = nil,
         vcount  = vertcount,
         ibuf   = nil,
-        icount  = 0,
+        icount  = buffers.icount or 0,
+        index_type = buffers.itype or nil,
         sbuf   = nil,
         scount  = 0,
         stride  = stride,
         attrs   = attribs,
         depth   = {},
     }
-
-    if(buffers.indices) then 
-        buffs.icount = buffers.icount
-        buffs.index_type = buffers.itype
-    end
 
     local uvptr = nil
     local nptr = nil
@@ -122,9 +123,9 @@ mesh.create_buffer     = function(name, buffers)
         -- Copy in interlaced! 
         local ptr = ffi.cast("float *", buffer) 
         for i=1, vertcount do 
-            ffi.copy(ptr, vptr,  3 * float_size)
-            vptr = vptr + 3
-            ptr = ptr + 3
+            ffi.copy(ptr, vptr,  stride * float_size)
+            vptr = vptr + vsize
+            ptr = ptr + vsize
 
             if(buffers.uvs) then 
                 ffi.copy(ptr, uvptr, 2* float_size)
@@ -205,7 +206,7 @@ mesh.material  = function(name, shaderfile, params)
     local cached = all_meshes.materials[shaderfile]
     if(cached) then return cached end
 
-    local shader    = shc.compile(shaderfile)
+    local shader    = shc.compile(shaderfile, nil, name)
     local shd       = sg.sg_make_shader(shader)
 
     local sampler_desc      = ffi.new("sg_sampler_desc")
@@ -227,7 +228,7 @@ mesh.material  = function(name, shaderfile, params)
         all_meshes.materials[shaderfile] = material
         return material
     else 
-        print("[Error mesh.material] Could not create material: "..tostring(name))
+        pprint("[Error mesh.material] Could not create material: "..tostring(name))
         return nil 
     end
 end
@@ -240,7 +241,7 @@ mesh.make_mesh = function(name, buffers)
 
     local buffercount = utils.tcount(buffers)
     if(buffercount == 0) then 
-        print("[Error mesh.make_mesh] No buffers to process!")
+        pprint("[Error mesh.make_mesh] No buffers to process!")
         return nil 
     end
     mesh.layout.buffers = ffi.new("sg_vertex_buffer_layout_state[8]")
@@ -303,17 +304,25 @@ mesh.model     = function(name, prim, mesh, material)
         if(mesh.depth.write_enabled) then pipe_desc[0].depth.write_enabled = mesh.depth.write_enabled end
         if(mesh.depth.compare) then pipe_desc[0].depth.compare = mesh.depth.compare end
     end
-    if(prim.material.alpha_mode == cgltf.cgltf_alpha_mode_blend) then 
-        pipe_desc[0].colors[0].blend.enabled = true
-        pipe_desc[0].colors[0].blend.src_factor_rgb = sg.SG_BLENDFACTOR_SRC_ALPHA
-        pipe_desc[0].colors[0].blend.dst_factor_rgb = sg.SG_BLENDFACTOR_ONE_MINUS_SRC_ALPHA
-        pipe_desc[0].colors[0].blend.src_factor_alpha = sg.SG_BLENDFACTOR_ONE
-        pipe_desc[0].colors[0].blend.dst_factor_alpha = sg.SG_BLENDFACTOR_ONE_MINUS_SRC_ALPHA
-    elseif(prim.material.alpha_mode == cgltf.cgltf_alpha_mode_mask) then 
+    local prim_alpha_mode = cgltf.cgltf_alpha_mode_opaque
+    local prim_alpha_cutoff = 0.0
+    if(prim.material) then 
+        if(prim.material.alpha_mode == cgltf.cgltf_alpha_mode_blend) then 
+            pipe_desc[0].colors[0].blend.enabled = true
+            pipe_desc[0].colors[0].blend.src_factor_rgb = sg.SG_BLENDFACTOR_SRC_ALPHA
+            pipe_desc[0].colors[0].blend.dst_factor_rgb = sg.SG_BLENDFACTOR_ONE_MINUS_SRC_ALPHA
+            pipe_desc[0].colors[0].blend.src_factor_alpha = sg.SG_BLENDFACTOR_ONE
+            pipe_desc[0].colors[0].blend.dst_factor_alpha = sg.SG_BLENDFACTOR_ONE_MINUS_SRC_ALPHA
+        elseif(prim.material.alpha_mode == cgltf.cgltf_alpha_mode_mask) then 
 
+        end
+        prim_alpha_mode = prim.material.alpha_mode
+        prim_alpha_cutoff = prim.material.alpha_cutoff
     end
 
     pipe_desc[0].label                  = name.."-pipeline"
+    -- pipe_desc[0].sample_count           = 1
+    -- pipe_desc[0].depth.pixel_format     = sg.SG_PIXELFORMAT_DEPTH
 
     local pipeline = sg.sg_make_pipeline(pipe_desc)
     
@@ -339,7 +348,7 @@ mesh.model     = function(name, prim, mesh, material)
     return {
         pip     = pipeline,
         bind    = binding,
-        alpha   = { mode = prim.material.alpha_mode, cutoff = prim.material.alpha_cutoff }
+        alpha   = { mode = prim_alpha_mode, cutoff = prim_alpha_cutoff }
     }
 end 
 
