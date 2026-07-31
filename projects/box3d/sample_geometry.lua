@@ -28,7 +28,7 @@ typedef struct state {
 -- --------------------------------------------------------------------------------------
 -- The nice way to take a glsl shader and load, compile and return a shader description
 local shc       = require("tools.shader_compiler.shc_compile").init( "sokol%-luajit", true )
-local shader    = shc.compile("./projects/examples/samples/cube-sapp.glsl")
+local shader    = shc.compile("./projects/examples/samples/cube-sapp.glsl", "cube")
 
 -- --------------------------------------------------------------------------------------
 

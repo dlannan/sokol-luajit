@@ -139,6 +139,7 @@ end
 
 sh_compiler.compile = function( glslfile, program_name )
 
+    program_name = program_name or ""
     local target_tmp = sh_compiler.target_tmp..program_name..".h"
     
     local command = exec..' -i '..glslfile.." -o "..target_tmp
