@@ -23,11 +23,7 @@ sh_compiler.init = function(base_path, debug_shader, tools_path)
         tools_dir = base_dir..tools_path..dirtools.sep
     end 
 
-    if(ffi.os == "Windows") then 
-        sh_compiler.target_tmp      = base_dir.."bin\\shaderbin\\shader_gen_"
-    else 
-        sh_compiler.target_tmp      = base_dir.."bin/shaderbin/shader_gen_"
-    end
+    sh_compiler.console_out     = "stdout:"
     sh_compiler.target_lang     = "glsl410"
     sh_compiler.target_output   = "sokol"
     
@@ -140,40 +136,33 @@ end
 sh_compiler.compile = function( glslfile, program_name )
 
     program_name = program_name or ""
-    local target_tmp = sh_compiler.target_tmp..program_name..".h"
-    
-    local command = exec..' -i '..glslfile.." -o "..target_tmp
+   
+    local command = exec..' -i '..glslfile.." -o "..sh_compiler.console_out
     command = command.." -l "..sh_compiler.target_lang.." -f "..sh_compiler.target_output
--- print(command)
+    -- print(command)
+
     local runner = io.popen(command, "r")
     -- Read in the results, then the files
+    local shader_src = nil
     if(runner) then 
-        local results = runner:read("*a")
+        shader_src = runner:read("*a")
         runner:close()
         print("[sh_compiler.lua] Shader: "..glslfile.." compiled correctly.")
     else 
-        print("[sh_compiler.lua] Invalid command: "..command)
+        print("[sh_compiler.lua] shc compiler failed: "..command)
         return nil
     end
 
     -- Load in the generated file
-    local lua_shader = ""
-    local tmpfile = io.open(target_tmp, "r")
-    if(tmpfile) then 
-        local shader_src = tmpfile:read("*a")
-        tmpfile:close()
-        if(shader_src) then 
-            local res, err = sh_compiler.process_shader(glslfile, shader_src, program_name)
-            if(err) then 
-                print("[sh_compiler.lua] Shader Compiler error: ", err)
-                return nil 
-            end 
-            return res
-        end
-        print("[sh_compiler.lua] Cannot process: "..target_tmp)
-        return nil
+    if(shader_src) then 
+        local res, err = sh_compiler.process_shader(glslfile, shader_src, program_name)
+        if(err) then 
+            print("[sh_compiler.lua] Process Shader error: ", err)
+            return nil 
+        end 
+        return res
     else
-        print("[sh_compiler.lua] Cannot load tmpfile: "..target_tmp)
+        print("[sh_compiler.lua] Shader not compiled: "..glslfile)
         return nil
     end
 end
